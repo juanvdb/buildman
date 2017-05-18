@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# UbuntuBuild V1.0.2
+# UbuntuBuild V1.2.3
 # Author : Juan van der Breggen
-
-No longer Crazy Idea
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
 # and of-course privilege for setting up apt.
