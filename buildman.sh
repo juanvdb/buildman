@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# UbuntuBuild V1.2.3
+# UbuntuBuild V0.12
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
