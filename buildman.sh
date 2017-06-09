@@ -544,6 +544,7 @@ installDigikamApp () {
 
 # ############################################################################
 # Configure DockerRepo
+# $$$ No longer needed, install with snap
 configureDockerRepo () {
   log_info "Configure Docker Repo"
 	# Setup App repository
@@ -562,16 +563,17 @@ configureDockerInstall () {
   currentPath=$(pwd)
   log_info "Configure Docker Install"
 	# Purge the old repo
-	sudo apt -y purge lxc-docker
+	# sudo apt -y purge lxc-docker
 	# Make sure that apt is pulling from the right repository
-	sudo apt-cache policy docker-engine
+	# sudo apt-cache policy docker-engine
 
 	# Add the additional kernel packages
 	# sudo apt -y install "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
 	sudo apt -y install linux-image-extra-virtual
 
 	# Install Docker
-	sudo apt -y install docker-engine
+	# sudo apt -y install docker-engine
+  sudo snap install docker
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
@@ -657,8 +659,8 @@ addRepositories () {
 	log_debug 'Rapid Photo downloader'
 	sudo add-apt-repository -y ppa:dlynch3;
 	# VLC Media Player
-	log_debug 'VLC Media Player'
-	sudo add-apt-repository -y ppa:n-muench/vlc
+	# log_debug 'VLC Media Player'
+	# sudo add-apt-repository -y ppa:n-muench/vlc
 	# Darktable
 	log_debug 'Darktable'
 	sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
@@ -766,8 +768,8 @@ addRepositories () {
     log_debug "Change Repos for which there aren't new repos."
     log_debug "Change n-muench to Xenial"
     changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-programs-ppa-$distReleaseName.list" "$distReleaseName" wily
-    log_debug "Change VLC to Xenial"
-    changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-vlc-$distReleaseName.list" "$distReleaseName" wily
+    # log_debug "Change VLC to Xenial"
+    # changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-vlc-$distReleaseName.list" "$distReleaseName" wily
     case $desktopEnvironment in
       "kde" )
         ;;
@@ -844,7 +846,9 @@ installApps () {
   log_info "Start Applications installation the general apps"
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc  gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
+
+  sudo snap install atom vlc vlc-data browser-plugin-vlc
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty)$ ]]; then
@@ -1077,8 +1081,8 @@ installOptions () {
       dckr )
         read -rp "Do you want to install Docker? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          configureDockerRepo
-          repoUpdate
+          # configureDockerRepo
+          # repoUpdate
           configureDockerInstall
         fi
       ;;
@@ -1354,9 +1358,9 @@ questionRun () {
     if [[ $ownCloudClientAns = 1 ]]; then
       ownCloudClientRepo
     fi
-    if [[ $dockerAns = 1 ]]; then
-      configureDockerRepo
-    fi
+    # if [[ $dockerAns = 1 ]]; then
+       # configureDockerRepo
+    # fi
     case $desktopEnvironment in
       gnome )
       if [[ $gnomeBackportsAns = 1 ]]; then
@@ -1445,7 +1449,7 @@ autoRun () {
   case $1 in
     [lw] )
       ownCloudClientRepo
-      configureDockerRepo
+      # configureDockerRepo
       ;;
   esac
   case $desktopEnvironment in
