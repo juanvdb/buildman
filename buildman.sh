@@ -40,6 +40,15 @@ noPrompt=0
 mkdir -p ~/tmp
 sudo chown "$USER":"$USER" ~/tmp
 
+# Create progress bar and colours for apt
+# echo 'Dpkg::Progress-Fancy "1";' | sudo tee -a /etc/apt/apt.conf.d/99progressbar > /dev/null
+cat << 'EOF' >>  99progressbar
+Dpkg::Progress-Fancy "1";
+APT::Color "1";
+Dpkg::Progress-Fancy::Progress-Bg "%1b[40m";
+EOF
+sudo cp ./99progressbar /etc/apt/apt.conf.d/99progressbar
+
 #--------------------------------------------------------------------------------------------------
 # ############################################################################
 # ==> set debugging on
@@ -149,7 +158,7 @@ die() { echo "$*" >&2; exit 1; }
 # Update repositories - hopefully only need to call once
 repoUpdate () {
   log_info "Repo Update"
-  sudo apt-get -y update;
+  sudo apt -y update;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -161,11 +170,11 @@ repoUpdate () {
 # Upgrade the system and distro  - hopefully only need to call once
 repoUpgrade () {
   log_info "Repo Upgrade"
-  sudo apt-get -y upgrade;
-  sudo apt-get -y full-upgrade
-  sudo apt-get -y dist-upgrade;
+  sudo apt -y upgrade;
+  sudo apt -y full-upgrade
+  sudo apt -y dist-upgrade;
   sudo apt -y autoremove
-  # sudo apt-get clean
+  # sudo apt clean
 }
 
 # ############################################################################
@@ -179,15 +188,15 @@ kernelUpdate () {
   # fi
   read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
   if [[ $answer = [Yy1] ]]; then
-    sudo apt-get -y update
+    sudo apt -y update
     if [[ "$noPrompt" -ne 1 ]]; then
       read -rp "Press ENTER to continue." nullEntry
       printf "%s" "$nullEntry"
     fi
-    sudo apt-get -yf install build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
-    sudo apt-get -y upgrade;
-    sudo apt-get -y full-upgrade;
-    sudo apt-get -y dist-upgrade;
+    sudo apt -yf install build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
+    sudo apt -y upgrade;
+    sudo apt -y full-upgrade;
+    sudo apt -y dist-upgrade;
     # if [[ "$noPrompt" -ne 1 ]]; then
     #   read -rp "Do you want to reboot (y/n)?" answer
     #   if [[ $answer = [Yy1] ]]; then
@@ -205,7 +214,7 @@ kernelUpdate () {
 # VMware Guest Setup, vmtools, nfs directories to host
 vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
-  sudo apt-get install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
+  sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
   LINE1="172.22.8.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
@@ -224,7 +233,7 @@ vmwareGuestSetup () {
 # VirtualBox Guest Setup, vmtools, nfs directories to host
 virtalBoxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
-  sudo apt-get install -y nfs-common ssh
+  sudo apt install -y nfs-common ssh
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
   LINE1="111.11.11.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
@@ -355,9 +364,9 @@ devAppsInstall(){
 
 	# install bashdb and ddd
 	printf "Please check ddd-3 version"
-	sudo apt-get -y install bashdb
-	sudo apt-get -y build-dep ddd
-	sudo apt-get -y install libmotif-dev
+	sudo apt -y install bashdb
+	sudo apt -y build-dep ddd
+	sudo apt -y install libmotif-dev
 	wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
 	wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
 	tar xvf ~/tmp/ddd-3.3.9.tar.gz
@@ -380,8 +389,8 @@ ownCloudClientRepo () {
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
-	sudo apt-get -y install owncloud-client
-  sudo apt-get install -yf
+	sudo apt -y install owncloud-client
+  sudo apt install -yf
 }
 
 # ############################################################################
@@ -390,7 +399,7 @@ displayLinkInstallApp () {
 
   currentPath=$(pwd)
   log_info "display Link Install App"
-	sudo apt-get -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
+	sudo apt -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
 	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=744
@@ -401,7 +410,7 @@ displayLinkInstallApp () {
 
   sudo chown -R "$USER":"$USER" ~/tmp/displaylink/
   cd "$currentPath" || return
-  sudo apt-get install -yf
+  sudo apt install -yf
 }
 
 # ############################################################################
@@ -410,7 +419,7 @@ laptopDisplayDrivers () {
   log_info "Install XPS Display Drivers"
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
-  sudo apt-get install nvidia-current intel-graphics-update-tool
+  sudo apt install nvidia-current intel-graphics-update-tool
 }
 
 # ############################################################################
@@ -461,27 +470,27 @@ kdeBackportsRepo () {
 kdeBackportsApps () {
   repoUpdate
   repoUpgrade
-  sudo apt-get -y full-upgradegnm
+  sudo apt -y full-upgradegnm
 }
 
 # ############################################################################
 # Google Chrome Install
 googleChromeInstall () {
   log_info "Google Chrome Install"
-	# sudo apt-get install -y libgconf2-4 libnss3-1d libxss1; # libnss3-1d is no longer in yakkety
+	# sudo apt install -y libgconf2-4 libnss3-1d libxss1; # libnss3-1d is no longer in yakkety
 	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 	#sudo sh -c 'echo "deb - http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-	#sudo apt-get install google-chrome-stable
+	#sudo apt install google-chrome-stable
 	wget -P ~/tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	sudo dpkg -i --force-depends ~/tmp/google-chrome-stable_current_amd64.deb
-  sudo apt-get install -yf
+  sudo apt install -yf
 }
 
 # ############################################################################
 # Install Fonts
 installFonts () {
   log_info "Install Fonts"
-	sudo apt-get -y install fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
+	sudo apt -y install fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
 }
 
 #
@@ -528,9 +537,9 @@ installDigikamRepo () {
 # Install digikam Application
 installDigikamApp () {
   log_info "Digikam Install"
-  # sudo apt-get install -yf
-	sudo apt-get -yf install digikam digikam-doc digikam-data
-  # sudo apt-get install -yf
+  # sudo apt install -yf
+	sudo apt -yf install digikam digikam-doc digikam-data
+  # sudo apt install -yf
 }
 
 # ############################################################################
@@ -553,16 +562,16 @@ configureDockerInstall () {
   currentPath=$(pwd)
   log_info "Configure Docker Install"
 	# Purge the old repo
-	sudo apt-get -y purge lxc-docker
+	sudo apt -y purge lxc-docker
 	# Make sure that apt is pulling from the right repository
 	sudo apt-cache policy docker-engine
 
 	# Add the additional kernel packages
-	# sudo apt-get -y install "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
-	sudo apt-get -y install linux-image-extra-virtual
+	# sudo apt -y install "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
+	sudo apt -y install linux-image-extra-virtual
 
 	# Install Docker
-	sudo apt-get -y install docker-engine
+	sudo apt -y install docker-engine
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
@@ -600,7 +609,7 @@ configureDockerInstall () {
 
   sudo ufw allow 2375/tcp
   cd "$currentPath" || return
-  sudo apt-get install -yf
+  sudo apt install -yf
 }
 
 # #########################################################################
@@ -698,8 +707,8 @@ addRepositories () {
 	log_debug 'Brackets'
 	sudo add-apt-repository -y ppa:webupd8team/brackets
 	# Atom
-	log_debug 'Atom'
-	sudo add-apt-repository -y ppa:webupd8team/atom
+	# log_debug 'Atom'
+	# sudo add-apt-repository -y ppa:webupd8team/atom
 	# Variety
 	log_debug 'Variety'
 	sudo add-apt-repository -y ppa:peterlevi/ppa
@@ -834,29 +843,29 @@ addRepositories () {
 installApps () {
   log_info "Start Applications installation the general apps"
 	# general applications
-  sudo apt-get install -yf
-	sudo apt-get -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc  gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
+  sudo apt install -yf
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc  gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty)$ ]]; then
-   sudo apt-get install scribes freefilesync cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 ufw-gtk inkscape
+   sudo apt install scribes freefilesync cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 ufw-gtk inkscape
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt-get -y install kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins;
+			sudo apt -y install kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins;
 			;;
 		"gnome" )
-			sudo apt-get -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
-			sudo apt-get -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
 			;;
 		"xubuntu" )
-			sudo apt-get -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
 			;;
 		"lubuntu" )
-			sudo apt-get -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
 			;;
 	esac
 }
@@ -902,15 +911,15 @@ installOtherApps () {
       	   repoUpdate
       	 fi
          if [[ $installVirtualboxHost = 1 ]]; then
-           sudo apt-get install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
+           sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
             case $desktopEnvironment in
               "kde" )
-                sudo apt-get -y virtualbox-qt;
+                sudo apt -y virtualbox-qt;
                 ;;
             esac
          fi
          if [[ $installVirtualboxGuest = 1 ]]; then
-           sudo apt-get install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+           sudo apt install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
          fi
          exit 1
       ;;
@@ -1567,22 +1576,22 @@ case "$choice" in
 	lq|xpsq)
     printf "Laptop Installation asking items:\n"
     questionRun l
-    echo "Operation completed successfully.\n"
+    printf "Operation completed successfully.\n"
 	;;
 	wa)
   	printf "Automated installation for a Workstation\n"
     autoRun w
-    echo "Operation completed successfully."
+    printf "Operation completed successfully.\n"
 	;;
 	wq)
     printf "Workstation Installation asking items:\n"
     questionRun w
-    echo "Operation completed successfully."
+    printf "Operation completed successfully.\n"
 	;;
 	vma)
     printf "Automated install for a Vmware virtual machine\n"
     autoRun vm
-  	echo "Operation completed successfully."
+    printf "Operation completed successfully.\n"
   ;;
   # ############################################################################
 	vmq|vm-question)
@@ -1593,7 +1602,7 @@ case "$choice" in
 	vba|vb-all)
     printf "Automated install for a VirtualBox virtual machine\n"
     autoRun vb
-    echo "Operation completed successfully."
+    printf "Operation completed successfully.\n"
   ;;
   # ############################################################################
   vbq|vb-question)
