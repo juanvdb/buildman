@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# UbuntuBuild V0.12
+# UbuntuBuild V1.2.6
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -602,8 +602,8 @@ configureDockerInstall () {
 
 	# Create docker group and add juanb
 	sudo usermod -aG docker "$USER"
-	printf "Logout and login for the user to be added to the group"
-	printf "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup"
+	printf "Logout and login for the user to be added to the group\n"
+	printf "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n"
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
