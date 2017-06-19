@@ -26,11 +26,11 @@
 
 # ############################################################################
 # ==> set global Variables
-betaReleaseName="zesty"
-betaReleaseVer="17.04"
-stableReleaseName="yakkety"
-stableReleaseVer="16.10"
-previousStableReleaseName="xenial"
+betaReleaseName="artful"
+betaReleaseVer="17.10"
+stableReleaseName="zesty"
+stableReleaseVer="17.04"
+previousStableReleaseName="yakkety"
 desktopEnvironment=""
 kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
@@ -42,12 +42,13 @@ sudo chown "$USER":"$USER" ~/tmp
 
 # Create progress bar and colours for apt
 # echo 'Dpkg::Progress-Fancy "1";' | sudo tee -a /etc/apt/apt.conf.d/99progressbar > /dev/null
+cat /dev/null > 99progressbar
 cat << 'EOF' >>  99progressbar
 Dpkg::Progress-Fancy "1";
 APT::Color "1";
-Dpkg::Progress-Fancy::Progress-Bg "%1b[40m";
+  Dpkg::Progress-Fancy::Progress-Bg "%1b[40m";
 EOF
-sudo cp ./99progressbar /etc/apt/apt.conf.d/99progressbar
+sudo mv ./99progressbar /etc/apt/apt.conf.d/99progressbar
 
 #--------------------------------------------------------------------------------------------------
 # ############################################################################
@@ -66,16 +67,18 @@ INTERACTIVE_MODE="on"
 scriptDebugToStdout="off"
 scriptDebugToFile="on"
 if [[ $scriptDebugToFile == "on" ]]; then
-  if [[ -e debug.log ]]; then
-    >debug.log
-  else
-    touch debug.log
-  fi
-  if [[ -e error.log ]]; then
-    >error.log
-  else
-    touch error.log
-  fi
+  cat /dev/null > debug.log
+  cat /dev/null > error.log
+  # if [[ -e debug.log ]]; then
+  #   >debug.log
+  # else
+  #   touch debug.log
+  # fi
+  # if [[ -e error.log ]]; then
+  #   >error.log
+  # else
+  #   touch error.log
+  # fi
 fi
 
 # ############################################################################
