@@ -59,7 +59,7 @@ sudo chown "$USER":"$USER" ~/tmp
 # set -e  # Fail on first error
 
 
-# source /home/juanb/ownCloud/bashscripts/log4bash-master/log4bash.sh
+# source /home/juan/ownCloud/bashscripts/log4bash-master/log4bash.sh
 # source /home/juan/data/ownCloud/bashscripts/log4bash-master/log4bash.sh
 
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
@@ -235,11 +235,11 @@ vmwareGuestSetup () {
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/vmhost/home
   mkdir -p ~/vmhost/data
-  LINE1="172.22.8.1:/home/juanb/      $HOME/vmhost/home    nfs     rw,intr    0       0"
+  LINE1="172.22.8.1:/home/juan/      $HOME/vmhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="172.22.8.1:/data      $HOME/vmhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  LINE3="172.22.1.1:/home/juanb/      $HOME/vmhost/home    nfs     rw,intr    0       0"
+  LINE3="172.22.1.1:/home/juan/      $HOME/vmhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE3|h; \${x;s|$LINE3||;{g;t};a\\" -e "$LINE3" -e "}" /etc/fstab
   LINE4="172.22.1.1:/data      $HOME/vmhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
@@ -254,7 +254,7 @@ virtalBoxGuestSetup () {
   sudo apt install -y nfs-common ssh
   mkdir -p ~/vbhost/home
   mkdir -p ~/vbhost/data
-  LINE1="192.168.56.1:/home/juanb/      $HOME/vbhost/home    nfs     rw,intr    0       0"
+  LINE1="192.168.56.1:/home/juan/      $HOME/vbhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="192.168.56.1:/data      $HOME/vbhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
@@ -622,7 +622,7 @@ configureDockerInstall () {
     sudo service docker start
   fi
 
-	# Create docker group and add juanb
+	# Create docker group and add $USER
 	sudo usermod -aG docker "$USER"
 	printline_error "Logout and login for the user to be added to the group\n"
 	printline_error "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n"
