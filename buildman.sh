@@ -35,6 +35,7 @@ desktopEnvironment=""
 kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
 distReleaseName=$(lsb_release -sc)
+hosthome="/home/juan/"
 noPrompt=0
 
 mkdir -p ~/tmp
@@ -235,11 +236,11 @@ vmwareGuestSetup () {
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/vmhost/home
   mkdir -p ~/vmhost/data
-  LINE1="172.22.8.1:/home/juan/      $HOME/vmhost/home    nfs     rw,intr    0       0"
+  LINE1="172.22.8.1:$hosthome      $HOME/vmhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="172.22.8.1:/data      $HOME/vmhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  LINE3="172.22.1.1:/home/juan/      $HOME/vmhost/home    nfs     rw,intr    0       0"
+  LINE3="172.22.1.1:$hosthome      $HOME/vmhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE3|h; \${x;s|$LINE3||;{g;t};a\\" -e "$LINE3" -e "}" /etc/fstab
   LINE4="172.22.1.1:/data      $HOME/vmhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
@@ -254,7 +255,7 @@ virtalBoxGuestSetup () {
   sudo apt install -y nfs-common ssh
   mkdir -p ~/vbhost/home
   mkdir -p ~/vbhost/data
-  LINE1="192.168.56.1:/home/juan/      $HOME/vbhost/home    nfs     rw,intr    0       0"
+  LINE1="192.168.56.1:$hosthome      $HOME/vbhost/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="192.168.56.1:/data      $HOME/vbhost/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
@@ -519,7 +520,7 @@ installFonts () {
 ############################################################################
 # Desktop environment check and return desktop environment
 desktopEnvironmentCheck () {
-  log_in "Desktop environment check"
+  log_info "Desktop environment check"
 	# another way from stackexchange
 	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
 	then
@@ -1652,9 +1653,9 @@ log_info "End of BuildMan"
 log_info "===================================================================="
 
 printline_info "Job done!"
-printline_info "Thanks for using. :-)"
+printline_info "Thanks for using."
 # ############################################################################
 # set debugging off
-set -xv
+# set -xv
 
 exit;
