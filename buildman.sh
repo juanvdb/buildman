@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# UbuntuBuild V1.2.6
+# UbuntuBuild V1.2.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -42,13 +42,13 @@ sudo chown "$USER":"$USER" ~/tmp
 
 # Create progress bar and colours for apt
 # echo 'Dpkg::Progress-Fancy "1";' | sudo tee -a /etc/apt/apt.conf.d/99progressbar > /dev/null
-cat /dev/null > 99progressbar
-cat << 'EOF' >>  99progressbar
-Dpkg::Progress-Fancy "1";
-APT::Color "1";
-  Dpkg::Progress-Fancy::Progress-Bg "%1b[40m";
-EOF
-sudo mv ./99progressbar /etc/apt/apt.conf.d/99progressbar
+# cat /dev/null > 99progressbar
+# cat << 'EOF' >>  99progressbar
+# Dpkg::Progress-Fancy "1";
+# APT::Color "1";
+#   Dpkg::Progress-Fancy::Progress-Bg "%1b[40m";
+# EOF
+# sudo mv ./99progressbar /etc/apt/apt.conf.d/99progressbar
 
 #--------------------------------------------------------------------------------------------------
 # ############################################################################
@@ -65,20 +65,16 @@ sudo mv ./99progressbar /etc/apt/apt.conf.d/99progressbar
 export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 INTERACTIVE_MODE="on"
 scriptDebugToStdout="off"
-scriptDebugToFile="on"
-if [[ $scriptDebugToFile == "on" ]]; then
-  cat /dev/null > debug.log
-  cat /dev/null > error.log
-  # if [[ -e debug.log ]]; then
-  #   >debug.log
-  # else
-  #   touch debug.log
-  # fi
-  # if [[ -e error.log ]]; then
-  #   >error.log
-  # else
-  #   touch error.log
-  # fi
+logToFile="on"
+if [[ $logToFile == "on" ]]; then
+  # cat /dev/null > buildman.log
+  # cat /dev/null > buildman_error.log
+  if [[ ! -e buildman.log ]]; then
+    touch buildman.log
+  fi
+  if [[ ! -e buildman_error.log ]]; then
+    touch buildman_error.log
+  fi
 fi
 
 # ############################################################################
@@ -91,12 +87,12 @@ debug () {
   then
     printf "DEBUG: %q\n" "$@"
   fi
-  if [[ $scriptDebugToFile == "on" ]]
+  if [[ $logToFile == "on" ]]
   then
-    printf "DEBUG: %q\n" "$@" >>debug.log 2>>error.log
+    printf "DEBUG: %q\n" "$@" >>buildman.log 2>>buildman_error.log
   fi
-  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>debug.log 2>>error.log || :
-  #log "$@" >>debug.log 2>>error.log
+  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>buildman.log 2>>buildman_error.log || :
+  #log "$@" >>buildman.log 2>>buildman_error.log
 }
 
 # ############################################################################
@@ -133,19 +129,38 @@ log() {
     if [[ $scriptDebugToStdout == "on" ]]; then
       echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}";
     fi
-    if [[ $scriptDebugToFile == "on" ]]
+    if [[ $logToFile == "on" ]]
     then
-      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>debug.log 2>>error.log
+      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>buildman.log 2>>buildman_error.log
     fi
-    # [[ $script_debug = 1 ]] && echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>debug.log 2>>error.log || :
+    # [[ $script_debug = 1 ]] && echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>buildman.log 2>>buildman_buildman_error.log || :
     return 0;
 }
 
 log_info()      { log "$@"; }
 log_success()   { log "$1" "SUCCESS" "${LOG_SUCCESS_COLOR}"; }
-log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; log_speak "$1"; }
+log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; }
 log_warning()   { log "$1" "WARNING" "${LOG_WARN_COLOR}"; }
 log_debug()     { log "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
+
+printline() {
+    local log_text="$1"
+    local log_level="$2"
+    local log_color="$3"
+
+    # Default level to "info"
+    [[ -z ${log_level} ]] && log_level="INFO";
+    [[ -z ${log_color} ]] && log_color="${LOG_INFO_COLOR}";
+
+    echo -e "${log_color} ${log_text} ${LOG_DEFAULT_COLOR}";
+    return 0;
+}
+
+printline_info()      { printline "$@"; }
+printline_success()   { printline "$1" "SUCCESS" "${LOG_SUCCESS_COLOR}"; }
+printline_error()     { printline "$1" "ERROR" "${LOG_ERROR_COLOR}"; }
+printline_warning()   { printline "$1" "WARNING" "${LOG_WARN_COLOR}"; }
+printline_debug()     { printline "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
 
 # ############################################################################
 #--------------------------------------------------------------------------------------------------
@@ -255,6 +270,7 @@ setupDataDirLinks () {
   cd "$HOME" || exit
 
   linkDataDirectories=(
+  "bin"
   "Documents"
   "Downloads"
   "Music"
@@ -366,7 +382,7 @@ devAppsInstall(){
   log_info "Dev Apps install"
 
 	# install bashdb and ddd
-	printf "Please check ddd-3 version"
+	printline_error "Please check ddd-3 version"
 	sudo apt -y install bashdb
 	sudo apt -y build-dep ddd
 	sudo apt -y install libmotif-dev
@@ -377,6 +393,9 @@ devAppsInstall(){
 	./configure
 	make
 	sudo make install
+
+
+
 	cd "$currentPath" || return
 }
 
@@ -605,11 +624,11 @@ configureDockerInstall () {
 
 	# Create docker group and add juanb
 	sudo usermod -aG docker "$USER"
-	printf "Logout and login for the user to be added to the group\n"
-	printf "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n"
+	printline_error "Logout and login for the user to be added to the group\n"
+	printline_error "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n"
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
+    printline_debug "%s" "$nullEntry"
   fi
 
   sudo ufw allow 2375/tcp
@@ -849,9 +868,10 @@ installApps () {
   log_info "Start Applications installation the general apps"
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
 
-  sudo snap install atom vlc vlc-data browser-plugin-vlc
+  sudo snap install vlc vlc-data browser-plugin-vlc
+  sudo snap install atom --classic
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty)$ ]]; then
@@ -1051,12 +1071,12 @@ installOptions () {
         fi
       ;;
       disp)
-    		printf "%s" choice
+    		printline_debug "%s" choice
         laptopDisplayDrivers
-    		echo "Installed Laptop Display Drivers."
+    		printline_success "Installed Laptop Display Drivers."
     		;;
     	dslk)
-    		printf "%s" "$choice"
+    		printline_debug "%s" "$choice"
         displayLinkInstallApp
     	;;
       ownc )
@@ -1115,7 +1135,7 @@ installOptions () {
         fi
       ;;
       beta )
-        echo "Running $desktopEnvironment $distReleaseName $distReleaseVer"
+        printline_warning "Running $desktopEnvironment $distReleaseName $distReleaseVer"
         read -rp "Do you want to setup the build for a beta install? (y/n) " answer
         if [[ $answer = [Yy1] ]]; then
           betaAns=1
@@ -1224,7 +1244,7 @@ installOptions () {
                 validchoice=1
               ;;
               * )
-                printf "Please enter a valid choice, the first letter of the stable release you need."
+                printline_warning "Please enter a valid choice, the first letter of the stable release you need."
                 validchoice=0
               ;;
             esac
@@ -1571,53 +1591,55 @@ read -rp "Enter your choice : " choice
 # 	exit 0
 # fi
 
-printf "Enter your system password if asked...\n"
+printline_warning "Enter your system password if asked...\n"
 
 # take inputs and perform as necessary
 case "$choice" in
 	la|xpsa)
-  	printf "Automated installation for a Laptop\n"
+  	printline_info "Automated installation for a Laptop\n"
     autoRun l
-    echo "Operation completed successfully."
+    printline_success "Operation completed successfully."
 	;;
 	lq|xpsq)
-    printf "Laptop Installation asking items:\n"
+    printline_info "Laptop Installation asking items:\n"
     questionRun l
-    printf "Operation completed successfully.\n"
+    printline_success "Operation completed successfully.\n"
 	;;
 	wa)
-  	printf "Automated installation for a Workstation\n"
+  	printline_info "Automated installation for a Workstation\n"
     autoRun w
-    printf "Operation completed successfully.\n"
+    printline_success "Operation completed successfully.\n"
 	;;
 	wq)
-    printf "Workstation Installation asking items:\n"
+    printline_info "Workstation Installation asking items:\n"
     questionRun w
-    printf "Operation completed successfully.\n"
+    printline_success "Operation completed successfully.\n"
 	;;
 	vma)
-    printf "Automated install for a Vmware virtual machine\n"
+    printline_info "Automated install for a Vmware virtual machine\n"
     autoRun vm
-    printf "Operation completed successfully.\n"
+    printline_success "Operation completed successfully.\n"
   ;;
   # ############################################################################
 	vmq|vm-question)
     log_info "Vmware install asking questions as to which apps to install for the run"
+    printline_warning "Vmware install asking questions as to which apps to install for the run"
     questionRun vm
   ;;
   # ############################################################################
 	vba|vb-all)
-    printf "Automated install for a VirtualBox virtual machine\n"
+    printline_info "Automated install for a VirtualBox virtual machine\n"
     autoRun vb
-    printf "Operation completed successfully.\n"
+    printline_success "Operation completed successfully.\n"
   ;;
   # ############################################################################
   vbq|vb-question)
     log_info "VirtualBox install asking questions as to which apps to install for the run"
+    printline_warning "VirtualBox install asking questions as to which apps to install for the run"
     questionRun vb
   ;;
 	item )
-  	echo "Selecting itemized installations"
+  	printline_info "Selecting itemized installations"
     installOptions
   ;;
   q);;
@@ -1629,8 +1651,8 @@ log_info "Job done!"
 log_info "End of BuildMan"
 log_info "===================================================================="
 
-printf "Job done!"
-printf "Thanks for using. :-)"
+printline_info "Job done!"
+printline_info "Thanks for using. :-)"
 # ############################################################################
 # set debugging off
 set -xv
