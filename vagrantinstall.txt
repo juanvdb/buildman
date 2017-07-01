@@ -2,7 +2,7 @@ Screen saver off
 Power saver off
 Auto login on
 
-sudo apt install vim sshfs nfs-common net-tools
+sudo apt install vim ssh sshfs nfs-common net-tools 
 sudo vim /etc/hosts
 ssh-keygen 
 ssh-copy-id juan@vbhost
@@ -13,5 +13,8 @@ sudo mount vbhost:/home/juan ~/vbhost/home
 
 sudo apt install linux-headers-$(uname -r) build-essential dkms
 Install VirtualBox Guest Addons
+sudo sh /cdrom/VBoxLinuxAdditions.run
 
-NAT MAC 08:00:27:bc:bd:
+
+
+NAT MAC 08:00:27:35:ea:45
