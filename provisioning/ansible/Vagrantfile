@@ -1,0 +1,25 @@
+Vagrant.configure("2") do |config|
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.synced_folder_opts = {
+      type: :nfs,
+      mount_options: ['rw', 'vers=3', 'tcp', 'nolock']
+    }
+    # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
+  end
+
+  # DNS for boxes
+  if Vagrant.has_plugin?("vagrant-dns")
+    config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
+  end
+
+  config.vm.box = "kubuntu1704"
+  config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
+  #config.vm.network "private_network", type: "dhcp", auto_config: false
+  config.vm.provider :virtualbox do |vb|
+    vb.gui = true
+  end
+  config.ssh.insert_key = true
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "../../", "/srv/share", disabled: false, type: "nfs"
+end
