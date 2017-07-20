@@ -1,0 +1,5 @@
+[vagrant.guests]
+172.28.128.201
+
+[virtualbox.guests]
+192.168.56.101
