@@ -1,3 +1,5 @@
+system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/')
+
 Vagrant.configure("2") do |config|
 
   if Vagrant.has_plugin?("vagrant-cachier")
@@ -14,13 +16,21 @@ Vagrant.configure("2") do |config|
   #   config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   # end
 
-  config.vm.box = "kubuntu1704"
+  # config.vm.box = "kubuntu1704"
+  config.vm.box = "ubuntu/xenial64"
+
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
   # config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provider :virtualbox do |vb|
     vb.gui = true
   end
-  config.ssh.insert_key = true
+  config.ssh.insert_key = false
   config.vm.synced_folder ".", "/vagrant", disabled: false
   config.vm.synced_folder "../../", "/srv/share", disabled: false, type: "nfs"
+
+  config.vm.provision "ansible" do |ansible|
+    ansible.verbose = "v"
+    ansible.playbook = "build.yml"
+  end
+
 end
