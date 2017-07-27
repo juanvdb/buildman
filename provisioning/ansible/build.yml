@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: no
+  remote_user: vagrant
+
+  tasks:
+  - name: Update repositories cache and install git package
+    apt:
+      name: git git-core
+      update_cache: yes

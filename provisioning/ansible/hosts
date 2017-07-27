@@ -1,5 +1,6 @@
-[vagrant.guests]
-172.28.128.201
+[vagrant]
+rho
 
-[virtualbox.guests]
+[virtualbox]
 192.168.56.101
+phi

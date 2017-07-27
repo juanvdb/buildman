@@ -1,0 +1,13 @@
+---
+- hosts: virtualbox
+  # connection: local
+  gather_facts: no
+  become: yes
+  # become_user: minzef
+
+
+  tasks:
+  - name: Update repositories cache and install git package
+    apt:
+      name: git git-core
+      update_cache: yes

@@ -1,0 +1,5 @@
+---
+- hosts: virtualbox
+  connection: local
+  tasks:
+    - debug:
