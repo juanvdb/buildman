@@ -1,0 +1,20 @@
+[1m[2017-08-07 18:31:08 SAST] [INFO] Start of BuildMan [0m
+[1m[2017-08-07 18:31:08 SAST] [INFO] ==================================================================== [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] distReleaseVer=17.04 [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] distReleaseName=zesty [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] stableReleaseVer=16.10 [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] stableReleaseName=yakkety [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] betaReleaseName=zesty [0m
+[1;33m[2017-08-07 18:31:08 SAST] [WARNING] betaAns=1 [0m
+[1m[2017-08-07 18:31:13 SAST] [INFO] Start Auto Applications installation [0m
+[1m[2017-08-07 18:31:13 SAST] [INFO] Kernel Update [0m
+[1m[2017-08-07 18:35:22 SAST] [INFO] Add Repositories [0m
+[1;34m[2017-08-07 18:35:24 SAST] [DEBUG] doublecmd [0m
+[1;34m[2017-08-07 18:35:34 SAST] [DEBUG] Google Chromium [0m
+[1;34m[2017-08-07 18:35:35 SAST] [DEBUG] Rapid Photo downloader [0m
+[1;34m[2017-08-07 18:35:37 SAST] [DEBUG] VLC Media Player [0m
+[1;34m[2017-08-07 18:35:37 SAST] [DEBUG] Darktable [0m
+[1;34m[2017-08-07 18:35:38 SAST] [DEBUG] WebUpd8 and SyncWall [0m
+[1;34m[2017-08-07 18:35:38 SAST] [DEBUG] Y PPA Manager [0m
+[1;34m[2017-08-07 18:35:38 SAST] [DEBUG] WebUpd8 Java [0m
+[1;34m[2017-08-07 18:35:38 SAST] [DEBUG] Filezilla [0m
