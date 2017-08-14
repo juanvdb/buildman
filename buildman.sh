@@ -26,11 +26,11 @@
 
 # ############################################################################
 # ==> set global Variables
-betaReleaseName="zesty"
-betaReleaseVer="17.04"
-stableReleaseName="yakkety"
-stableReleaseVer="16.10"
-previousStableReleaseName="xenial"
+betaReleaseName="arty"
+betaReleaseVer="17.10"
+stableReleaseName="zesty"
+stableReleaseVer="17.04"
+previousStableReleaseName="yakkety"
 desktopEnvironment=""
 kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
@@ -39,6 +39,10 @@ noPrompt=0
 
 mkdir -p ~/tmp
 sudo chown "$USER":"$USER" ~/tmp
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                          Debug                                           O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 #--------------------------------------------------------------------------------------------------
 # ############################################################################
@@ -131,7 +135,7 @@ log() {
 
 log_info()      { log "$@"; }
 log_success()   { log "$1" "SUCCESS" "${LOG_SUCCESS_COLOR}"; }
-log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; log_speak "$1"; }
+log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; }
 log_warning()   { log "$1" "WARNING" "${LOG_WARN_COLOR}"; }
 log_debug()     { log "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
 
@@ -142,6 +146,10 @@ log_debug()     { log "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
 # ############################################################################
 # Die process to exit because of a failure
 die() { echo "$*" >&2; exit 1; }
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                  Update and upgrade                                      O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 
 # ############################################################################
@@ -167,6 +175,10 @@ repoUpgrade () {
   sudo apt -y autoremove
   # sudo apt-get clean
 }
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                         Kernel                                           O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
 # Setup Kernel
@@ -201,6 +213,10 @@ kernelUpdate () {
   fi
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O              Virtual Machines Setup                                      O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # VMware Guest Setup, vmtools, nfs directories to host
 vmwareGuestSetup () {
@@ -234,6 +250,10 @@ virtalBoxGuestSetup () {
   sudo chown -R "$USER":"$USER" ~/hostfiles
   # sudo mount -a
 }
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                     Home directory setup                                 O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
 # Links directories to data disk if exists
@@ -344,6 +364,9 @@ setupDataDirLinks () {
     cd "$currentPath" || exit
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                 Development Apps                                         O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # ############################################################################
 # Development packages repositories
 #devAppsRepos () {}
@@ -368,6 +391,9 @@ devAppsInstall(){
 	cd "$currentPath" || return
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                 Physical Machine Setup                                   O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # ############################################################################
 # ownCloud Client repository
 ownCloudClientRepo () {
@@ -411,6 +437,42 @@ laptopDisplayDrivers () {
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt-get install nvidia-current intel-graphics-update-tool
+}
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                   Window Managers Backports                              O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+############################################################################
+# Desktop environment check and return desktop environment
+desktopEnvironmentCheck () {
+  log_in "Desktop environment check"
+	# another way from stackexchange
+	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
+	then
+    # shellcheck disable=SC2001
+	  desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
+	else
+	  desktop=$XDG_CURRENT_DESKTOP
+	fi
+  # convert to lower case
+	desktop=${desktop,,}
+
+  # debug "desktopEnvironmentCheck -GDMSESSION = $GDMSESSION"
+	case $desktop in
+	 	"kde" | "plasma")
+	   	desktopEnvironment="kde"
+	 		;;
+    "gnome" )
+      desktopEnvironment="gnome"
+      ;;
+	 	"xfce" )
+	   	desktopEnvironment="xubuntu"
+	 		;;
+    "ubuntu" ) ;;
+    * )
+      desktopEnvironment="ubuntu"
+      ;;
+  esac
 }
 
 # ############################################################################
@@ -464,6 +526,9 @@ kdeBackportsApps () {
   sudo apt-get -y full-upgradegnm
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                   Apps Install                                           O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # ############################################################################
 # Google Chrome Install
 googleChromeInstall () {
@@ -482,55 +547,6 @@ googleChromeInstall () {
 installFonts () {
   log_info "Install Fonts"
 	sudo apt-get -y install fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
-}
-
-#
-############################################################################
-# Desktop environment check and return desktop environment
-desktopEnvironmentCheck () {
-  log_in "Desktop environment check"
-	# another way from stackexchange
-	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
-	then
-    # shellcheck disable=SC2001
-	  desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
-	else
-	  desktop=$XDG_CURRENT_DESKTOP
-	fi
-  # convert to lower case
-	desktop=${desktop,,}
-
-  # debug "desktopEnvironmentCheck -GDMSESSION = $GDMSESSION"
-	case $desktop in
-	 	"kde" | "plasma")
-	   	desktopEnvironment="kde"
-	 		;;
-    "gnome" )
-      desktopEnvironment="gnome"
-      ;;
-	 	"xfce" )
-	   	desktopEnvironment="xubuntu"
-	 		;;
-    "ubuntu" ) ;;
-    * )
-      desktopEnvironment="ubuntu"
-      ;;
-  esac
-}
-
-# #########################################################################
-# Install digikam repository
-installDigikamRepo () {
-  log_info "Digikam Repo"
-	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-}
-# #########################################################################
-# Install digikam Application
-installDigikamApp () {
-  log_info "Digikam Install"
-  # sudo apt-get install -yf
-	sudo apt-get -yf install digikam digikam-doc digikam-data
-  # sudo apt-get install -yf
 }
 
 # ############################################################################
@@ -603,6 +619,27 @@ configureDockerInstall () {
   sudo apt-get install -yf
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O               Photography Apps                                           O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# #########################################################################
+# Install digikam repository
+installDigikamRepo () {
+  log_info "Digikam Repo"
+	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
+}
+# #########################################################################
+# Install digikam Application
+installDigikamApp () {
+  log_info "Digikam Install"
+  # sudo apt-get install -yf
+	sudo apt-get -yf install digikam digikam-doc digikam-data
+  # sudo apt-get install -yf
+}
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           General Apps Install                                           O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # #########################################################################
 # changeAptSource
 changeAptSource () {
