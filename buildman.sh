@@ -379,15 +379,18 @@ devAppsInstall(){
 	# install bashdb and ddd
 	printf "Please check ddd-3 version"
 	sudo apt-get -y install bashdb
-	sudo apt-get -y build-dep ddd
-	sudo apt-get -y install libmotif-dev
-	wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
-	wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
-	tar xvf ~/tmp/ddd-3.3.9.tar.gz
-	cd ~/tmp/ddd-3.3.12 || return
-	./configure
-	make
-	sudo make install
+	# sudo apt-get -y build-dep ddd
+	# sudo apt-get -y install libmotif-dev
+	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
+	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
+	# tar xvf ~/tmp/ddd-3.3.9.tar.gz
+	# cd ~/tmp/ddd-3.3.12 || return
+	# ./configure
+	# make
+	# sudo make install
+
+  snap install --classic atom
+
 	cd "$currentPath" || return
 }
 
