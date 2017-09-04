@@ -111,6 +111,8 @@ else
     declare -r LOG_SUCCESS_COLOR="\033[1;32m"
     declare -r LOG_WARN_COLOR="\033[1;33m"
     declare -r LOG_DEBUG_COLOR="\033[1;34m"
+    declare -r BANNER_BLUE="\e[7;44;39m"
+    declare -r BANNER_YELLOW="\e[0;103;30m"
 fi
 
 log() {
@@ -139,6 +141,25 @@ log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; }
 log_warning()   { log "$1" "WARNING" "${LOG_WARN_COLOR}"; }
 log_debug()     { log "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
 
+println() {
+  local println_text="$1"
+  local println_color="$2"
+
+  # Default level to "info"
+  [[ -z ${println_color} ]] && println_color="${LOG_INFO_COLOR}";
+
+  echo -e "${println_color} ${log_text} ${LOG_DEFAULT_COLOR}";
+  return 0;
+}
+
+println_info()      { log "$@"; }
+println_banner_yellow()   { log "$1" "${BANNER_YELLOW}"; }
+println_banner_blue()   { log "$1" "${BANNER_BLUE}"; }
+println_red()     { log "$1" "${LOG_ERROR_COLOR}"; }
+println_yellow()   { log "$1" "${LOG_WARN_COLOR}"; }
+println_blue()     { log "$1" "${LOG_DEBUG_COLOR}"; }
+
+
 # ############################################################################
 #--------------------------------------------------------------------------------------------------
 
@@ -157,6 +178,7 @@ die() { echo "$*" >&2; exit 1; }
 # Update repositories - hopefully only need to call once
 repoUpdate () {
   log_info "Repo Update"
+  println_banner_yellow "Repo Update                                            "
   sudo apt-get -y update;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
@@ -169,6 +191,7 @@ repoUpdate () {
 # Upgrade the system and distro  - hopefully only need to call once
 repoUpgrade () {
   log_info "Repo Upgrade"
+  println_banner_yellow "Repo Upgrade                                           "
   sudo apt-get -y upgrade;
   sudo apt-get -y full-upgrade
   sudo apt-get -y dist-upgrade;
@@ -184,6 +207,7 @@ repoUpgrade () {
 # Setup Kernel
 kernelUpdate () {
   log_info "Kernel Update"
+  println_banner_yellow "Kernel Update                                          "
   # if [[ "$noPrompt" -ne 1 ]]; then
   #   read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
   # else
@@ -221,6 +245,7 @@ kernelUpdate () {
 # VMware Guest Setup, vmtools, nfs directories to host
 vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
+  println_banner_yellow "VMware setup with Open VM Tools and NFS file share to host"
   sudo apt-get install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -240,6 +265,7 @@ vmwareGuestSetup () {
 # VirtualBox Guest Setup, vmtools, nfs directories to host
 virtalBoxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
+  println_banner_yellow "VirtualBox setup NFS file share to hostfiles           "
   sudo apt-get install -y nfs-common ssh
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -375,6 +401,7 @@ setupDataDirLinks () {
 devAppsInstall(){
   currentPath=$(pwd)
   log_info "Dev Apps install"
+  println_banner_yellow "Dev Apps install                                       "
 
 	# install bashdb and ddd
 	printf "Please check ddd-3 version"
@@ -401,7 +428,8 @@ devAppsInstall(){
 # ownCloud Client repository
 ownCloudClientRepo () {
   log_info "ownCloud Repo"
-  sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
+  println_banner_yellow "ownCloud Repo                                          "
+    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
   wget -q -O - "http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
 
@@ -409,6 +437,7 @@ ownCloudClientRepo () {
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
+  println_banner_yellow "ownCloud Install                                       "
 	sudo apt-get -y install owncloud-client
   sudo apt-get install -yf
 }
@@ -419,6 +448,7 @@ displayLinkInstallApp () {
 
   currentPath=$(pwd)
   log_info "display Link Install App"
+  println_banner_yellow "display Link Install App                               "
 	sudo apt-get -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
@@ -437,6 +467,7 @@ displayLinkInstallApp () {
 # XPS Display Drivers inatallations
 laptopDisplayDrivers () {
   log_info "Install XPS Display Drivers"
+  println_banner_yellow "Install XPS Display Drivers                            "
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt-get install nvidia-current intel-graphics-update-tool
@@ -449,6 +480,7 @@ laptopDisplayDrivers () {
 # Desktop environment check and return desktop environment
 desktopEnvironmentCheck () {
   log_in "Desktop environment check"
+  println_banner_yellow "Desktop environment check                              "
 	# another way from stackexchange
 	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
 	then
@@ -482,6 +514,7 @@ desktopEnvironmentCheck () {
 # gnome3BackportsRepo
 gnome3BackportsRepo () {
   log_info "Add Gnome3 Backports Repo apt sources"
+  println_banner_yellow "Add Gnome3 Backports Repo apt sources                  "
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3
   if [[ $betaAns == 1 ]]; then
@@ -496,6 +529,7 @@ gnome3BackportsRepo () {
 # gnome3BackportsApps
 gnome3BackportsApps () {
   log_info "Install Gnome3 Backports Apps"
+  println_banner_yellow "Install Gnome3 Backports Apps                          "
 	repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
@@ -505,6 +539,7 @@ gnome3BackportsApps () {
 # gnome3Settings
 gnome3Settings () {
   log_info "Change Gnome3 settings"
+  println_banner_yellow "Change Gnome3 settings                                 "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
 }
 
@@ -513,6 +548,7 @@ gnome3Settings () {
 # kdeBackportsRepo
 kdeBackportsRepo () {
   log_info "Add KDE Backports Repo"
+  println_banner_yellow "Add KDE Backports Repo                                 "
 	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
   if [[ $betaAns == 1 ]]; then
@@ -536,7 +572,8 @@ kdeBackportsApps () {
 # Google Chrome Install
 googleChromeInstall () {
   log_info "Google Chrome Install"
-	# sudo apt-get install -y libgconf2-4 libnss3-1d libxss1; # libnss3-1d is no longer in yakkety
+  println_blue "Google Chrome Install"
+  	# sudo apt-get install -y libgconf2-4 libnss3-1d libxss1; # libnss3-1d is no longer in yakkety
 	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 	#sudo sh -c 'echo "deb - http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 	#sudo apt-get install google-chrome-stable
@@ -549,6 +586,7 @@ googleChromeInstall () {
 # Install Fonts
 installFonts () {
   log_info "Install Fonts"
+  println_blue "Install Fonts"
 	sudo apt-get -y install fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
 }
 
@@ -556,6 +594,7 @@ installFonts () {
 # Configure DockerRepo
 configureDockerRepo () {
   log_info "Configure Docker Repo"
+  println_blue "Configure Docker Repo"
 	# Setup App repository
 	sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
 	sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
@@ -571,6 +610,7 @@ configureDockerRepo () {
 configureDockerInstall () {
   currentPath=$(pwd)
   log_info "Configure Docker Install"
+  println_blue "Configure Docker Install"
 	# Purge the old repo
 	sudo apt-get -y purge lxc-docker
 	# Make sure that apt is pulling from the right repository
@@ -629,12 +669,14 @@ configureDockerInstall () {
 # Install digikam repository
 installDigikamRepo () {
   log_info "Digikam Repo"
+  println_blue "Digikam Repo"
 	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
 }
 # #########################################################################
 # Install digikam Application
 installDigikamApp () {
   log_info "Digikam Install"
+  println_blue "Digikam Install"
   # sudo apt-get install -yf
 	sudo apt-get -yf install digikam digikam-doc digikam-data
   # sudo apt-get install -yf
@@ -671,60 +713,77 @@ changeAptSource () {
 # Add all repositories
 addRepositories () {
   log_info "Add Repositories"
-  # general repositories
+  println_banner_yellow "Add Repositories                                       "
+    # general repositories
 	sudo add-apt-repository -y universe
   # doublecmd
   log_debug 'doublecmd'
+  println_yellow 'doublecmd'
 	sudo apt-add-repository -y ppa:alexx2000/doublecmd
 	# Google Chromium
 	log_debug "Google Chromium"
+	println_yellow "Google Chromium"
 	# sudo add-apt-repository -y ppa:chromium-daily/ppa;
 	sudo add-apt-repository -y ppa:chromium-daily/stable;
 	#Google Chrome
 	#log_info 'Google Chrome'
+	#println_yellow 'Google Chrome'
 	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 	#sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 	# Rapid Photo downloader
 	log_debug 'Rapid Photo downloader'
+	println_yellow 'Rapid Photo downloader'
 	sudo add-apt-repository -y ppa:dlynch3;
 	# VLC Media Player
 	log_debug 'VLC Media Player'
+	println_yellow 'VLC Media Player'
 	sudo add-apt-repository -y ppa:n-muench/vlc
 	# Darktable
 	log_debug 'Darktable'
+	println_yellow 'Darktable'
 	sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
 	# WebUpd8 and SyncWall
 	log_debug 'WebUpd8 and SyncWall'
+	println_yellow 'WebUpd8 and SyncWall'
 	sudo add-apt-repository -y ppa:nilarimogard/webupd8
 	# Y PPA Manager
 	log_debug 'Y PPA Manager'
+	println_yellow 'Y PPA Manager'
 	sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
 	# WebUpd8 Java
 	log_debug 'WebUpd8 Java'
+	println_yellow 'WebUpd8 Java'
 	sudo add-apt-repository -y ppa:webupd8team/java
 	# Filezilla
 	log_debug 'Filezilla'
+	println_yellow 'Filezilla'
 	sudo add-apt-repository -y ppa:n-muench/programs-ppa
 	# Uncomplicated Firewall frontend
 	log_debug 'Uncomplicated Firewall frontend'
+	println_yellow 'Uncomplicated Firewall frontend'
 	sudo add-apt-repository -y ppa:baudm/ppa;
 	# Grub Customizer
 	log_debug 'Grub Customizer'
+	println_yellow 'Grub Customizer'
 	sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
 	# Clementine
 	log_debug 'Clementine'
+	println_yellow 'Clementine'
 	sudo add-apt-repository -y ppa:me-davidsansome/clementine
 	# [?] LibreCAD
 	log_debug '[?] LibreCAD'
+	println_yellow '[?] LibreCAD'
 	sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
 	# [?] WinUSB
 	log_debug '[?] WinUSB'
+	println_yellow '[?] WinUSB'
 	sudo add-apt-repository -y ppa:colingille/freshlight
 	# [5] Sublime text 2 - Now has a fee
 	# log_debug '[5] Sublime text 2 - Now has a fee'
 	# sudo add-apt-repository -y ppa:webupd8team/sublime-text-2
 	# Dropbox
 	log_debug 'Dropbox'
+	println_yellow 'Dropbox'
 	sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
 	# sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
 	# sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
@@ -733,15 +792,19 @@ addRepositories () {
 	sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
 	# Boot-Repair
 	log_debug 'Boot-Repair'
+	println_yellow 'Boot-Repair'
 	sudo add-apt-repository -y ppa:yannubuntu/boot-repair
 	# Brackets
 	log_debug 'Brackets'
+	println_yellow 'Brackets'
 	sudo add-apt-repository -y ppa:webupd8team/brackets
 	# Atom
 	log_debug 'Atom'
+	println_yellow 'Atom'
 	sudo add-apt-repository -y ppa:webupd8team/atom
 	# Variety
 	log_debug 'Variety'
+	println_yellow 'Variety'
 	sudo add-apt-repository -y ppa:peterlevi/ppa
 	# Docker
 	#log_debug 'Docker'
@@ -749,9 +812,11 @@ addRepositories () {
 	#sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-$distReleaseName main" >> /etc/apt/sources.list.d/docker-$distReleaseName.list'
 	# LightTable
 	log_debug 'LightTable'
+	println_yellow 'LightTable'
 	sudo add-apt-repository -y ppa:dr-akulavich/lighttable
 	# Sunflower
 	log_debug 'Sunflower'
+	println_yellow 'Sunflower'
 	sudo add-apt-repository -y ppa:atareao/sunflower
 
   # dekstop specific repositories
@@ -762,17 +827,21 @@ addRepositories () {
 		"gnome" )
 			# [4] Ambiance and Radiance Theme Color pack
 			log_debug '[4] Ambiance and Radiance Theme Color pack'
+			println_yellow '[4] Ambiance and Radiance Theme Color pack'
 			sudo add-apt-repository -y ppa:ravefinity-project/ppa
 			# [?] Blue Ambiance
 			log_debug '[?] Blue Ambiance'
+			println_yellow '[?] Blue Ambiance'
 			sudo apt-add-repository -y ppa:satyajit-happy/themes
 			;;
 		"ubuntu" )
 			# [4] Ambiance and Radiance Theme Color pack
       log_debug '[4] Ambiance and Radiance Theme Color pack'
+      println_yellow '[4] Ambiance and Radiance Theme Color pack'
 			sudo add-apt-repository -y ppa:ravefinity-project/ppa
 			# [?] Blue Ambiance
       log_debug '[?] Blue Ambiance'
+      println_yellow '[?] Blue Ambiance'
 			sudo apt-add-repository -y ppa:satyajit-happy/themes
 			;;
 		"xubuntu" )
@@ -783,6 +852,7 @@ addRepositories () {
 
   #Change distro for some of the older PPAs
   log_debug "Change distirubtion name in repos to old versions as there has been no updates"
+  println_yellow "Change distirubtion name in repos to old versions as there has been no updates"
   changeAptSource "/etc/apt/sources.list.d/baudm-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" oneiric
   changeAptSource "/etc/apt/sources.list.d/chromium-daily-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
   changeAptSource "/etc/apt/sources.list.d/colingille-ubuntu-freshlight-$distReleaseName.list" "$distReleaseName" saucy
@@ -795,15 +865,19 @@ addRepositories () {
   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
     log_debug "Change Repos for which there aren't new repos."
+    println_yellow "Change Repos for which there aren't new repos."
     log_debug "Change n-muench to Xenial"
+    println_yellow "Change n-muench to Xenial"
     changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-programs-ppa-$distReleaseName.list" "$distReleaseName" wily
     log_debug "Change VLC to Xenial"
+    println_yellow "Change VLC to Xenial"
     changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-vlc-$distReleaseName.list" "$distReleaseName" wily
     case $desktopEnvironment in
       "kde" )
         ;;
       "gnome" )
         log_debug "Change Happy Themes to Xenial"
+        println_yellow "Change Happy Themes to Xenial"
         changeAptSource "/etc/apt/sources.list.d/satyajit-happy-ubuntu-themes-$distReleaseName.list" "$distReleaseName" wily
         ;;
       "xubuntu" )
@@ -814,17 +888,22 @@ addRepositories () {
   fi
   if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
     log_warning "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
+    println_yellow "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
     log_warning "Change Sunflower to $previousStableReleaseName"
+    println_yellow "Change Sunflower to $previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     log_warning "Change Dropbox to $previousStableReleaseName"
+    println_yellow "Change Dropbox to $previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$previousStableReleaseName"
     log_warning "Change Lighttable to $previousStableReleaseName"
+    println_yellow "Change Lighttable to $previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     case $desktopEnvironment in
       "kde" )
         ;;
       "gnome" )
         log_warning "Change ravefinity-project to $previousStableReleaseName"
+        println_yellow "Change ravefinity-project to $previousStableReleaseName"
         changeAptSource "/etc/apt/sources.list.d/ravefinity-project-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
         # Should not bet here should be in add gnome3 apt repositorites gnome3BackportsRepo
         # changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -844,12 +923,14 @@ addRepositories () {
     changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
     # FreeFileSync
     log_warning 'FreeFileSync'
+    println_yellow 'FreeFileSync'
     sudo add-apt-repository -y ppa:freefilesync/ffs
     # wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
     # sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu vivid-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
     changeAptSource "/etc/apt/sources.list.d/freefilesync-ubuntu-ffs-$distReleaseName.list" "$distReleaseName" trusty
     # Canon Printer Drivers
   	log_warning 'Canon Printer Drivers'
+  	println_yellow 'Canon Printer Drivers'
   	sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
   	sudo add-apt-repository -y ppa:michael-gruz/canon
   	sudo add-apt-repository -y ppa:inameiname/stable
@@ -858,10 +939,12 @@ addRepositories () {
     changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
     # Inkscape
     log_warning 'Inkscape'
+    println_yellow 'Inkscape'
     sudo add-apt-repository -y ppa:inkscape.dev/stable
   fi
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the apt sources."
+    println_yellow "Beta Code, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
@@ -873,6 +956,7 @@ addRepositories () {
 # Install applications
 installApps () {
   log_info "Start Applications installation the general apps"
+  println_banner_yellow "Start Applications installation the general apps       "
 	# general applications
   sudo apt-get install -yf
 	sudo apt-get -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc  gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
@@ -1418,7 +1502,8 @@ questionRun () {
 
   #start of application install
   if [[ $installAppsAns = 1 ]]; then
-    log_info 'Start Applications installation'
+    log_info "Start Applications installation"
+    println_banner_yellow "Start Applications installation                      "
     if [[ $vmwareGuestSetupAns = 1 ]]; then
       vmwareGuestSetup
     fi
@@ -1470,7 +1555,8 @@ questionRun () {
 # ############################################################################
 # Autorun function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
 autoRun () {
-  log_info 'Start Auto Applications installation'
+  log_info "Start Auto Applications installation"
+  println_banner_yellow "Start Auto Applications installation                   "
   noPrompt=1
   kernelUpdate
   case $1 in
@@ -1539,6 +1625,8 @@ autoRun () {
 log_info "Start of BuildMan"
 log_info "===================================================================="
 clear
+println_banner_yellow "Start of BuildMan                                                   "
+println_banner_yellow "===================================================================="
 
 # ########################################################
 # Set global variables
@@ -1556,6 +1644,12 @@ log_warning "stableReleaseVer=$stableReleaseVer"
 log_warning "stableReleaseName=$stableReleaseName"
 log_warning "betaReleaseName=$betaReleaseName"
 log_warning "betaAns=$betaAns"
+println_yellow "distReleaseVer=$distReleaseVer"
+println_yellow "distReleaseName=$distReleaseName"
+println_yellow "stableReleaseVer=$stableReleaseVer"
+println_yellow "stableReleaseName=$stableReleaseName"
+println_yellow "betaReleaseName=$betaReleaseName"
+println_yellow "betaAns=$betaAns"
 
 
 echo "
@@ -1626,7 +1720,7 @@ case "$choice" in
   ;;
   # ############################################################################
 	vmq|vm-question)
-    log_info "Vmware install asking questions as to which apps to install for the run"
+    printf "Vmware install asking questions as to which apps to install for the run"
     questionRun vm
   ;;
   # ############################################################################
@@ -1637,7 +1731,7 @@ case "$choice" in
   ;;
   # ############################################################################
   vbq|vb-question)
-    log_info "VirtualBox install asking questions as to which apps to install for the run"
+    printf "VirtualBox install asking questions as to which apps to install for the run"
     questionRun vb
   ;;
 	item )
