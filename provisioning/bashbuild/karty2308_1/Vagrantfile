@@ -1,6 +1,3 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
 system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/')
 
 Vagrant.configure("2") do |config|
@@ -14,7 +11,12 @@ Vagrant.configure("2") do |config|
     # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
   end
 
-  config.vm.box = "kartyb1"
+  # # DNS for boxes
+  # if Vagrant.has_plugin?("vagrant-dns")
+  #   config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
+  # end
+
+  config.vm.box = "karty2308"
   # config.vm.box = "kubuntu1710_v2"
   # config.vm.box = "ubuntu/xenial64"
   # config.vm.box = "wholebits/ubuntu17.04-64"
@@ -32,16 +34,9 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: false
   config.vm.synced_folder "../../", "/srv/share", disabled: false, type: "nfs"
 
-  # Do an update, upgrade and virtualbox additions
-  config.vm.provision "shell", inline: "sudo apt-get update"
-  config.vm.provision "shell", inline: "sudo apt-get -y upgrade"
-  # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11"
-  # Permit anyone to start the GUI
-  config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-
-  config.vm.provision "ansible" do |ansible|
-    ansible.verbose = "v"
-    ansible.playbook = "build.yml"
-  end
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.verbose = "v"
+  #  ansible.playbook = "build.yml"
+  #end
 
 end
