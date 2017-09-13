@@ -1,6 +1,7 @@
 [vagrant]
 rho
 kartyb1
+localhost
 
 [virtualbox]
 192.168.56.101
