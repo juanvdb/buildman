@@ -270,9 +270,9 @@ virtalBoxGuestSetup () {
   sudo apt install -y nfs-common ssh
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
-  LINE1="111.11.11.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  LINE2="111.11.11.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
   sudo chown -R "$USER":"$USER" ~/hostfiles
   # sudo mount -a
@@ -396,7 +396,17 @@ setupDataDirLinks () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # ############################################################################
 # Development packages repositories
-#devAppsRepos () {}
+devAppsRepos () {
+  # Brackets
+  log_debug 'Brackets Repo'
+  println_yellow 'Brackets Repo'
+  sudo add-apt-repository -y ppa:webupd8team/brackets
+  # Atom
+  log_debug 'Atom Repo'
+  println_yellow 'Atom Repo'
+  sudo add-apt-repository -y ppa:webupd8team/atom
+
+}
 # ############################################################################
 # Development packages installation
 devAppsInstall(){
@@ -405,8 +415,7 @@ devAppsInstall(){
   println_banner_yellow "Dev Apps install                                       "
 
 	# install bashdb and ddd
-	printf "Please check ddd-3 version"
-	sudo apt -y install bashdb
+	# printf "Please check ddd-3 version"
 	# sudo apt -y build-dep ddd
 	# sudo apt -y install libmotif-dev
 	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
@@ -417,7 +426,13 @@ devAppsInstall(){
 	# make
 	# sudo make install
 
-  snap install --classic atom
+  sudo add-apt-repository -y ppa:webupd8team/atom
+  repoUpdate
+  sudo apt -y install bashdb atom eclipse bashdb ddd idle3 idle3-tools brackets atom shellcheck eric eric-api-files;
+  # The following packages was installed in the past but never used or I could not figure out how to use them.
+  # abs-guide
+  snap install --classic --beta atom
+
 
 	cd "$currentPath" || return
 }
@@ -795,14 +810,6 @@ addRepositories () {
 	log_debug 'Boot-Repair'
 	println_yellow 'Boot-Repair'
 	sudo add-apt-repository -y ppa:yannubuntu/boot-repair
-	# Brackets
-	log_debug 'Brackets'
-	println_yellow 'Brackets'
-	sudo add-apt-repository -y ppa:webupd8team/brackets
-	# Atom
-	log_debug 'Atom'
-	println_yellow 'Atom'
-	sudo add-apt-repository -y ppa:webupd8team/atom
 	# Variety
 	log_debug 'Variety'
 	println_yellow 'Variety'
@@ -960,7 +967,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps       "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc bashdb ddd abs-guide tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview idle3 idle3-tools  keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre eclipse shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc  gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer brackets atom shellcheck variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart eric eric-api-files;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty)$ ]]; then
@@ -1077,6 +1084,7 @@ installOptions () {
     vmgs : Setup for a Vmware guest
     vbgs : Setup for a VirtualBox guest
     dtdr : Setup the home directories to link to the data disk directories
+    dev  : Install Development Apps and IDEs
 
     beta: Set options for an Ubuntu Beta install with PPA references to a previous version
 
@@ -1222,6 +1230,11 @@ installOptions () {
         if [[ $answer = [Yy1] ]]; then
           setupDataDirLinks
         fi
+      ;;
+      dev )
+        devAppsRepos
+        repoUpdate
+        devAppsInstall
       ;;
       beta )
         echo "Running $desktopEnvironment $distReleaseName $distReleaseVer"
