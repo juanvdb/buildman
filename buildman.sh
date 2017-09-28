@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DateVer 0913
-# UbuntuBuild V1.2.4
+# UbuntuBuild V1.2.5
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -149,16 +149,16 @@ println() {
   # Default level to "info"
   [[ -z ${println_color} ]] && println_color="${LOG_INFO_COLOR}";
 
-  echo -e "${println_color} ${log_text} ${LOG_DEFAULT_COLOR}";
+  echo -e "${println_color} ${println_text} ${LOG_DEFAULT_COLOR}";
   return 0;
 }
 
-println_info()      { log "$@"; }
-println_banner_yellow()   { log "$1" "${BANNER_YELLOW}"; }
-println_banner_blue()   { log "$1" "${BANNER_BLUE}"; }
-println_red()     { log "$1" "${LOG_ERROR_COLOR}"; }
-println_yellow()   { log "$1" "${LOG_WARN_COLOR}"; }
-println_blue()     { log "$1" "${LOG_DEBUG_COLOR}"; }
+println_info()      { println "$@"; }
+println_banner_yellow()   { println "$1" "${BANNER_YELLOW}"; }
+println_banner_blue()   { println "$1" "${BANNER_BLUE}"; }
+println_red()     { println "$1" "${LOG_ERROR_COLOR}"; }
+println_yellow()   { println "$1" "${LOG_WARN_COLOR}"; }
+println_blue()     { println "$1" "${LOG_DEBUG_COLOR}"; }
 
 
 # ############################################################################
@@ -179,7 +179,7 @@ die() { echo "$*" >&2; exit 1; }
 # Update repositories - hopefully only need to call once
 repoUpdate () {
   log_info "Repo Update"
-  println_banner_yellow "Repo Update                                            "
+  println_banner_yellow "Repo Update                                                          "
   sudo apt -y update;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
@@ -192,7 +192,7 @@ repoUpdate () {
 # Upgrade the system and distro  - hopefully only need to call once
 repoUpgrade () {
   log_info "Repo Upgrade"
-  println_banner_yellow "Repo Upgrade                                           "
+  println_banner_yellow "Repo Upgrade                                                         "
   sudo apt -y upgrade;
   sudo apt -y full-upgrade
   sudo apt -y dist-upgrade;
@@ -208,7 +208,7 @@ repoUpgrade () {
 # Setup Kernel
 kernelUpdate () {
   log_info "Kernel Update"
-  println_banner_yellow "Kernel Update                                          "
+  println_banner_yellow "Kernel Update                                                        "
   # if [[ "$noPrompt" -ne 1 ]]; then
   #   read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
   # else
@@ -246,7 +246,7 @@ kernelUpdate () {
 # VMware Guest Setup, vmtools, nfs directories to host
 vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
-  println_banner_yellow "VMware setup with Open VM Tools and NFS file share to host"
+  println_banner_yellow "VMware setup with Open VM Tools and NFS file share to host           "
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -266,7 +266,7 @@ vmwareGuestSetup () {
 # VirtualBox Guest Setup, vmtools, nfs directories to host
 virtalBoxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
-  println_banner_yellow "VirtualBox setup NFS file share to hostfiles           "
+  println_banner_yellow "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -405,14 +405,14 @@ devAppsRepos () {
   log_debug 'Atom Repo'
   println_yellow 'Atom Repo'
   sudo add-apt-repository -y ppa:webupd8team/atom
-
 }
+
 # ############################################################################
 # Development packages installation
 devAppsInstall(){
   currentPath=$(pwd)
   log_info "Dev Apps install"
-  println_banner_yellow "Dev Apps install                                       "
+  println_banner_yellow "Dev Apps install                                                     "
 
 	# install bashdb and ddd
 	# printf "Please check ddd-3 version"
@@ -428,9 +428,9 @@ devAppsInstall(){
 
   sudo add-apt-repository -y ppa:webupd8team/atom
   repoUpdate
-  sudo apt -y install bashdb atom eclipse bashdb ddd idle3 idle3-tools brackets atom shellcheck eric eric-api-files;
+  sudo apt -y install bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
-  # abs-guide
+  #
   snap install --classic --beta atom
 
 
@@ -444,7 +444,7 @@ devAppsInstall(){
 # ownCloud Client repository
 ownCloudClientRepo () {
   log_info "ownCloud Repo"
-  println_banner_yellow "ownCloud Repo                                          "
+  println_banner_yellow "ownCloud Repo                                                        "
     sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
   wget -q -O - "http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
@@ -453,7 +453,7 @@ ownCloudClientRepo () {
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
-  println_banner_yellow "ownCloud Install                                       "
+  println_banner_yellow "ownCloud Install                                                     "
 	sudo apt -y install owncloud-client
   sudo apt install -yf
 }
@@ -464,7 +464,7 @@ displayLinkInstallApp () {
 
   currentPath=$(pwd)
   log_info "display Link Install App"
-  println_banner_yellow "display Link Install App                               "
+  println_banner_yellow "display Link Install App                                             "
 	sudo apt -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
@@ -483,7 +483,7 @@ displayLinkInstallApp () {
 # XPS Display Drivers inatallations
 laptopDisplayDrivers () {
   log_info "Install XPS Display Drivers"
-  println_banner_yellow "Install XPS Display Drivers                            "
+  println_banner_yellow "Install XPS Display Drivers                                          "
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt install nvidia-current intel-graphics-update-tool
@@ -495,8 +495,8 @@ laptopDisplayDrivers () {
 ############################################################################
 # Desktop environment check and return desktop environment
 desktopEnvironmentCheck () {
-  log_in "Desktop environment check"
-  println_banner_yellow "Desktop environment check                              "
+  log_info "Desktop environment check"
+  println_banner_yellow "Desktop environment check                                            "
 	# another way from stackexchange
 	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
 	then
@@ -530,7 +530,7 @@ desktopEnvironmentCheck () {
 # gnome3BackportsRepo
 gnome3BackportsRepo () {
   log_info "Add Gnome3 Backports Repo apt sources"
-  println_banner_yellow "Add Gnome3 Backports Repo apt sources                  "
+  println_banner_yellow "Add Gnome3 Backports Repo apt sources                                "
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3
   if [[ $betaAns == 1 ]]; then
@@ -545,7 +545,7 @@ gnome3BackportsRepo () {
 # gnome3BackportsApps
 gnome3BackportsApps () {
   log_info "Install Gnome3 Backports Apps"
-  println_banner_yellow "Install Gnome3 Backports Apps                          "
+  println_banner_yellow "Install Gnome3 Backports Apps                                        "
 	repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
@@ -555,7 +555,7 @@ gnome3BackportsApps () {
 # gnome3Settings
 gnome3Settings () {
   log_info "Change Gnome3 settings"
-  println_banner_yellow "Change Gnome3 settings                                 "
+  println_banner_yellow "Change Gnome3 settings                                               "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
 }
 
@@ -564,7 +564,7 @@ gnome3Settings () {
 # kdeBackportsRepo
 kdeBackportsRepo () {
   log_info "Add KDE Backports Repo"
-  println_banner_yellow "Add KDE Backports Repo                                 "
+  println_banner_yellow "Add KDE Backports Repo                                               "
 	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
   if [[ $betaAns == 1 ]]; then
@@ -729,7 +729,7 @@ changeAptSource () {
 # Add all repositories
 addRepositories () {
   log_info "Add Repositories"
-  println_banner_yellow "Add Repositories                                       "
+  println_banner_yellow "Add Repositories                                                     "
     # general repositories
 	sudo add-apt-repository -y universe
   # doublecmd
@@ -964,7 +964,7 @@ addRepositories () {
 # Install applications
 installApps () {
   log_info "Start Applications installation the general apps"
-  println_banner_yellow "Start Applications installation the general apps       "
+  println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
 	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart;
@@ -1517,7 +1517,7 @@ questionRun () {
   #start of application install
   if [[ $installAppsAns = 1 ]]; then
     log_info "Start Applications installation"
-    println_banner_yellow "Start Applications installation                      "
+    println_banner_yellow "Start Applications installation                                    "
     if [[ $vmwareGuestSetupAns = 1 ]]; then
       vmwareGuestSetup
     fi
@@ -1570,7 +1570,7 @@ questionRun () {
 # Autorun function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
 autoRun () {
   log_info "Start Auto Applications installation"
-  println_banner_yellow "Start Auto Applications installation                   "
+  println_banner_yellow "Start Auto Applications installation                                 "
   noPrompt=1
   kernelUpdate
   case $1 in
@@ -1639,8 +1639,8 @@ autoRun () {
 log_info "Start of BuildMan"
 log_info "===================================================================="
 clear
-println_banner_yellow "Start of BuildMan                                                   "
-println_banner_yellow "===================================================================="
+println_banner_yellow "Start of BuildMan                                                    "
+println_banner_yellow "====================================================================="
 
 # ########################################################
 # Set global variables
