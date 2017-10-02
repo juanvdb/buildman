@@ -39,7 +39,7 @@ sudo shutdown -h now
 
 ssh juan@vbhost
 
-vagrant package –-base <VitualBox VM Name>
+vagrant package --base <VitualBox VM Name>
 
 vagrant box add {boxname} package.box
 
