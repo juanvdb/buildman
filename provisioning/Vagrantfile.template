@@ -27,7 +27,8 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "kubuntu1710"
+  config.vm.box = "karty0914"
+  # config.vm.box = "kubuntu1710_v2"
   # config.vm.box = "ubuntu/xenial64"
   # config.vm.box = "wholebits/ubuntu17.04-64"
 
