@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DateVer 0913
-# UbuntuBuild V1.2.5
+# UbuntuBuild V1.2.6
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -27,7 +27,7 @@
 
 # ############################################################################
 # ==> set global Variables
-betaReleaseName="arty"
+betaReleaseName="artful"
 betaReleaseVer="17.10"
 stableReleaseName="zesty"
 stableReleaseVer="17.04"
