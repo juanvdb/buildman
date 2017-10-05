@@ -32,6 +32,7 @@ betaReleaseVer="17.10"
 stableReleaseName="zesty"
 stableReleaseVer="17.04"
 previousStableReleaseName="yakkety"
+ltsReleaseName="xenial"
 desktopEnvironment=""
 kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
@@ -104,7 +105,7 @@ then
     declare -r LOG_INFO_COLOR=""
     declare -r LOG_SUCCESS_COLOR=""
     declare -r LOG_WARN_COLOR=""
-    declare -r LOG_DEBUG_COLOR=""
+    declare -r log_info_COLOR=""
 else
     declare -r LOG_DEFAULT_COLOR="\033[0m"
     declare -r LOG_ERROR_COLOR="\033[1;31m"
@@ -398,13 +399,27 @@ setupDataDirLinks () {
 # Development packages repositories
 devAppsRepos () {
   # Brackets
-  log_debug 'Brackets Repo'
-  println_yellow 'Brackets Repo'
+  log_info "Brackets Repo"
+  println_blue "Brackets Repo"
   sudo add-apt-repository -y ppa:webupd8team/brackets
   # Atom
-  log_debug 'Atom Repo'
-  println_yellow 'Atom Repo'
+  log_info "Atom Repo"
+  println_blue "Atom Repo"
   sudo add-apt-repository -y ppa:webupd8team/atom
+  # LightTable
+  log_info "LightTable"
+  println_blue "LightTable"
+  sudo add-apt-repository -y ppa:dr-akulavich/lighttable
+  log_warning "Change Lighttable to $ltsReleaseName"
+  println_blue "Change Lighttable to $ltsReleaseName"
+  changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+  # Atom
+  sudo add-apt-repository -y ppa:webupd8team/atom
+  if [[ $betaAns == 1 ]]; then
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+
+  fi
+
 }
 
 # ############################################################################
@@ -426,9 +441,8 @@ devAppsInstall(){
 	# make
 	# sudo make install
 
-  sudo add-apt-repository -y ppa:webupd8team/atom
   repoUpdate
-  sudo apt -y install bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files;
+  sudo apt -y install bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
   snap install --classic --beta atom
@@ -697,6 +711,32 @@ installDigikamApp () {
 	sudo apt -yf install digikam digikam-doc digikam-data
   # sudo apt install -yf
 }
+# #########################################################################
+# Install photo apps repository
+photoAppsRepo () {
+  log_info "Photo Apps Repositories"
+  println_banner_yellow "Photo Apps Repositories                                              "
+
+}
+# #########################################################################
+# Install photo applications
+photoAppsInstall () {
+  currentPath=$(pwd)
+  log_info "Photo Apps install"
+  println_banner_yellow "Photo Apps install                                                   "
+
+  # Rapid Photo downloader
+  log_info "Rapid Photo downloader"
+  println_blue "Rapid Photo downloader"
+  wget -P ~/tmp https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
+  cd ~/tmp || return
+  python3 install.py
+
+  sudo apt install rawtherapee graphicsmagick imagemagick darktable;
+
+  cd "$currentPath" || return
+}
+
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O           General Apps Install                                           O
@@ -710,7 +750,7 @@ changeAptSource () {
   newrelease=$3		#distro of new release
 
   log_info "Change Apt Source $infile from $oldrelease to $newrelease"
-  # log_debug "Infile=$infile"
+  # log_info "Infile=$infile"
   # log_debug "Old Release=$oldrelease"
   # log_debug "New Release=$newrelease"
 
@@ -733,124 +773,65 @@ addRepositories () {
     # general repositories
 	sudo add-apt-repository -y universe
   # doublecmd
-  log_debug 'doublecmd'
-  println_yellow 'doublecmd'
+  log_info "doublecmd"
+  println_blue "doublecmd"
 	sudo apt-add-repository -y ppa:alexx2000/doublecmd
-	# Google Chromium
-	log_debug "Google Chromium"
-	println_yellow "Google Chromium"
-	# sudo add-apt-repository -y ppa:chromium-daily/ppa;
-	sudo add-apt-repository -y ppa:chromium-daily/stable;
-	#Google Chrome
-	#log_info 'Google Chrome'
-	#println_yellow 'Google Chrome'
-	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-	#sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-	# Rapid Photo downloader
-	log_debug 'Rapid Photo downloader'
-	println_yellow 'Rapid Photo downloader'
-	sudo add-apt-repository -y ppa:dlynch3;
-	# VLC Media Player
-	log_debug 'VLC Media Player'
-	println_yellow 'VLC Media Player'
-	sudo add-apt-repository -y ppa:n-muench/vlc
 	# Darktable
-	log_debug 'Darktable'
-	println_yellow 'Darktable'
+	log_info "Darktable"
+	println_blue "Darktable"
 	sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
 	# WebUpd8 and SyncWall
-	log_debug 'WebUpd8 and SyncWall'
-	println_yellow 'WebUpd8 and SyncWall'
+	log_info "WebUpd8: SyncWall, WoeUSB"
+	println_blue "WebUpd8: SyncWall, WoeUSB"
 	sudo add-apt-repository -y ppa:nilarimogard/webupd8
 	# Y PPA Manager
-	log_debug 'Y PPA Manager'
-	println_yellow 'Y PPA Manager'
+	log_info "Y PPA Manager"
+	println_blue "Y PPA Manager"
 	sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
 	# WebUpd8 Java
-	log_debug 'WebUpd8 Java'
-	println_yellow 'WebUpd8 Java'
+	log_info "WebUpd8 Java"
+	println_blue "WebUpd8 Java"
 	sudo add-apt-repository -y ppa:webupd8team/java
-	# Filezilla
-	log_debug 'Filezilla'
-	println_yellow 'Filezilla'
-	sudo add-apt-repository -y ppa:n-muench/programs-ppa
-	# Uncomplicated Firewall frontend
-	log_debug 'Uncomplicated Firewall frontend'
-	println_yellow 'Uncomplicated Firewall frontend'
-	sudo add-apt-repository -y ppa:baudm/ppa;
+	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet
+	log_info "Filezilla"
+	println_blue "Filezilla"
+  sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $stableReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb.list"
+	wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
 	# Grub Customizer
-	log_debug 'Grub Customizer'
-	println_yellow 'Grub Customizer'
+	log_info "Grub Customizer"
+	println_blue "Grub Customizer"
 	sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
 	# Clementine
-	log_debug 'Clementine'
-	println_yellow 'Clementine'
+	log_info "Clementine"
+	println_blue "Clementine"
 	sudo add-apt-repository -y ppa:me-davidsansome/clementine
-	# [?] LibreCAD
-	log_debug '[?] LibreCAD'
-	println_yellow '[?] LibreCAD'
-	sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
-	# [?] WinUSB
-	log_debug '[?] WinUSB'
-	println_yellow '[?] WinUSB'
-	sudo add-apt-repository -y ppa:colingille/freshlight
-	# [5] Sublime text 2 - Now has a fee
-	# log_debug '[5] Sublime text 2 - Now has a fee'
-	# sudo add-apt-repository -y ppa:webupd8team/sublime-text-2
-	# Dropbox
-	log_debug 'Dropbox'
-	println_yellow 'Dropbox'
-	sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
-	# sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
-	# sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
-	# sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
-	# sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
-	sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
 	# Boot-Repair
-	log_debug 'Boot-Repair'
-	println_yellow 'Boot-Repair'
+	log_info "Boot-Repair"
+	println_blue "Boot-Repair"
 	sudo add-apt-repository -y ppa:yannubuntu/boot-repair
 	# Variety
-	log_debug 'Variety'
-	println_yellow 'Variety'
+	log_info "Variety"
+	println_blue "Variety"
 	sudo add-apt-repository -y ppa:peterlevi/ppa
-	# Docker
-	#log_debug 'Docker'
-	#sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-	#sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-$distReleaseName main" >> /etc/apt/sources.list.d/docker-$distReleaseName.list'
-	# LightTable
-	log_debug 'LightTable'
-	println_yellow 'LightTable'
-	sudo add-apt-repository -y ppa:dr-akulavich/lighttable
-	# Sunflower
-	log_debug 'Sunflower'
-	println_yellow 'Sunflower'
-	sudo add-apt-repository -y ppa:atareao/sunflower
-
-  # dekstop specific repositories
+  # FreeFileSync
+  log_warning "FreeFileSync"
+  println_blue "FreeFileSync"
+  sudo add-apt-repository -y ppa:freefilesync/ffs
 	case $desktopEnvironment in
 		"kde" )
       sudo add-apt-repository -y ppa:rikmills/latte-dock
 			;;
 		"gnome" )
 			# [4] Ambiance and Radiance Theme Color pack
-			log_debug '[4] Ambiance and Radiance Theme Color pack'
-			println_yellow '[4] Ambiance and Radiance Theme Color pack'
+			log_info "[4] Ambiance and Radiance Theme Color pack"
+			println_blue "[4] Ambiance and Radiance Theme Color pack"
 			sudo add-apt-repository -y ppa:ravefinity-project/ppa
-			# [?] Blue Ambiance
-			log_debug '[?] Blue Ambiance'
-			println_yellow '[?] Blue Ambiance'
-			sudo apt-add-repository -y ppa:satyajit-happy/themes
 			;;
 		"ubuntu" )
 			# [4] Ambiance and Radiance Theme Color pack
-      log_debug '[4] Ambiance and Radiance Theme Color pack'
-      println_yellow '[4] Ambiance and Radiance Theme Color pack'
+      log_info "[4] Ambiance and Radiance Theme Color pack"
+      println_blue "[4] Ambiance and Radiance Theme Color pack"
 			sudo add-apt-repository -y ppa:ravefinity-project/ppa
-			# [?] Blue Ambiance
-      log_debug '[?] Blue Ambiance'
-      println_yellow '[?] Blue Ambiance'
-			sudo apt-add-repository -y ppa:satyajit-happy/themes
 			;;
 		"xubuntu" )
 			;;
@@ -859,34 +840,22 @@ addRepositories () {
 	esac
 
   #Change distro for some of the older PPAs
-  log_debug "Change distirubtion name in repos to old versions as there has been no updates"
-  println_yellow "Change distirubtion name in repos to old versions as there has been no updates"
-  changeAptSource "/etc/apt/sources.list.d/baudm-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" oneiric
-  changeAptSource "/etc/apt/sources.list.d/chromium-daily-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
-  changeAptSource "/etc/apt/sources.list.d/colingille-ubuntu-freshlight-$distReleaseName.list" "$distReleaseName" saucy
-  changeAptSource "/etc/apt/sources.list.d/dlynch3-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" utopic
-  changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" utopic
+  log_info "Change distirubtion name in repos to old versions as there has been no updates"
+  println_blue "Change distirubtion name in repos to old versions as there has been no updates"
   changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" trusty
 }
 
   downgradeAptDistro () {
   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
-    log_debug "Change Repos for which there aren't new repos."
-    println_yellow "Change Repos for which there aren't new repos."
-    log_debug "Change n-muench to Xenial"
-    println_yellow "Change n-muench to Xenial"
-    changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-programs-ppa-$distReleaseName.list" "$distReleaseName" wily
-    log_debug "Change VLC to Xenial"
-    println_yellow "Change VLC to Xenial"
-    changeAptSource "/etc/apt/sources.list.d/n-muench-ubuntu-vlc-$distReleaseName.list" "$distReleaseName" wily
+    log_info "Change Repos for which there aren't new repos."
+    println_blue "Change Repos for which there aren't new repos."
     case $desktopEnvironment in
       "kde" )
         ;;
       "gnome" )
-        log_debug "Change Happy Themes to Xenial"
-        println_yellow "Change Happy Themes to Xenial"
-        changeAptSource "/etc/apt/sources.list.d/satyajit-happy-ubuntu-themes-$distReleaseName.list" "$distReleaseName" wily
+        log_info "Change Happy Themes to Xenial"
+        println_blue "Change Happy Themes to Xenial"
         ;;
       "xubuntu" )
         ;;
@@ -896,22 +865,13 @@ addRepositories () {
   fi
   if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
     log_warning "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
-    println_yellow "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
-    log_warning "Change Sunflower to $previousStableReleaseName"
-    println_yellow "Change Sunflower to $previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    log_warning "Change Dropbox to $previousStableReleaseName"
-    println_yellow "Change Dropbox to $previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$previousStableReleaseName"
-    log_warning "Change Lighttable to $previousStableReleaseName"
-    println_yellow "Change Lighttable to $previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    println_blue "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
     case $desktopEnvironment in
       "kde" )
         ;;
       "gnome" )
         log_warning "Change ravefinity-project to $previousStableReleaseName"
-        println_yellow "Change ravefinity-project to $previousStableReleaseName"
+        println_blue "Change ravefinity-project to $previousStableReleaseName"
         changeAptSource "/etc/apt/sources.list.d/ravefinity-project-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
         # Should not bet here should be in add gnome3 apt repositorites gnome3BackportsRepo
         # changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -930,15 +890,12 @@ addRepositories () {
     sudo add-apt-repository -y ppa:mystilleef/scribes-daily
     changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
     # FreeFileSync
-    log_warning 'FreeFileSync'
-    println_yellow 'FreeFileSync'
-    sudo add-apt-repository -y ppa:freefilesync/ffs
-    # wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
-    # sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu vivid-getdeb apps" >> /etc/apt/sources.list.d/getdeb.list'
+    log_warning "FreeFileSync"
+    println_blue "FreeFileSync"
     changeAptSource "/etc/apt/sources.list.d/freefilesync-ubuntu-ffs-$distReleaseName.list" "$distReleaseName" trusty
     # Canon Printer Drivers
-  	log_warning 'Canon Printer Drivers'
-  	println_yellow 'Canon Printer Drivers'
+  	log_warning "Canon Printer Drivers"
+  	println_blue "Canon Printer Drivers"
   	sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
   	sudo add-apt-repository -y ppa:michael-gruz/canon
   	sudo add-apt-repository -y ppa:inameiname/stable
@@ -946,15 +903,14 @@ addRepositories () {
     changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
     changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
     # Inkscape
-    log_warning 'Inkscape'
-    println_yellow 'Inkscape'
+    log_warning "Inkscape"
+    println_blue "Inkscape"
     sudo add-apt-repository -y ppa:inkscape.dev/stable
   fi
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the apt sources."
-    println_yellow "Beta Code, downgrade the apt sources."
+    println_blue "Beta Code, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
@@ -967,22 +923,22 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba vlc ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave freeplane unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry rawtherapee graphicsmagick vlc imagemagick calibre shutter easytag clementine terminator chromium-browser google-chrome-stable rapid-photo-downloader vlc vlc-data browser-plugin-vlc gimp-plugin-registry y-ppa-manager oracle-java9-installer darktable librecad winusb dropbox boot-repair grub-customizer variety lighttable-installer sunflower blender google-chrome-stable caffeine upstart;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry calibre shutter easytag clementine terminator chromium-browser google-chrome-stable gimp-plugin-registry y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit;
 
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty)$ ]]; then
-   sudo apt install scribes freefilesync cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 ufw-gtk inkscape
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
+   sudo apt install scribes freefilesync cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt -y install kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins;
+			sudo apt -y install kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde;
 			;;
 		"gnome" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky	gufw nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
+			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
 			;;
 		"xubuntu" )
 			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
@@ -1009,10 +965,15 @@ installOtherApps () {
     NOTE: The apps will only be installed when you quit this menu so that only one repo update is done.
     TASK : DESCRIPTION
     -----: ---------------------------------------
-    v    : VirtualBox Host
-    w    : VirtualBox Guest
+    1    : VirtualBox Host
+    2    : VirtualBox Guest
+    3    : Development Apps
+    4    : Photography Apps
+    5    : Dropbox
+    20   : Sunflower
+    21   : LibreCAD
 
-    q       : Quit this program
+    0|q  : Quit this program
 
     "
 
@@ -1021,29 +982,76 @@ installOtherApps () {
 
     # take inputs and perform as necessary
     case "$choice" in
-      v )
-        doUpdateUpgrade=1
-        installVirtualboxHost=1
+      1 )
+        repoUpdate
+        sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
+        case $desktopEnvironment in
+          "kde" )
+          sudo apt -y virtualbox-qt;
+          ;;
+        esac
       ;;
-      w )
-        doUpdateUpgrade=1
-        installVirtualboxGuest=1
+      2 )
+        repoUpdate
+        sudo apt install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
       ;;
-    	q )
-      	 if [[ $doUpdateUpgrade = 1 ]]; then
-      	   repoUpdate
-      	 fi
-         if [[ $installVirtualboxHost = 1 ]]; then
-           sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
-            case $desktopEnvironment in
-              "kde" )
-                sudo apt -y virtualbox-qt;
-                ;;
-            esac
-         fi
-         if [[ $installVirtualboxGuest = 1 ]]; then
-           sudo apt install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
-         fi
+      3 )
+        devAppsRepos
+        devAppsInstall
+      ;;
+      4 )
+        photoAppsRepo
+        photoAppsInstall
+      ;;
+      5 )
+        # Dropbox
+        log_info "Dropbox"
+        println_blue "Dropbox"
+        sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
+        # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
+        # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
+        # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
+        # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
+        sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
+        log_warning "Change Dropbox to $ltsReleaseName"
+        println_blue "Change Dropbox to $ltsReleaseName"
+        changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
+
+        repoUpdate
+
+        sudo apt install dropbox
+      ;;
+      10 )
+        # Freeplane
+        log_info "Dropbox"
+        println_blue Dropbox
+        sudo apt install freeplane
+      ;;
+      20 )
+        # Sunflower
+        log_info "Sunflower"
+        println_blue "Sunflower"
+        sudo add-apt-repository -y ppa:atareao/sunflower
+        log_warning "Change Sunflower to $ltsReleaseName"
+        println_blue "Change Sunflower to $ltsReleaseName"
+        changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+
+        repoUpdate
+
+        sudo apt install sunflower
+      ;;
+      21 )
+        # [?] LibreCAD
+        log_info "LibreCAD"
+        println_blue "LibreCAD"
+        sudo add-apt-repository ppa:librecad-dev/librecad-stable
+        changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+
+        repoUpdate
+
+        sudo apt install librecad
+      ;;
+    	0|q )
          exit 1
       ;;
     	*) exit 1
@@ -1679,21 +1687,23 @@ Running $desktopEnvironment $distReleaseName $distReleaseVer
 There are the following options for this script
 TASK :     DESCRIPTION
 
-la   : Install Laptop with all packages without asking
-lq   : Install Laptop with all packages asking for groups of packages
+1    : Install Laptop with all packages without asking
+2    : Install Laptop with all packages asking for groups of packages
 
-wa   : Install Workstation with all packages without asking
-wq   : Install Workstation with all packages asking for groups of packages
+3    : Install Workstation with all packages without asking
+4    : Install Workstation with all packages asking for groups of packages
 
-vma  : Install VMware VM with all packages without asking
-vmq  : Install VMware VM with all packages asking for groups of packages
+5    : Install VMware VM with all packages without asking
+6    : Install VMware VM with all packages asking for groups of packages
 
-vba  : Install VirtualBox VM with all packages without asking
-vbq  : Install VirtualBox VM with all packages asking for groups of packages
+7    : Install VirtualBox VM with all packages without asking
+8    : Install VirtualBox VM with all packages asking for groups of packages
 
-item : Install individual repos and items
+9    : Install other individual applications
 
-q       : Quit this program
+99   : Install individual repos and items
+
+0/q  : Quit this program
 
 "
 
@@ -1707,52 +1717,55 @@ printf "Enter your system password if asked...\n"
 
 # take inputs and perform as necessary
 case "$choice" in
-	la|xpsa)
+	1)
   	printf "Automated installation for a Laptop\n"
     autoRun l
     echo "Operation completed successfully."
 	;;
-	lq|xpsq)
+	2)
     printf "Laptop Installation asking items:\n"
     questionRun l
     echo "Operation completed successfully.\n"
 	;;
-	wa)
+	3)
   	printf "Automated installation for a Workstation\n"
     autoRun w
     echo "Operation completed successfully."
 	;;
-	wq)
+	4)
     printf "Workstation Installation asking items:\n"
     questionRun w
     echo "Operation completed successfully."
 	;;
-	vma)
+	5)
     printf "Automated install for a Vmware virtual machine\n"
     autoRun vm
   	echo "Operation completed successfully."
   ;;
   # ############################################################################
-	vmq|vm-question)
+	6)
     printf "Vmware install asking questions as to which apps to install for the run"
     questionRun vm
   ;;
   # ############################################################################
-	vba|vb-all)
+	7)
     printf "Automated install for a VirtualBox virtual machine\n"
     autoRun vb
     echo "Operation completed successfully."
   ;;
   # ############################################################################
-  vbq|vb-question)
+  8)
     printf "VirtualBox install asking questions as to which apps to install for the run"
     questionRun vb
   ;;
-	item )
+  9)
+    installOtherApps
+  ;;
+	99 )
   	echo "Selecting itemized installations"
     installOptions
   ;;
-  q);;
+  0|q);;
   *) exit
   ;;
 esac
