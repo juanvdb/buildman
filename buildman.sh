@@ -105,7 +105,7 @@ then
     declare -r LOG_INFO_COLOR=""
     declare -r LOG_SUCCESS_COLOR=""
     declare -r LOG_WARN_COLOR=""
-    declare -r log_info_COLOR=""
+    declare -r LOG_INFO_COLOR=""
 else
     declare -r LOG_DEFAULT_COLOR="\033[0m"
     declare -r LOG_ERROR_COLOR="\033[1;31m"
@@ -511,11 +511,25 @@ laptopDisplayDrivers () {
 desktopEnvironmentCheck () {
   log_info "Desktop environment check"
   println_banner_yellow "Desktop environment check                                            "
-	# another way from stackexchange
+	# another way for ssh terminals
+
 	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
 	then
     # shellcheck disable=SC2001
-	  desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
+    if [[ $XDG_DATA_DIRS = "" ]]; then
+      # desktop=$(pgrep -l "compiz|metacity|mutter|kwin|sawfish|fluxbox|openbox|xmonad")
+      desktop=$(pgrep -l "gnome|kde|mate|cinnamon")
+      case $desktop in
+        *"startkde"* )
+          desktop="kde"
+        ;;
+        *"mutter"* )
+          desktop="gnome"
+        ;;
+      esac
+    else
+	     desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
+    fi
 	else
 	  desktop=$XDG_CURRENT_DESKTOP
 	fi
@@ -533,9 +547,11 @@ desktopEnvironmentCheck () {
 	 	"xfce" )
 	   	desktopEnvironment="xubuntu"
 	 		;;
-    "ubuntu" ) ;;
-    * )
+    "ubuntu" )
       desktopEnvironment="ubuntu"
+    ;;
+    * )
+      desktopEnvironment="gnome"
       ;;
   esac
 }
@@ -792,7 +808,7 @@ addRepositories () {
 	log_info "WebUpd8 Java"
 	println_blue "WebUpd8 Java"
 	sudo add-apt-repository -y ppa:webupd8team/java
-	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet
+	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
 	log_info "Filezilla"
 	println_blue "Filezilla"
   sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $stableReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb.list"
@@ -813,10 +829,6 @@ addRepositories () {
 	log_info "Variety"
 	println_blue "Variety"
 	sudo add-apt-repository -y ppa:peterlevi/ppa
-  # FreeFileSync
-  log_warning "FreeFileSync"
-  println_blue "FreeFileSync"
-  sudo add-apt-repository -y ppa:freefilesync/ffs
 	case $desktopEnvironment in
 		"kde" )
       sudo add-apt-repository -y ppa:rikmills/latte-dock
@@ -889,10 +901,6 @@ addRepositories () {
     # log_warning 'Scribes Developer editor'
     sudo add-apt-repository -y ppa:mystilleef/scribes-daily
     changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
-    # FreeFileSync
-    log_warning "FreeFileSync"
-    println_blue "FreeFileSync"
-    changeAptSource "/etc/apt/sources.list.d/freefilesync-ubuntu-ffs-$distReleaseName.list" "$distReleaseName" trusty
     # Canon Printer Drivers
   	log_warning "Canon Printer Drivers"
   	println_blue "Canon Printer Drivers"
@@ -909,7 +917,8 @@ addRepositories () {
   fi
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the apt sources."
-    println_blue "Beta Code, downgrade the apt sources."
+    println_red "Beta Code, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
@@ -923,11 +932,11 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry calibre shutter easytag clementine terminator chromium-browser google-chrome-stable gimp-plugin-registry y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry calibre shutter easytag clementine terminator chromium-browser google-chrome-stable gimp-plugin-registry y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit freefilesync;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
-   sudo apt install scribes freefilesync cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
+   sudo apt install scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
@@ -953,7 +962,6 @@ installApps () {
 # Install other applications individually
 installOtherApps () {
   ##### Menu section
-  doUpdateUpgrade=0
 
   until [[ "$choice" = "q" ]]; do
     clear
@@ -1245,7 +1253,7 @@ installOptions () {
         devAppsInstall
       ;;
       beta )
-        echo "Running $desktopEnvironment $distReleaseName $distReleaseVer"
+        println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
         read -rp "Do you want to setup the build for a beta install? (y/n) " answer
         if [[ $answer = [Yy1] ]]; then
           betaAns=1
@@ -1664,14 +1672,19 @@ log_warning "distReleaseVer=$distReleaseVer"
 log_warning "distReleaseName=$distReleaseName"
 log_warning "stableReleaseVer=$stableReleaseVer"
 log_warning "stableReleaseName=$stableReleaseName"
+log_warning "ltsReleaseName=$ltsReleaseName"
 log_warning "betaReleaseName=$betaReleaseName"
 log_warning "betaAns=$betaAns"
+log_warning "desktopEnvironment=$desktopEnvironment"
+
 println_yellow "distReleaseVer=$distReleaseVer"
 println_yellow "distReleaseName=$distReleaseName"
 println_yellow "stableReleaseVer=$stableReleaseVer"
 println_yellow "stableReleaseName=$stableReleaseName"
+println_yellow "ltsReleaseName=$ltsReleaseName"
 println_yellow "betaReleaseName=$betaReleaseName"
 println_yellow "betaAns=$betaAns"
+println_yellow "desktopEnvironment=$desktopEnvironment"
 
 
 echo "
@@ -1725,7 +1738,7 @@ case "$choice" in
 	2)
     printf "Laptop Installation asking items:\n"
     questionRun l
-    echo "Operation completed successfully.\n"
+    echo -e "Operation completed successfully.\n"
 	;;
 	3)
   	printf "Automated installation for a Workstation\n"
