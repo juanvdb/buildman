@@ -1,0 +1,57 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/')
+
+# Load our custom configuration and prepare some global variables
+# require 'yaml'
+# cwd       = File.dirname(File.expand_path(__FILE__))
+# ext_conf  = YAML.load_file("#{cwd}/build.yaml")
+#_opts     = Hash[ext_conf.select {|hash| hash["option"] == "general"}[0]]
+# machines  = ext_conf.select {|hash| hash["option"] == "machine"}
+#
+
+Vagrant.configure("2") do |config|
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.synced_folder_opts = {
+      type: :nfs,
+      mount_options: ['rw', 'vers=4', 'tcp', 'nolock']
+    }
+    # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
+  end
+
+  # DNS for boxes
+  #if Vagrant.has_plugin?("vagrant-dns")
+  #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
+  #end
+
+  config.vm.box = "karty"
+
+  # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
+  config.vm.network "private_network", type: "dhcp", auto_config: false
+  config.vm.provider :virtualbox do |vb|
+    vb.gui = true
+#    vb.customize ["modifyvm", :id, "--groups", "vagrant"]
+    vb.memory = "2048"
+#    vb.name = "vagrant_kubuntu1710"
+  end
+
+  config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant", disabled: false
+  config.vm.synced_folder "../../../", "/srv/share", disabled: false, type: "nfs"
+
+  # Do an update, upgrade and virtualbox additions
+  config.vm.provision "shell", inline: "sudo apt-get update"
+  config.vm.provision "shell", inline: "sudo apt-get -y upgrade && sudo apt-get -y dist-upgrade"
+  # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11"
+  # Permit anyone to start the GUI
+  config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.verbose = "v"
+  #  ansible.playbook = "build.yml"
+  #end
+
+end
