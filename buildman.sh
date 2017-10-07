@@ -532,14 +532,14 @@ desktopEnvironmentCheck () {
 	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
 	then
     # shellcheck disable=SC2001
-    if [[ $XDG_DATA_DIRS = "" ]]; then
+    if [[ -z $(echo "$XDG_DATA_DIRS" | grep -Eo 'xfce|kde|gnome') ]]; then
       # desktop=$(pgrep -l "compiz|metacity|mutter|kwin|sawfish|fluxbox|openbox|xmonad")
       desktop=$(pgrep -l "gnome|kde|mate|cinnamon")
       case $desktop in
         *"startkde"* )
           desktop="kde"
         ;;
-        *"mutter"* )
+        *"gnome-shell"* )
           desktop="gnome"
         ;;
       esac
@@ -563,7 +563,7 @@ desktopEnvironmentCheck () {
 	 	"xfce" )
 	   	desktopEnvironment="xubuntu"
 	 		;;
-    "ubuntu" )
+    "ubuntu:GNOME" )
       desktopEnvironment="ubuntu"
     ;;
     * )
