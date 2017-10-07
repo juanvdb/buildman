@@ -38,6 +38,8 @@ kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
 distReleaseName=$(lsb_release -sc)
 noPrompt=0
+debugLogFile="buildmandebug.log"
+errorLogFile="buildmanerror.log"
 
 mkdir -p ~/tmp
 sudo chown "$USER":"$USER" ~/tmp
@@ -63,15 +65,29 @@ INTERACTIVE_MODE="on"
 scriptDebugToStdout="off"
 scriptDebugToFile="on"
 if [[ $scriptDebugToFile == "on" ]]; then
-  if [[ -e debug.log ]]; then
-    >debug.log
+  if [[ -e $debugLogFile ]]; then
+    # >$debugLogFile
+    echo -en "\n" >>$debugLogFile
+    echo -en "\033[1;31m##############################################################\n\033[0m" >>$debugLogFile
+    echo -en "\n" >>$debugLogFile
+    echo -en "\033[1;31m START OF NEW RUN\n\033[0m" >>$debugLogFile
+    echo -en "\n" >>$debugLogFile
+    echo -en "\033[1;31m###############################################################\n\033[0m" >>$debugLogFile
+    echo -en "\n" >>$debugLogFile
   else
-    touch debug.log
+    touch $debugLogFile
   fi
-  if [[ -e error.log ]]; then
-    >error.log
+  if [[ -e $errorLogFile ]]; then
+    # >$errorLogFile
+    echo -en "\n"
+    echo -en "\033[1;31m###############################################################\n\033[0m" >>$errorLogFile
+    echo -en "\n" >>$errorLogFile
+    echo -en "\033[1;31m START OF NEW RUN\n\033[0m" >>$errorLogFile
+    echo -en "\n" >>$errorLogFile
+    echo -en "\033[1;31m###############################################################\n\033[0m" >>$errorLogFile
+    echo -en "\n" >>$errorLogFile
   else
-    touch error.log
+    touch $errorLogFile
   fi
 fi
 
@@ -87,10 +103,10 @@ debug () {
   fi
   if [[ $scriptDebugToFile == "on" ]]
   then
-    printf "DEBUG: %q\n" "$@" >>debug.log 2>>error.log
+    printf "DEBUG: %q\n" "$@" >>$debugLogFile 2>>$errorLogFile
   fi
-  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>debug.log 2>>error.log || :
-  #log "$@" >>debug.log 2>>error.log
+  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>$debugLogFile 2>>$errorLogFile || :
+  #log "$@" >>$debugLogFile 2>>$errorLogFile
 }
 
 # ############################################################################
@@ -131,9 +147,9 @@ log() {
     fi
     if [[ $scriptDebugToFile == "on" ]]
     then
-      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>debug.log 2>>error.log
+      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>$debugLogFile 2>>$errorLogFile
     fi
-    # [[ $script_debug = 1 ]] && echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>debug.log 2>>error.log || :
+    # [[ $script_debug = 1 ]] && echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>$debugLogFile 2>>$errorLogFile || :
     return 0;
 }
 
@@ -247,7 +263,7 @@ kernelUpdate () {
 # VMware Guest Setup, vmtools, nfs directories to host
 vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
-  println_banner_yellow "VMware setup with Open VM Tools and NFS file share to host           "
+  println_blue "VMware setup with Open VM Tools and NFS file share to host           "
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -267,7 +283,7 @@ vmwareGuestSetup () {
 # VirtualBox Guest Setup, vmtools, nfs directories to host
 virtalBoxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
-  println_banner_yellow "VirtualBox setup NFS file share to hostfiles                         "
+  println_blue "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
@@ -458,7 +474,7 @@ devAppsInstall(){
 # ownCloud Client repository
 ownCloudClientRepo () {
   log_info "ownCloud Repo"
-  println_banner_yellow "ownCloud Repo                                                        "
+  println_blue "ownCloud Repo                                                        "
     sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
   wget -q -O - "http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
@@ -467,7 +483,7 @@ ownCloudClientRepo () {
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
-  println_banner_yellow "ownCloud Install                                                     "
+  println_blue "ownCloud Install                                                     "
 	sudo apt -y install owncloud-client
   sudo apt install -yf
 }
@@ -478,7 +494,7 @@ displayLinkInstallApp () {
 
   currentPath=$(pwd)
   log_info "display Link Install App"
-  println_banner_yellow "display Link Install App                                             "
+  println_blue "display Link Install App                                             "
 	sudo apt -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
@@ -497,7 +513,7 @@ displayLinkInstallApp () {
 # XPS Display Drivers inatallations
 laptopDisplayDrivers () {
   log_info "Install XPS Display Drivers"
-  println_banner_yellow "Install XPS Display Drivers                                          "
+  println_blue "Install XPS Display Drivers                                          "
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt install nvidia-current intel-graphics-update-tool
@@ -551,7 +567,7 @@ desktopEnvironmentCheck () {
       desktopEnvironment="ubuntu"
     ;;
     * )
-      desktopEnvironment="gnome"
+      desktopEnvironment="kde"
       ;;
   esac
 }
@@ -560,7 +576,7 @@ desktopEnvironmentCheck () {
 # gnome3BackportsRepo
 gnome3BackportsRepo () {
   log_info "Add Gnome3 Backports Repo apt sources"
-  println_banner_yellow "Add Gnome3 Backports Repo apt sources                                "
+  println_blue "Add Gnome3 Backports Repo apt sources                                "
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
 	sudo add-apt-repository -y ppa:gnome3-team/gnome3
   if [[ $betaAns == 1 ]]; then
@@ -575,7 +591,7 @@ gnome3BackportsRepo () {
 # gnome3BackportsApps
 gnome3BackportsApps () {
   log_info "Install Gnome3 Backports Apps"
-  println_banner_yellow "Install Gnome3 Backports Apps                                        "
+  println_blue "Install Gnome3 Backports Apps                                        "
 	repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
@@ -585,7 +601,7 @@ gnome3BackportsApps () {
 # gnome3Settings
 gnome3Settings () {
   log_info "Change Gnome3 settings"
-  println_banner_yellow "Change Gnome3 settings                                               "
+  println_blue "Change Gnome3 settings                                               "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
 }
 
@@ -594,7 +610,7 @@ gnome3Settings () {
 # kdeBackportsRepo
 kdeBackportsRepo () {
   log_info "Add KDE Backports Repo"
-  println_banner_yellow "Add KDE Backports Repo                                               "
+  println_blue "Add KDE Backports Repo                                               "
 	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
   if [[ $betaAns == 1 ]]; then
@@ -731,16 +747,17 @@ installDigikamApp () {
 # Install photo apps repository
 photoAppsRepo () {
   log_info "Photo Apps Repositories"
-  println_banner_yellow "Photo Apps Repositories                                              "
-
+  println_blue "Photo Apps Repositories                                              "
+  installDigikamRepo
 }
 # #########################################################################
 # Install photo applications
 photoAppsInstall () {
   currentPath=$(pwd)
   log_info "Photo Apps install"
-  println_banner_yellow "Photo Apps install                                                   "
+  println_blue "Photo Apps install                                                   "
 
+  installDigikamApp
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
@@ -851,10 +868,6 @@ addRepositories () {
 			;;
 	esac
 
-  #Change distro for some of the older PPAs
-  log_info "Change distirubtion name in repos to old versions as there has been no updates"
-  println_blue "Change distirubtion name in repos to old versions as there has been no updates"
-  changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" trusty
 }
 
   downgradeAptDistro () {
@@ -862,6 +875,7 @@ addRepositories () {
   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
     log_info "Change Repos for which there aren't new repos."
     println_blue "Change Repos for which there aren't new repos."
+    changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
     case $desktopEnvironment in
       "kde" )
         ;;
@@ -932,7 +946,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea dia-gnome planner gimp gimp-plugin-registry calibre shutter easytag clementine terminator chromium-browser google-chrome-stable gimp-plugin-registry y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit freefilesync;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit freefilesync;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
@@ -978,8 +992,11 @@ installOtherApps () {
     3    : Development Apps
     4    : Photography Apps
     5    : Dropbox
+    6    : Image Editing Applications
+    7    : Music and Video Applications
     20   : Sunflower
     21   : LibreCAD
+    22   : Calibre
 
     0|q  : Quit this program
 
@@ -1029,10 +1046,22 @@ installOtherApps () {
 
         sudo apt install dropbox
       ;;
+      6 )
+        # Imaging Editing Applications
+        log_info "Imaging Editing Applications"
+        println_blue "Imaging Editing Applications"
+        sudo apt install dia-gnome gimp gimp-plugin-registry
+      ;;
+      7 )
+        # Music and Video apps
+        log_info "Music and Video apps"
+        println_blue "Music and Video apps"
+        sudo apt install vlc browser-plugin-vlc easytag clementine
+      ;;
       10 )
         # Freeplane
-        log_info "Dropbox"
-        println_blue Dropbox
+        log_info "Freeplane"
+        println_blue "Freeplane"
         sudo apt install freeplane
       ;;
       20 )
@@ -1050,8 +1079,6 @@ installOtherApps () {
       ;;
       21 )
         # [?] LibreCAD
-        log_info "LibreCAD"
-        println_blue "LibreCAD"
         sudo add-apt-repository ppa:librecad-dev/librecad-stable
         changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 
@@ -1059,10 +1086,17 @@ installOtherApps () {
 
         sudo apt install librecad
       ;;
-    	0|q )
-         exit 1
+      22 )
+        # Calibre
+        log_info "Calibre"
+        println_blue "Calibre"
+        # sudo apt install calibre
+        sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
       ;;
-    	*) exit 1
+    	0|q )
+         return 1
+      ;;
+    	*) return 1
     		;;
     esac
   done
@@ -1086,25 +1120,25 @@ installOptions () {
     3    : Repositories upgrade
     4    : Add the additional Repositories for the general applications
     5    : Install the general applications
-    gnmb : Upgrade Gnome to Gnome on backports
-    kdeb : Upgrade KDE to KDE on backports
-    ignm : Install Gnome Desktop from backports
-    ikde : Install KDE Desktop from backports
-    disp : Install Laptop Display Drivers for Intel en Nvidia
-    dslk : Install DisplayLink
-    ownc : Install ownCloudClient
-    chrm : Install Google Chrome browser
-    dgkm : Install Digikam
-    dckr : Install Docker
-    fnts : Install extra fonts
-    vmgs : Setup for a Vmware guest
-    vbgs : Setup for a VirtualBox guest
-    dtdr : Setup the home directories to link to the data disk directories
-    dev  : Install Development Apps and IDEs
+    6    : Upgrade Gnome to Gnome on backports
+    7    : Upgrade KDE to KDE on backports
+    8    : Install Gnome Desktop from backports
+    9    : Install KDE Desktop from backports
+    10   : Install Laptop Display Drivers for Intel en Nvidia
+    11   : Install DisplayLink
+    12   : Install ownCloudClient
+    13   : Install Google Chrome browser
+    14   : Install Digikam
+    15   : Install Docker
+    16   : Install extra fonts
+    17   : Setup for a Vmware guest
+    18   : Setup for a VirtualBox guest
+    19   : Install Development Apps and IDEs
+    20   : Setup the home directories to link to the data disk directories
 
-    beta: Set options for an Ubuntu Beta install with PPA references to a previous version
+    30   : Set options for an Ubuntu Beta install with PPA references to a previous version
 
-    q       : Quit this program
+    0/q  : Quit this program
 
     "
 
@@ -1148,7 +1182,7 @@ installOptions () {
           installApps
         fi
       ;;
-      gnmb )
+      6 )
         read -rp "Do you want to add the Gnome3 Backports PPA? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           gnome3BackportsRepo
@@ -1159,7 +1193,7 @@ installOptions () {
           gnome3Settings
         fi
       ;;
-      ignm )
+      8 )
         read -rp "Do you want to install Gnome from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           # gnome3BackportsRepo
@@ -1170,29 +1204,29 @@ installOptions () {
           gnome3Settings
         fi
       ;;
-      kdeb )
+      7 )
         read -rp "Do you want to add the KDE Backports apt sources? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           kdeBackportsRepo
         fi
       ;;
-      ikde )
+      9 )
         read -rp "Do you want to install KDE from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           # kdeBackportsRepo
           kdeBackportsApps
         fi
       ;;
-      disp)
+      10)
     		printf "%s" choice
         laptopDisplayDrivers
     		echo "Installed Laptop Display Drivers."
     		;;
-    	dslk)
+    	11)
     		printf "%s" "$choice"
         displayLinkInstallApp
     	;;
-      ownc )
+      12 )
         read -rp "Do you want to install ownCloudClient? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           ownCloudClientRepo
@@ -1200,13 +1234,13 @@ installOptions () {
           ownCloudClientInstallApp
         fi
       ;;
-      chrm )
+      13 )
         read -rp "Do you want to install Google Chrome? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           googleChromeInstall
         fi
       ;;
-      dgkm )
+      14 )
         read -rp "Do you want to install DigiKam? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           installDigikamRepo
@@ -1214,7 +1248,7 @@ installOptions () {
           installDigikamApp
         fi
       ;;
-      dckr )
+      15 )
         read -rp "Do you want to install Docker? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           configureDockerRepo
@@ -1222,37 +1256,37 @@ installOptions () {
           configureDockerInstall
         fi
       ;;
-      fnts )
+      16 )
         read -rp "Do you want to install extra Fonts? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           installFonts
         fi
       ;;
-      vmgs )
+      17 )
         read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           vmwareGuestSetup
       fi
       ;;
-      vbgs )
+      18 )
         read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           virtalBoxGuestSetup
       fi
       ;;
 
-      dtdr )
+      20 )
         read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           setupDataDirLinks
         fi
       ;;
-      dev )
+      19 )
         devAppsRepos
         repoUpdate
         devAppsInstall
       ;;
-      beta )
+      30 )
         println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
         read -rp "Do you want to setup the build for a beta install? (y/n) " answer
         if [[ $answer = [Yy1] ]]; then
@@ -1369,8 +1403,8 @@ installOptions () {
           done
         fi
       ;;
-    	q )	;;
-    	*) exit 1
+    	0|q )	;;
+    	*) return 1
     		;;
     esac
   done
@@ -1668,6 +1702,7 @@ else
   stableReleaseVer=$distReleaseVer
   stableReleaseName=$distReleaseName
 fi
+log_warning "desktopEnvironment=$desktopEnvironment"
 log_warning "distReleaseVer=$distReleaseVer"
 log_warning "distReleaseName=$distReleaseName"
 log_warning "stableReleaseVer=$stableReleaseVer"
@@ -1675,8 +1710,8 @@ log_warning "stableReleaseName=$stableReleaseName"
 log_warning "ltsReleaseName=$ltsReleaseName"
 log_warning "betaReleaseName=$betaReleaseName"
 log_warning "betaAns=$betaAns"
-log_warning "desktopEnvironment=$desktopEnvironment"
 
+println_yellow "desktopEnvironment=$desktopEnvironment"
 println_yellow "distReleaseVer=$distReleaseVer"
 println_yellow "distReleaseName=$distReleaseName"
 println_yellow "stableReleaseVer=$stableReleaseVer"
@@ -1684,7 +1719,6 @@ println_yellow "stableReleaseName=$stableReleaseName"
 println_yellow "ltsReleaseName=$ltsReleaseName"
 println_yellow "betaReleaseName=$betaReleaseName"
 println_yellow "betaAns=$betaAns"
-println_yellow "desktopEnvironment=$desktopEnvironment"
 
 
 echo "
