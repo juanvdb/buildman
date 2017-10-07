@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "karty"
+  config.vm.box = "gartful"
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
   config.vm.network "private_network", type: "dhcp", auto_config: false
@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
 
   # Do an update, upgrade and virtualbox additions
   config.vm.provision "shell", inline: "sudo apt-get update"
-  config.vm.provision "shell", inline: "sudo apt-get -y upgrade && sudo apt-get -y dist-upgrade"
+  config.vm.provision "shell", inline: "sudo apt-get -y upgrade"
   # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11"
   # Permit anyone to start the GUI
   config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
