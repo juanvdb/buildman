@@ -306,33 +306,6 @@ setupDataDirLinks () {
 	currentPath=$(pwd)
   cd "$HOME" || exit
 
-  linkDataDirectories=(
-  "Documents"
-  "Downloads"
-  "Music"
-  "Pictures"
-  "Videos"
-  "ownCloud"
-  "VirtualMachines"
-  "Dropbox"
-  "GoogleDrive"
-  "SpiderOak Hive"
-  "Software"
-  ".thunderbird"
-  ".cxoffice"
-  ".atom"
-  ".nylas"
-  "scripts"
-  "vagrant"
-  ".vagrant.d"
-  )
-
-    # DATAHOMEDIRECTORIES=(".local"
-    # ".config"
-    #
-    # )
-
-  log_info "linkDataDirectories ${linkDataDirectories[*]}"
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
@@ -353,59 +326,144 @@ setupDataDirLinks () {
       ln -s "/data" "$HOME/$sourceDataDirectory"
     fi
 
+    linkDataDirectories=(
+    "Documents"
+    "Downloads"
+    "Music"
+    "Pictures"
+    "Videos"
+    "ownCloud"
+    "VirtualMachines"
+    "Dropbox"
+    "GoogleDrive"
+    "SpiderOak Hive"
+    "Software"
+    ".thunderbird"
+    ".cxoffice"
+    ".atom"
+    ".nylas"
+    "scripts"
+    )
+
+    # DATAHOMEDIRECTORIES=(".local"
+    # ".config"
+    #
+    # )
+
+    log_info "linkDataDirectories ${linkDataDirectories[*]}"
+
     for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
       log_debug "Link directory = $sourceLinkDirectory"
+      # remove after testing
+      # mkdir -p "/data/$sourceLinkDirectory"
+      # up to here
       if [ -e "$HOME/$sourceLinkDirectory" ]; then
         if [ -d "$HOME/$sourceLinkDirectory" ]; then
-            if [ -L "$HOME/$sourceLinkDirectory" ]; then
-              # It is a symlink!
-              log_debug "Remove symlink $HOME/$sourceLinkDirectory"
-              rm "$HOME/$sourceLinkDirectory"
-              ln -s "/data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-              log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-            else
-              # It's a directory!
-              log_debug "Remove directory $HOME/data"
-              rmdir "$HOME/$sourceLinkDirectory"
-              ln -s "/data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-              log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-            fi
-          else
-            rm "$HOME/$sourceLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-          fi
-        else
-          log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
-          if [ -L "$HOME/$sourceLinkDirectory" ];  then
+          if [ -L "$HOME/$sourceLinkDirectory" ]; then
             # It is a symlink!
             log_debug "Remove symlink $HOME/$sourceLinkDirectory"
             rm "$HOME/$sourceLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          else
+            # It's a directory!
+            log_debug "Remove directory $HOME/data"
+            rmdir "$HOME/$sourceLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
           fi
-          ln -s "/data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
-        fi
-      done
-      if [[ "$noPrompt" -ne 1 ]]; then
-        read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
-        if [[ $qfirefox = [Yy1] ]]; then
-          sourceLinkDirectory=~/.mozilla
-          if [ -d "$sourceLinkDirectory" ]; then
-            rm -R "$sourceLinkDirectory"
-            ln -s /data/.mozilla "$sourceLinkDirectory"
-          fi
+        else
+          rm "$HOME/$sourceLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
         fi
       else
+        log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOME/$sourceLinkDirectory" ];  then
+          # It is a symlink!
+          log_debug "Remove symlink $HOME/$sourceLinkDirectory"
+          rm "$HOME/$sourceLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+        fi
+        ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+        log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+      fi
+    done
+
+    # Link DataDirectories from sub dirs to specified home dir
+    linkDataDirectories=(
+    "vagrant/vagrant" "vagrant"
+    "vagrant/.vagrant.d" ".vagrant.d"
+    )
+
+    log_info "linkDataDirectories ${linkDataDirectories[*]}"
+    count=$(((${#linkDataDirectories[@]}+1)/2))
+
+    for (( i = 0; i <= count; i+=2 )); do
+      sourceLinkDirectory=${linkDataDirectories[i]}
+      targetLinkDirectory=${linkDataDirectories[i+1]}
+      # remove after testing
+      # mkdir -p "/data/$sourceLinkDirectory"
+      # up to here
+      log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
+      if [ -e "$HOME/$targetLinkDirectory" ]; then
+        if [ -d "$HOME/$targetLinkDirectory" ]; then
+          if [ -L "$HOME/$targetLinkDirectory" ]; then
+            # It is a symlink!
+            log_debug "Remove symlink $HOME/$targetLinkDirectory"
+            rm "$HOME/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          else
+            # It's a directory!
+            log_debug "Remove directory $HOME/data"
+            rmdir "$HOME/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          fi
+        else
+          rm "$HOME/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+        fi
+      else
+        log_debug "$HOME/$targetLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOME/$targetLinkDirectory" ];  then
+          # It is a symlink!
+          log_debug "Remove symlink $HOME/$targetLinkDirectory"
+          rm "$HOME/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+        fi
+        ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+        log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+      fi
+    done
+
+
+    # For Firefox only
+    if [[ "$noPrompt" -ne 1 ]]; then
+      read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
+      if [[ $qfirefox = [Yy1] ]]; then
         sourceLinkDirectory=~/.mozilla
         if [ -d "$sourceLinkDirectory" ]; then
           rm -R "$sourceLinkDirectory"
           ln -s /data/.mozilla "$sourceLinkDirectory"
         fi
       fi
+    else
+      sourceLinkDirectory=~/.mozilla
+      if [ -d "$sourceLinkDirectory" ]; then
+        rm -R "$sourceLinkDirectory"
+        ln -s /data/.mozilla "$sourceLinkDirectory"
+      fi
     fi
-    cd "$currentPath" || exit
+  fi
+
+
+
+  cd "$currentPath" || exit
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -498,7 +556,7 @@ displayLinkInstallApp () {
 	sudo apt -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
-	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=744
+	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=1057
   mkdir -p ~/tmp/displaylink
   unzip displaylink.zip -d ~/tmp/displaylink/
   chmod +x ~/tmp/displaylink/displaylink-driver-1.3.52.run
@@ -658,13 +716,16 @@ configureDockerRepo () {
   log_info "Configure Docker Repo"
   println_blue "Configure Docker Repo"
 	# Setup App repository
-	sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-	sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
-  if [[ "$distReleaseName" =~ ^($betaReleaseName)$ ]]; then
-    log_warning "Change Docker to Stable Release"
-    sudo mv "/etc/apt/sources.list.d/docker-$stableReleaseName.list" "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list"
-    changeAptSource "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list" "ubuntu-$stableReleaseName" ubuntu-yakkety
-  fi
+  sudo apt -y install apt-transport-https ca-certificates curl software-properties-common
+	# sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+	# sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable"
+  # if [[ "$distReleaseName" =~ ^($betaReleaseName)$ ]]; then
+  #   log_warning "Change Docker to Stable Release"
+  #   sudo mv "/etc/apt/sources.list.d/docker-$stableReleaseName.list" "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list"
+  #   changeAptSource "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list" "ubuntu-$stableReleaseName" ubuntu-yakkety
+  # fi
 }
 
 # ############################################################################
@@ -674,16 +735,18 @@ configureDockerInstall () {
   log_info "Configure Docker Install"
   println_blue "Configure Docker Install"
 	# Purge the old repo
-	sudo apt -y purge lxc-docker
+	sudo apt -y purge lxc-docker docker-engine docker.io
 	# Make sure that apt is pulling from the right repository
-	sudo apt-cache policy docker-engine
+	# sudo apt-cache policy docker-engine
+	sudo apt-cache policy docker-ce
 
 	# Add the additional kernel packages
 	# sudo apt -y install "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
 	sudo apt -y install linux-image-extra-virtual
 
 	# Install Docker
-	sudo apt -y install docker-engine
+	# sudo apt -y install docker-engine
+	sudo apt -y install docker-ce
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
@@ -814,7 +877,7 @@ addRepositories () {
 	println_blue "Darktable"
 	sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
 	# WebUpd8 and SyncWall
-	log_info "WebUpd8: SyncWall, WoeUSB"
+	log_info "WebUpd8: SyncWall, ?WoeUSB?"
 	println_blue "WebUpd8: SyncWall, WoeUSB"
 	sudo add-apt-repository -y ppa:nilarimogard/webupd8
 	# Y PPA Manager
@@ -946,7 +1009,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine upstart vlc browser-plugin-vlc gufw woeusb cockpit freefilesync;
+	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit freefilesync autofs;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
@@ -997,7 +1060,8 @@ installOtherApps () {
     20   : Sunflower
     21   : LibreCAD
     22   : Calibre
-
+    30   : Git
+    31   : AsciiDoc
     0|q  : Quit this program
 
     "
@@ -1008,11 +1072,14 @@ installOtherApps () {
     # take inputs and perform as necessary
     case "$choice" in
       1 )
+        sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $stableReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox.org.list"
+        wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
         repoUpdate
-        sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
+        # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
+        sudo apt install virtualbox-5.1 dkms
         case $desktopEnvironment in
           "kde" )
-          sudo apt -y virtualbox-qt;
+          # sudo apt -y virtualbox-qt;
           ;;
         esac
       ;;
@@ -1092,6 +1159,18 @@ installOtherApps () {
         println_blue "Calibre"
         # sudo apt install calibre
         sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+      ;;
+      30 )
+        sudo apt install gitk git-flow
+      ;;
+      31 )
+        sudo apt install asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
+        sudo gem install bundler
+      ;;
+      32 )
+        sudo apt-get install vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
+        vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network
+        sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
       ;;
     	0|q )
          return 1
@@ -1301,6 +1380,8 @@ installOptions () {
             There are the following options for changing the distribution app sources to a stable release:
             Key  : Stable Release
             -----: ---------------------------------------
+            a    : 17.10 Artful
+            x    : 17.04 Zesty
             y    : 16.10 Yakkety
             x    : 16.04 Xenial LTS
             w    : 15.10 Wily
@@ -1322,6 +1403,16 @@ installOptions () {
 
             read -rp "Enter your choice : " stablechoice
             case $stablechoice in
+              a )
+                stableReleaseName="artful"
+                stableReleaseVer="17.10"
+                validchoice=1
+              ;;
+              z )
+                stableReleaseName="zesty"
+                stableReleaseVer="17.04"
+                validchoice=1
+              ;;
               y )
                 stableReleaseName="yakkety"
                 stableReleaseVer="16.10"
@@ -1813,7 +1904,7 @@ case "$choice" in
     installOptions
   ;;
   0|q);;
-  *) exit
+  *)
   ;;
 esac
 
