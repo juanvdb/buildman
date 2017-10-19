@@ -355,7 +355,7 @@ setupDataDirLinks () {
     for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
       log_debug "Link directory = $sourceLinkDirectory"
       # remove after testing
-      # mkdir -p "/data/$sourceLinkDirectory"
+      mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       if [ -e "$HOME/$sourceLinkDirectory" ]; then
         if [ -d "$HOME/$sourceLinkDirectory" ]; then
@@ -404,7 +404,7 @@ setupDataDirLinks () {
       sourceLinkDirectory=${linkDataDirectories[i]}
       targetLinkDirectory=${linkDataDirectories[i+1]}
       # remove after testing
-      # mkdir -p "/data/$sourceLinkDirectory"
+      mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
       if [ -e "$HOME/$targetLinkDirectory" ]; then
@@ -828,7 +828,7 @@ photoAppsInstall () {
   cd ~/tmp || return
   python3 install.py
 
-  sudo apt install rawtherapee graphicsmagick imagemagick darktable;
+  sudo apt -y install rawtherapee graphicsmagick imagemagick darktable;
 
   cd "$currentPath" || return
 }
