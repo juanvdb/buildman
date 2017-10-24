@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DateVer 0913
-# UbuntuBuild V1.2.6
+# DateVer 2017/10/23
+# Buildman V1.2.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -404,7 +404,7 @@ setupDataDirLinks () {
       sourceLinkDirectory=${linkDataDirectories[i]}
       targetLinkDirectory=${linkDataDirectories[i+1]}
       # remove after testing
-      mkdir -p "/data/$sourceLinkDirectory"
+      # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
       if [ -e "$HOME/$targetLinkDirectory" ]; then
@@ -487,8 +487,6 @@ devAppsRepos () {
   log_warning "Change Lighttable to $ltsReleaseName"
   println_blue "Change Lighttable to $ltsReleaseName"
   changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
-  # Atom
-  sudo add-apt-repository -y ppa:webupd8team/atom
   if [[ $betaAns == 1 ]]; then
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
 
@@ -519,7 +517,7 @@ devAppsInstall(){
   sudo apt -y install bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
-  snap install --classic --beta atom
+  # sudo snap install --classic --beta atom
 
 
 	cd "$currentPath" || return
@@ -898,9 +896,10 @@ addRepositories () {
 	println_blue "Grub Customizer"
 	sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
 	# Clementine
-	log_info "Clementine"
-	println_blue "Clementine"
-	sudo add-apt-repository -y ppa:me-davidsansome/clementine
+  # Commented as it is now a snap install
+	# log_info "Clementine"
+	# println_blue "Clementine"
+	# sudo add-apt-repository -y ppa:me-davidsansome/clementine
 	# Boot-Repair
 	log_info "Boot-Repair"
 	println_blue "Boot-Repair"
@@ -938,7 +937,8 @@ addRepositories () {
   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
     log_info "Change Repos for which there aren't new repos."
     println_blue "Change Repos for which there aren't new repos."
-    changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+    # Commented as it is now a snap install
+    # changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
     case $desktopEnvironment in
       "kde" )
         ;;
@@ -1123,7 +1123,9 @@ installOtherApps () {
         # Music and Video apps
         log_info "Music and Video apps"
         println_blue "Music and Video apps"
-        sudo apt install vlc browser-plugin-vlc easytag clementine
+        sudo apt install vlc browser-plugin-vlc easytag
+        # clementine
+        sudo snap install clementine
       ;;
       10 )
         # Freeplane
