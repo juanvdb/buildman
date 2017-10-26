@@ -263,7 +263,7 @@ set_parameters() {
 
 # Here is where the script starts
 # Above were the functions to be used
-currentPath=$(pwd)
+# currentPath=$(pwd)
 # cd ~/scripts
 clear
 echo "
@@ -380,29 +380,29 @@ case "$choice" in
 	s) echo "Setting Proxy for Bankserv Selby"
 		unset_gsettings
 		unset_environment
-		configure_apt 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_gsettings 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_environment 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
+		configure_apt 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_gsettings 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_environment 'prdproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
 		;;
 	r) echo "Setting Proxy for Bankserv Randburg"
 		unset_gsettings
 		unset_environment
-		configure_apt 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_gsettings 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_environment 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
+		configure_apt 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_gsettings 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_environment 'drpproxy.bankservafrica.ent' '8080' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
 		;;
 	b) echo "Setting Proxy for Bankserv Randburg"
 		unset_gsettings
 		unset_environment
-		configure_apt '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_gsettings '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
-		configure_environment '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'skroeF.0er'
+		configure_apt '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_gsettings '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
+		configure_environment '172.16.101.93' '3128' 'y' 'y' 'bankservafrica\\juanv' 'sk0.Meling'
 		;;
 	q)	;;
 	*) exit 1
 		;;
 esac
 rm apt_config.conf bash_set.conf
-cd "$currentPath"
+# cd "$currentPath"
 echo "Job done!"
 echo "Thanks for using. :-)"

@@ -1418,14 +1418,28 @@ installOptions () {
 
             read -rp "Enter your choice : " stablechoice
             case $stablechoice in
+              b)
+                stableReleaseName="bionic"
+                stableReleaseVer="18.04"
+                betaReleaseName="c"
+                betaReleaseVer="18.10"
+                previousStableReleaseName="zesty"
+                validchoice=1
+              ;;
               a )
                 stableReleaseName="artful"
                 stableReleaseVer="17.10"
+                betaReleaseName="bionic"
+                betaReleaseVer="18.04"
+                previousStableReleaseName="zesty"
                 validchoice=1
               ;;
               z )
                 stableReleaseName="zesty"
                 stableReleaseVer="17.04"
+                betaReleaseName="artful"
+                betaReleaseVer="17.10"
+                previousStableReleaseName="yakkety"
                 validchoice=1
               ;;
               y )
