@@ -1053,7 +1053,7 @@ installApps () {
 installOtherApps () {
   ##### Menu section
 
-  until [[ "$choiceApps" = "q" ]]; do
+  until [[ "$choiceApps" =~ ^(0|q|Q|quit)$ ]]; do
     clear
     printf "
 
@@ -1203,7 +1203,7 @@ installOtherApps () {
 # Install settings and applications one by one by selecting options
 installOptions () {
   ##### Menu section
-  until [[ $choiceOpt = "q" ]]; do
+  until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
     clear
     printf "
 
@@ -1809,7 +1809,7 @@ autoRun () {
 # Above were the functions to be used
 choiceMain=NULL
 
-until [[ choiceMain = "q|0|quit|Q" ]]; do
+until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
 
   log_info "Start of BuildMan"
   log_info "===================================================================="
@@ -1878,6 +1878,7 @@ until [[ choiceMain = "q|0|quit|Q" ]]; do
   0/q  : Quit this program
 
   "
+  printf "Enter your system password if asked...\n\n"
 
   read -rp "Enter your choice : " choiceMain
 
@@ -1885,7 +1886,6 @@ until [[ choiceMain = "q|0|quit|Q" ]]; do
   # 	exit 0
   # fi
 
-  printf "Enter your system password if asked...\n"
 
   # take inputs and perform as necessary
   case "$choiceMain" in
