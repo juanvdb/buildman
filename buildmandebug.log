@@ -1,0 +1,56 @@
+[1m[2017-10-24 23:28:46 SAST] [INFO] Start of BuildMan [0m
+[1m[2017-10-24 23:28:46 SAST] [INFO] ==================================================================== [0m
+[1m[2017-10-24 23:28:46 SAST] [INFO] Desktop environment check [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] desktopEnvironment=kde [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] distReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] distReleaseName=zesty [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] stableReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] stableReleaseName=zesty [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] ltsReleaseName=xenial [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] betaReleaseName=artful [0m
+[1;33m[2017-10-24 23:28:46 SAST] [WARNING] betaAns= [0m
+[1m[2017-10-24 23:28:53 SAST] [INFO] Job done! [0m
+[1m[2017-10-24 23:28:53 SAST] [INFO] End of BuildMan [0m
+[1m[2017-10-24 23:28:53 SAST] [INFO] ==================================================================== [0m
+
+[1;31m##############################################################
+[0m
+[1;31m START OF NEW RUN
+[0m
+[1;31m###############################################################
+[0m
+[1m[2017-10-24 23:30:12 SAST] [INFO] Start of BuildMan [0m
+[1m[2017-10-24 23:30:12 SAST] [INFO] ==================================================================== [0m
+[1m[2017-10-24 23:30:12 SAST] [INFO] Desktop environment check [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] desktopEnvironment=kde [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] distReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] distReleaseName=zesty [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] stableReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] stableReleaseName=zesty [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] ltsReleaseName=xenial [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] betaReleaseName=artful [0m
+[1;33m[2017-10-24 23:30:12 SAST] [WARNING] betaAns= [0m
+[1m[2017-10-24 23:30:29 SAST] [INFO] Job done! [0m
+[1m[2017-10-24 23:30:29 SAST] [INFO] End of BuildMan [0m
+[1m[2017-10-24 23:30:29 SAST] [INFO] ==================================================================== [0m
+
+[1;31m##############################################################
+[0m
+[1;31m START OF NEW RUN
+[0m
+[1;31m###############################################################
+[0m
+[1m[2017-10-24 23:30:33 SAST] [INFO] Start of BuildMan [0m
+[1m[2017-10-24 23:30:33 SAST] [INFO] ==================================================================== [0m
+[1m[2017-10-24 23:30:33 SAST] [INFO] Desktop environment check [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] desktopEnvironment=kde [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] distReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] distReleaseName=zesty [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] stableReleaseVer=17.04 [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] stableReleaseName=zesty [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] ltsReleaseName=xenial [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] betaReleaseName=artful [0m
+[1;33m[2017-10-24 23:30:33 SAST] [WARNING] betaAns= [0m
+[1m[2017-10-24 23:31:19 SAST] [INFO] Job done! [0m
+[1m[2017-10-24 23:31:19 SAST] [INFO] End of BuildMan [0m
+[1m[2017-10-24 23:31:19 SAST] [INFO] ==================================================================== [0m
