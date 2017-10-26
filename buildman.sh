@@ -27,11 +27,21 @@
 
 # ############################################################################
 # ==> set global Variables
-betaReleaseName="artful"
-betaReleaseVer="17.10"
-stableReleaseName="zesty"
-stableReleaseVer="17.04"
-previousStableReleaseName="yakkety"
+
+# Ready for Artful
+betaReleaseName="bionic"
+betaReleaseVer="18.04"
+stableReleaseName="artful"
+stableReleaseVer="17.10"
+previousStableReleaseName="zesty"
+
+# Settings for Zesty
+# betaReleaseName="artful"
+# betaReleaseVer="17.10"
+# stableReleaseName="zesty"
+# stableReleaseVer="17.04"
+# previousStableReleaseName="yakkety"
+
 ltsReleaseName="xenial"
 desktopEnvironment=""
 kernelRelease=$(uname -r)
@@ -197,7 +207,7 @@ die() { echo "$*" >&2; exit 1; }
 repoUpdate () {
   log_info "Repo Update"
   println_banner_yellow "Repo Update                                                          "
-  sudo apt -y update;
+  sudo apt update -y;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -210,11 +220,11 @@ repoUpdate () {
 repoUpgrade () {
   log_info "Repo Upgrade"
   println_banner_yellow "Repo Upgrade                                                         "
-  sudo apt -y upgrade;
-  sudo apt -y full-upgrade
-  sudo apt -y dist-upgrade;
-  sudo apt -y autoremove
-  # sudo apt clean
+  sudo apt upgrade -y;
+  sudo apt full-upgrade -y;
+  sudo apt dist-upgrade -y;
+  sudo apt autoremove -y;
+  # sudo apt clean -y
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -233,15 +243,15 @@ kernelUpdate () {
   # fi
   read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
   if [[ $answer = [Yy1] ]]; then
-    sudo apt -y update
+    sudo apt update -y;
     if [[ "$noPrompt" -ne 1 ]]; then
       read -rp "Press ENTER to continue." nullEntry
       printf "%s" "$nullEntry"
     fi
-    sudo apt -yf install build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
-    sudo apt -y upgrade;
-    sudo apt -y full-upgrade;
-    sudo apt -y dist-upgrade;
+    sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
+    sudo apt upgrade -y;
+    sudo apt full-upgrade -y;
+    sudo apt dist-upgrade -y;
     # if [[ "$noPrompt" -ne 1 ]]; then
     #   read -rp "Do you want to reboot (y/n)?" answer
     #   if [[ $answer = [Yy1] ]]; then
@@ -503,8 +513,8 @@ devAppsInstall(){
 
 	# install bashdb and ddd
 	# printf "Please check ddd-3 version"
-	# sudo apt -y build-dep ddd
-	# sudo apt -y install libmotif-dev
+	# sudo apt build-dep ddd
+	# sudo apt install -y libmotif-dev
 	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
 	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
 	# tar xvf ~/tmp/ddd-3.3.9.tar.gz
@@ -514,7 +524,10 @@ devAppsInstall(){
 	# sudo make install
 
   repoUpdate
-  sudo apt -y install bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer;
+  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven;
+  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+  sudo apt install -yf;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
   # sudo snap install --classic --beta atom
@@ -540,7 +553,7 @@ ownCloudClientRepo () {
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
   println_blue "ownCloud Install                                                     "
-	sudo apt -y install owncloud-client
+	sudo apt install -y owncloud-client
   sudo apt install -yf
 }
 
@@ -551,7 +564,7 @@ displayLinkInstallApp () {
   currentPath=$(pwd)
   log_info "display Link Install App"
   println_blue "display Link Install App                                             "
-	sudo apt -y install libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
+	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd ~/tmp || return
 	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=1057
@@ -572,7 +585,7 @@ laptopDisplayDrivers () {
   println_blue "Install XPS Display Drivers                                          "
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
-  sudo apt install nvidia-current intel-graphics-update-tool
+  sudo apt install -y nvidia-current intel-graphics-update-tool
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -680,7 +693,7 @@ kdeBackportsRepo () {
 kdeBackportsApps () {
   repoUpdate
   repoUpgrade
-  sudo apt -y full-upgradegnm
+  sudo apt full-upgrade -y;
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -705,7 +718,7 @@ googleChromeInstall () {
 installFonts () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
-	sudo apt -y install fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
+	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
 }
 
 # ############################################################################
@@ -714,7 +727,7 @@ configureDockerRepo () {
   log_info "Configure Docker Repo"
   println_blue "Configure Docker Repo"
 	# Setup App repository
-  sudo apt -y install apt-transport-https ca-certificates curl software-properties-common
+  sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
 	# sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 	# sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
@@ -733,18 +746,18 @@ configureDockerInstall () {
   log_info "Configure Docker Install"
   println_blue "Configure Docker Install"
 	# Purge the old repo
-	sudo apt -y purge lxc-docker docker-engine docker.io
+	sudo apt purge -y lxc-docker docker-engine docker.io
 	# Make sure that apt is pulling from the right repository
 	# sudo apt-cache policy docker-engine
 	sudo apt-cache policy docker-ce
 
 	# Add the additional kernel packages
-	# sudo apt -y install "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
-	sudo apt -y install linux-image-extra-virtual
+	# sudo apt install -y "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
+	sudo apt install -y linux-image-extra-virtual
 
 	# Install Docker
-	# sudo apt -y install docker-engine
-	sudo apt -y install docker-ce
+	# sudo apt install -y docker-engine
+	sudo apt install -y docker-ce
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
@@ -801,7 +814,7 @@ installDigikamApp () {
   log_info "Digikam Install"
   println_blue "Digikam Install"
   # sudo apt install -yf
-	sudo apt -yf install digikam digikam-doc digikam-data
+	sudo apt install -yf digikam digikam-doc digikam-data
   # sudo apt install -yf
 }
 # #########################################################################
@@ -826,7 +839,7 @@ photoAppsInstall () {
   cd ~/tmp || return
   python3 install.py
 
-  sudo apt -y install rawtherapee graphicsmagick imagemagick darktable;
+  sudo apt install -y rawtherapee graphicsmagick imagemagick darktable;
 
   cd "$currentPath" || return
 }
@@ -1009,28 +1022,28 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt -yf install synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit freefilesync autofs;
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit freefilesync autofs;
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
-   sudo apt install scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
+   sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt -y install kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde;
 			;;
 		"gnome" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
+			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
+			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
 			;;
 		"xubuntu" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
 			;;
 		"lubuntu" )
-			sudo apt -y install doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
 			;;
 	esac
 }
@@ -1040,7 +1053,7 @@ installApps () {
 installOtherApps () {
   ##### Menu section
 
-  until [[ "$choice" = "q" ]]; do
+  until [[ "$choiceApps" = "q" ]]; do
     clear
     printf "
 
@@ -1062,15 +1075,16 @@ installOtherApps () {
     22   : Calibre
     30   : Git
     31   : AsciiDoc
+    32   : Vagrant
     0|q  : Quit this program
 
     "
 
-    read -rp "Enter your choice : " choice
-    # printf "%s" "$choice"
+    read -rp "Enter your choice : " choiceApps
+    # printf "%s" "$choiceApps"
 
     # take inputs and perform as necessary
-    case "$choice" in
+    case "$choiceApps" in
       1 )
         sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $stableReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox.org.list"
         wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
@@ -1079,13 +1093,13 @@ installOtherApps () {
         sudo apt install virtualbox-5.1 dkms
         case $desktopEnvironment in
           "kde" )
-          # sudo apt -y virtualbox-qt;
+          # sudo apt install -y virtualbox-qt;
           ;;
         esac
       ;;
       2 )
         repoUpdate
-        sudo apt install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+        sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
       ;;
       3 )
         devAppsRepos
@@ -1111,19 +1125,19 @@ installOtherApps () {
 
         repoUpdate
 
-        sudo apt install dropbox
+        sudo apt install -y dropbox
       ;;
       6 )
         # Imaging Editing Applications
         log_info "Imaging Editing Applications"
         println_blue "Imaging Editing Applications"
-        sudo apt install dia-gnome gimp gimp-plugin-registry
+        sudo apt install -y dia-gnome gimp gimp-plugin-registry
       ;;
       7 )
         # Music and Video apps
         log_info "Music and Video apps"
         println_blue "Music and Video apps"
-        sudo apt install vlc browser-plugin-vlc easytag
+        sudo apt install -y vlc browser-plugin-vlc easytag
         # clementine
         sudo snap install clementine
       ;;
@@ -1131,7 +1145,7 @@ installOtherApps () {
         # Freeplane
         log_info "Freeplane"
         println_blue "Freeplane"
-        sudo apt install freeplane
+        sudo apt install -y freeplane
       ;;
       20 )
         # Sunflower
@@ -1144,7 +1158,7 @@ installOtherApps () {
 
         repoUpdate
 
-        sudo apt install sunflower
+        sudo apt install -y sunflower
       ;;
       21 )
         # [?] LibreCAD
@@ -1153,7 +1167,7 @@ installOtherApps () {
 
         repoUpdate
 
-        sudo apt install librecad
+        sudo apt install -y librecad
       ;;
       22 )
         # Calibre
@@ -1163,21 +1177,23 @@ installOtherApps () {
         sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
       ;;
       30 )
-        sudo apt install gitk git-flow
+        sudo apt install -y gitk git-flow giggle gitk gitg
+        wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
+        sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+        sudo apt install -yf
       ;;
       31 )
-        sudo apt install asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
-        sudo gem install bundler
+        sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
+        sudo gem install -y bundler
       ;;
       32 )
-        sudo apt-get install vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
+        sudo apt install -y vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
         vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network
         sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
       ;;
-    	0|q )
-         return 1
-      ;;
-    	*) return 1
+    	0|q);;
+    	*)
+        # return 1
     		;;
     esac
   done
@@ -1187,11 +1203,9 @@ installOtherApps () {
 # Install settings and applications one by one by selecting options
 installOptions () {
   ##### Menu section
-  until [[ "$choice" = "q" ]]; do
+  until [[ $choiceOpt = "q" ]]; do
     clear
     printf "
-
-
 
     There are the following options for this script
     TASK : DESCRIPTION
@@ -1223,11 +1237,11 @@ installOptions () {
 
     "
 
-    read -rp "Enter your choice : " choice
-    # printf "%s" "$choice"
+    read -rp "Enter your choice : " choiceOpt
+    # printf "%s" "$choiceOpt"
 
     # take inputs and perform as necessary
-    case "$choice" in
+    case "$choiceOpt" in
       1|krnl )
         read -rp "Do you want to do a Kernel update that includes a reboot? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
@@ -1299,12 +1313,10 @@ installOptions () {
         fi
       ;;
       10)
-    		printf "%s" choice
         laptopDisplayDrivers
     		echo "Installed Laptop Display Drivers."
     		;;
     	11)
-    		printf "%s" "$choice"
         displayLinkInstallApp
     	;;
       12 )
@@ -1382,7 +1394,8 @@ installOptions () {
             There are the following options for changing the distribution app sources to a stable release:
             Key  : Stable Release
             -----: ---------------------------------------
-            a    : 17.10 Artful
+            b    : 18.04 Bionic Beaver
+            a    : 17.10 Artful Aardvark
             x    : 17.04 Zesty
             y    : 16.10 Yakkety
             x    : 16.04 Xenial LTS
@@ -1485,7 +1498,7 @@ installOptions () {
                 stableReleaseVer="10.04"
                 validchoice=1
               ;;
-              quit )
+              quit|q|0)
                 validchoice=1
               ;;
               * )
@@ -1496,8 +1509,9 @@ installOptions () {
           done
         fi
       ;;
-    	0|q )	;;
-    	*) return 1
+    	0|q);;
+    	*)
+        return 1
     		;;
     esac
   done
@@ -1779,145 +1793,148 @@ autoRun () {
 # ############################################################################
 # Here is where the main script starts
 # Above were the functions to be used
-log_info "Start of BuildMan"
-log_info "===================================================================="
-clear
-println_banner_yellow "Start of BuildMan                                                    "
-println_banner_yellow "====================================================================="
+choiceMain=NULL
 
-# ########################################################
-# Set global variables
-desktopEnvironmentCheck
+until [[ choiceMain = "q|0|quit|Q" ]]; do
 
-if [[ ("$betaReleaseName" == "$distReleaseName") || ("$betaReleaseVer" == "$distReleaseVer") ]]; then
-  betaAns=1
-else
-  stableReleaseVer=$distReleaseVer
-  stableReleaseName=$distReleaseName
-fi
-log_warning "desktopEnvironment=$desktopEnvironment"
-log_warning "distReleaseVer=$distReleaseVer"
-log_warning "distReleaseName=$distReleaseName"
-log_warning "stableReleaseVer=$stableReleaseVer"
-log_warning "stableReleaseName=$stableReleaseName"
-log_warning "ltsReleaseName=$ltsReleaseName"
-log_warning "betaReleaseName=$betaReleaseName"
-log_warning "betaAns=$betaAns"
+  log_info "Start of BuildMan"
+  log_info "===================================================================="
+  clear
+  println_banner_yellow "Start of BuildMan                                                    "
+  println_banner_yellow "====================================================================="
 
-println_yellow "desktopEnvironment=$desktopEnvironment"
-println_yellow "distReleaseVer=$distReleaseVer"
-println_yellow "distReleaseName=$distReleaseName"
-println_yellow "stableReleaseVer=$stableReleaseVer"
-println_yellow "stableReleaseName=$stableReleaseName"
-println_yellow "ltsReleaseName=$ltsReleaseName"
-println_yellow "betaReleaseName=$betaReleaseName"
-println_yellow "betaAns=$betaAns"
+  # ########################################################
+  # Set global variables
+  desktopEnvironmentCheck
+
+  if [[ ("$betaReleaseName" == "$distReleaseName") || ("$betaReleaseVer" == "$distReleaseVer") ]]; then
+    betaAns=1
+  else
+    stableReleaseVer=$distReleaseVer
+    stableReleaseName=$distReleaseName
+  fi
+  log_warning "desktopEnvironment=$desktopEnvironment"
+  log_warning "distReleaseVer=$distReleaseVer"
+  log_warning "distReleaseName=$distReleaseName"
+  log_warning "stableReleaseVer=$stableReleaseVer"
+  log_warning "stableReleaseName=$stableReleaseName"
+  log_warning "ltsReleaseName=$ltsReleaseName"
+  log_warning "betaReleaseName=$betaReleaseName"
+  log_warning "betaAns=$betaAns"
+
+  println_yellow "desktopEnvironment=$desktopEnvironment"
+  println_yellow "distReleaseVer=$distReleaseVer"
+  println_yellow "distReleaseName=$distReleaseName"
+  println_yellow "stableReleaseVer=$stableReleaseVer"
+  println_yellow "stableReleaseName=$stableReleaseName"
+  println_yellow "ltsReleaseName=$ltsReleaseName"
+  println_yellow "betaReleaseName=$betaReleaseName"
+  println_yellow "betaAns=$betaAns"
 
 
-echo "
-MESSAGE : In case of options, one value is displayed as the default value.
-Do erase it to use other value.
+  echo "
+  MESSAGE : In case of options, one value is displayed as the default value.
+  Do erase it to use other value.
 
-BuildMan v0.1
+  BuildMan v0.1
 
-This script is documented in README.md file.
+  This script is documented in README.md file.
 
-Running $desktopEnvironment $distReleaseName $distReleaseVer
+  Running $desktopEnvironment $distReleaseName $distReleaseVer
 
-There are the following options for this script
-TASK :     DESCRIPTION
+  There are the following options for this script
+  TASK :     DESCRIPTION
 
-1    : Install Laptop with all packages without asking
-2    : Install Laptop with all packages asking for groups of packages
+  1    : Install Laptop with all packages without asking
+  2    : Install Laptop with all packages asking for groups of packages
 
-3    : Install Workstation with all packages without asking
-4    : Install Workstation with all packages asking for groups of packages
+  3    : Install Workstation with all packages without asking
+  4    : Install Workstation with all packages asking for groups of packages
 
-5    : Install VMware VM with all packages without asking
-6    : Install VMware VM with all packages asking for groups of packages
+  5    : Install VMware VM with all packages without asking
+  6    : Install VMware VM with all packages asking for groups of packages
 
-7    : Install VirtualBox VM with all packages without asking
-8    : Install VirtualBox VM with all packages asking for groups of packages
+  7    : Install VirtualBox VM with all packages without asking
+  8    : Install VirtualBox VM with all packages asking for groups of packages
 
-9    : Install other individual applications
+  9    : Install other individual applications
 
-99   : Install individual repos and items
+  99   : Install individual repos and items
 
-0/q  : Quit this program
+  0/q  : Quit this program
 
-"
+  "
 
-read -rp "Enter your choice : " choice
+  read -rp "Enter your choice : " choiceMain
 
-# if [[ $choice == 'q' ]]; then
-# 	exit 0
-# fi
+  # if [[ $choiceMain == 'q' ]]; then
+  # 	exit 0
+  # fi
 
-printf "Enter your system password if asked...\n"
+  printf "Enter your system password if asked...\n"
 
-# take inputs and perform as necessary
-case "$choice" in
-	1)
-  	printf "Automated installation for a Laptop\n"
+  # take inputs and perform as necessary
+  case "$choiceMain" in
+    1)
+    printf "Automated installation for a Laptop\n"
     autoRun l
     echo "Operation completed successfully."
-	;;
-	2)
+    ;;
+    2)
     printf "Laptop Installation asking items:\n"
     questionRun l
     echo -e "Operation completed successfully.\n"
-	;;
-	3)
-  	printf "Automated installation for a Workstation\n"
+    ;;
+    3)
+    printf "Automated installation for a Workstation\n"
     autoRun w
     echo "Operation completed successfully."
-	;;
-	4)
+    ;;
+    4)
     printf "Workstation Installation asking items:\n"
     questionRun w
     echo "Operation completed successfully."
-	;;
-	5)
+    ;;
+    5)
     printf "Automated install for a Vmware virtual machine\n"
     autoRun vm
-  	echo "Operation completed successfully."
-  ;;
-  # ############################################################################
-	6)
+    echo "Operation completed successfully."
+    ;;
+    # ############################################################################
+    6)
     printf "Vmware install asking questions as to which apps to install for the run"
     questionRun vm
-  ;;
-  # ############################################################################
-	7)
+    ;;
+    # ############################################################################
+    7)
     printf "Automated install for a VirtualBox virtual machine\n"
     autoRun vb
     echo "Operation completed successfully."
-  ;;
-  # ############################################################################
-  8)
+    ;;
+    # ############################################################################
+    8)
     printf "VirtualBox install asking questions as to which apps to install for the run"
     questionRun vb
-  ;;
-  9)
+    ;;
+    9)
     installOtherApps
-  ;;
-	99 )
-  	echo "Selecting itemized installations"
+    ;;
+    99 )
+    echo "Selecting itemized installations"
     installOptions
-  ;;
-  0|q);;
-  *)
-  ;;
-esac
+    ;;
+    0|q);;
+    *);;
+  esac
+done
 
-log_info "Job done!"
+log_info "Jobs done!"
 log_info "End of BuildMan"
 log_info "===================================================================="
 
-printf "Job done!"
-printf "Thanks for using. :-)"
+printf "\n\nJob done!\n"
+printf "Thanks for using. :-)\n"
 # ############################################################################
 # set debugging off
-set -xv
-
+# set -xv
 exit;
