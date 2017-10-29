@@ -34,7 +34,7 @@ betaReleaseVer="18.04"
 stableReleaseName="artful"
 stableReleaseVer="17.10"
 previousStableReleaseName="zesty"
-
+noCurrentReleaseRepo=1
 # Settings for Zesty
 # betaReleaseName="artful"
 # betaReleaseVer="17.10"
@@ -77,24 +77,20 @@ scriptDebugToFile="on"
 if [[ $scriptDebugToFile == "on" ]]; then
   if [[ -e $debugLogFile ]]; then
     # >$debugLogFile
-    echo -en "\n" >>$debugLogFile
-    echo -en "\033[1;31m##############################################################\n\033[0m" >>$debugLogFile
-    echo -en "\n" >>$debugLogFile
-    echo -en "\033[1;31m START OF NEW RUN\n\033[0m" >>$debugLogFile
-    echo -en "\n" >>$debugLogFile
-    echo -en "\033[1;31m###############################################################\n\033[0m" >>$debugLogFile
-    echo -en "\n" >>$debugLogFile
+    echo -en "\n \033[1;31m##############################################################\n\033[0m
+    \n
+    \033[1;31m START OF NEW RUN\n\033[0m
+    \n
+    \033[1;31m###############################################################\n\033[0m\n" >>$debugLogFile
   else
     touch $debugLogFile
   fi
   if [[ -e $errorLogFile ]]; then
-    # >$errorLogFile
-    echo -en "\n"
-    echo -en "\033[1;31m###############################################################\n\033[0m" >>$errorLogFile
-    echo -en "\n" >>$errorLogFile
-    echo -en "\033[1;31m START OF NEW RUN\n\033[0m" >>$errorLogFile
-    echo -en "\n" >>$errorLogFile
-    echo -en "\033[1;31m###############################################################\n\033[0m" >>$errorLogFile
+    echo -en "\n \033[1;31m##############################################################\n\033[0m
+    \n
+    \033[1;31m START OF NEW RUN\n\033[0m
+    \n
+    \033[1;31m###############################################################\n\033[0m\n" >>$errorLogFile
     echo -en "\n" >>$errorLogFile
   else
     touch $errorLogFile
@@ -595,12 +591,12 @@ laptopDisplayDrivers () {
 # Desktop environment check and return desktop environment
 desktopEnvironmentCheck () {
   log_info "Desktop environment check"
-  println_banner_yellow "Desktop environment check                                            "
+  # println_banner_yellow "Desktop environment check                                            "
 	# another way for ssh terminals
 
-	if [[ "$XDG_CURRENT_DESKTOP" = "" ]];
+	if [[ -z "$XDG_CURRENT_DESKTOP" ]];
 	then
-    # shellcheck disable=SC2001
+    # shellcheck disable=SC2001 disable=SC2143
     if [[ -z $(echo "$XDG_DATA_DIRS" | grep -Eo 'xfce|kde|gnome') ]]; then
       # desktop=$(pgrep -l "compiz|metacity|mutter|kwin|sawfish|fluxbox|openbox|xmonad")
       desktop=$(pgrep -l "gnome|kde|mate|cinnamon")
@@ -731,12 +727,18 @@ configureDockerRepo () {
 	# sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 	# sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
-  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable"
-  # if [[ "$distReleaseName" =~ ^($betaReleaseName)$ ]]; then
-  #   log_warning "Change Docker to Stable Release"
-  #   sudo mv "/etc/apt/sources.list.d/docker-$stableReleaseName.list" "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list"
-  #   changeAptSource "/etc/apt/sources.list.d/docker-ubuntu-$stableReleaseName.list" "ubuntu-$stableReleaseName" ubuntu-yakkety
-  # fi
+  if [[ ! "$noCurrentReleaseRepo" = 1  ]]; then
+    if [[ ! "$distReleaseName" =~ ^($betaReleaseName)$ ]]; then
+      log_warning "Add Docker to repository."
+      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
+    else
+      log_warning "Add Docker to repository, Previous Stable Release, no beta release available."
+      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
+    fi
+  else
+    log_warning "Add Docker to repository, Change Docker to Previous Stable Release, no current release available."
+    sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable' >> /etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
+  fi
 }
 
 # ############################################################################
@@ -823,6 +825,15 @@ photoAppsRepo () {
   log_info "Photo Apps Repositories"
   println_blue "Photo Apps Repositories                                              "
   installDigikamRepo
+  # Darktable
+  log_info "Darktable"
+  println_blue "Darktable"
+  sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, downgrade the apt sources."
+    println_red "Beta Code, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
 }
 # #########################################################################
 # Install photo applications
@@ -883,10 +894,6 @@ addRepositories () {
   log_info "doublecmd"
   println_blue "doublecmd"
 	sudo apt-add-repository -y ppa:alexx2000/doublecmd
-	# Darktable
-	log_info "Darktable"
-	println_blue "Darktable"
-	sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
 	# WebUpd8 and SyncWall
 	log_info "WebUpd8: SyncWall, ?WoeUSB?"
 	println_blue "WebUpd8: SyncWall, WoeUSB"
@@ -900,9 +907,9 @@ addRepositories () {
 	println_blue "WebUpd8 Java"
 	sudo add-apt-repository -y ppa:webupd8team/java
 	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
-	log_info "Filezilla"
-	println_blue "Filezilla"
-  sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $stableReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb.list"
+	log_info "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+	println_blue "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+  sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
 	wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
 	# Grub Customizer
 	log_info "Grub Customizer"
@@ -989,17 +996,17 @@ addRepositories () {
   if ! [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
     # Scribes Developer editor
     # log_warning 'Scribes Developer editor'
-    sudo add-apt-repository -y ppa:mystilleef/scribes-daily
-    changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
+    # sudo add-apt-repository -y ppa:mystilleef/scribes-daily
+    # changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
     # Canon Printer Drivers
-  	log_warning "Canon Printer Drivers"
-  	println_blue "Canon Printer Drivers"
-  	sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
-  	sudo add-apt-repository -y ppa:michael-gruz/canon
-  	sudo add-apt-repository -y ppa:inameiname/stable
-    changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-trunk-$distReleaseName.list" "$distReleaseName" utopic
-    changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
-    changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
+  	# log_warning "Canon Printer Drivers"
+  	# println_blue "Canon Printer Drivers"
+  	# sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
+  	# sudo add-apt-repository -y ppa:michael-gruz/canon
+  	# sudo add-apt-repository -y ppa:inameiname/stable
+    # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-trunk-$distReleaseName.list" "$distReleaseName" utopic
+    # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
+    # changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
     # Inkscape
     log_warning "Inkscape"
     println_blue "Inkscape"
@@ -1011,7 +1018,13 @@ addRepositories () {
     changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Repos not available as yet, downgrade the apt sources."
+    println_red "Repos not available as yet, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/getdeb.list" "$distReleaseName" "$previousStableReleaseName"
+    # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
 
@@ -1056,8 +1069,6 @@ installOtherApps () {
   until [[ "$choiceApps" =~ ^(0|q|Q|quit)$ ]]; do
     clear
     printf "
-
-
 
     There are the following options for installing individual apps.
     NOTE: The apps will only be installed when you quit this menu so that only one repo update is done.
@@ -1836,17 +1847,17 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
   log_warning "betaReleaseName=$betaReleaseName"
   log_warning "betaAns=$betaAns"
 
-  println_yellow "desktopEnvironment=$desktopEnvironment"
-  println_yellow "distReleaseVer=$distReleaseVer"
-  println_yellow "distReleaseName=$distReleaseName"
-  println_yellow "stableReleaseVer=$stableReleaseVer"
-  println_yellow "stableReleaseName=$stableReleaseName"
-  println_yellow "ltsReleaseName=$ltsReleaseName"
-  println_yellow "betaReleaseName=$betaReleaseName"
-  println_yellow "betaAns=$betaAns"
+  # println_yellow "desktopEnvironment=$desktopEnvironment"
+  # println_yellow "distReleaseVer=$distReleaseVer"
+  # println_yellow "distReleaseName=$distReleaseName"
+  # println_yellow "stableReleaseVer=$stableReleaseVer"
+  # println_yellow "stableReleaseName=$stableReleaseName"
+  # println_yellow "ltsReleaseName=$ltsReleaseName"
+  # println_yellow "betaReleaseName=$betaReleaseName"
+  # println_yellow "betaAns=$betaAns"
 
 
-  echo "
+  echo -e "
   MESSAGE : In case of options, one value is displayed as the default value.
   Do erase it to use other value.
 
@@ -1854,7 +1865,7 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
 
   This script is documented in README.md file.
 
-  Running $desktopEnvironment $distReleaseName $distReleaseVer
+  Running $LOG_ERROR_COLOR $distReleaseName $distReleaseVer $desktopEnvironment $LOG_DEFAULT_COLOR
 
   There are the following options for this script
   TASK :     DESCRIPTION
@@ -1871,9 +1882,8 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
   7    : Install VirtualBox VM with all packages without asking
   8    : Install VirtualBox VM with all packages asking for groups of packages
 
-  9    : Install other individual applications
-
-  99   : Install individual repos and items
+  10   : Install other individual applications
+  11   : Install individual repos and items
 
   0/q  : Quit this program
 
@@ -1930,10 +1940,10 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
     printf "VirtualBox install asking questions as to which apps to install for the run"
     questionRun vb
     ;;
-    9)
+    10)
     installOtherApps
     ;;
-    99 )
+    11)
     echo "Selecting itemized installations"
     installOptions
     ;;
