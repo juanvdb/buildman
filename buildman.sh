@@ -221,6 +221,10 @@ repoUpgrade () {
   sudo apt dist-upgrade -y;
   sudo apt autoremove -y;
   # sudo apt clean -y
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -248,6 +252,10 @@ kernelUpdate () {
     sudo apt upgrade -y;
     sudo apt full-upgrade -y;
     sudo apt dist-upgrade -y;
+    if [[ "$noPrompt" -ne 1 ]]; then
+      read -rp "Kernel Updates installed. Press ENTER to continue." nullEntry
+      printf "%s" "$nullEntry"
+    fi
     # if [[ "$noPrompt" -ne 1 ]]; then
     #   read -rp "Do you want to reboot (y/n)?" answer
     #   if [[ $answer = [Yy1] ]]; then
@@ -283,6 +291,11 @@ vmwareGuestSetup () {
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
   sudo chown -R "$USER":"$USER" ~/hostfiles
   # sudo mount -a
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "VMware Guest Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 
 # ############################################################################
@@ -290,7 +303,7 @@ vmwareGuestSetup () {
 virtalBoxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
-  sudo apt install -y nfs-common ssh
+  sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
   mkdir -p ~/hostfiles/home
   mkdir -p ~/hostfiles/data
   LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
@@ -299,6 +312,11 @@ virtalBoxGuestSetup () {
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
   sudo chown -R "$USER":"$USER" ~/hostfiles
   # sudo mount -a
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -527,8 +545,10 @@ devAppsInstall(){
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
   # sudo snap install --classic --beta atom
-
-
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Development Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 	cd "$currentPath" || return
 }
 
@@ -551,6 +571,10 @@ ownCloudClientInstallApp () {
   println_blue "ownCloud Install                                                     "
 	sudo apt install -y owncloud-client
   sudo apt install -yf
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "ownCloud Client installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # ############################################################################
@@ -572,6 +596,10 @@ displayLinkInstallApp () {
   sudo chown -R "$USER":"$USER" ~/tmp/displaylink/
   cd "$currentPath" || return
   sudo apt install -yf
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Displaylink Application installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # ############################################################################
@@ -582,6 +610,10 @@ laptopDisplayDrivers () {
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt install -y nvidia-current intel-graphics-update-tool
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Laptop Display drivers installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -660,6 +692,11 @@ gnome3BackportsApps () {
 	repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Gnome Shell installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 
 # ############################################################################
@@ -707,6 +744,11 @@ googleChromeInstall () {
 	wget -P ~/tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 	sudo dpkg -i --force-depends ~/tmp/google-chrome-stable_current_amd64.deb
   sudo apt install -yf
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Google Chrome installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 
 # ############################################################################
@@ -715,6 +757,11 @@ installFonts () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
 	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Fonts installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 
 # ############################################################################
@@ -798,6 +845,35 @@ configureDockerInstall () {
   sudo ufw allow 2375/tcp
   cd "$currentPath" || return
   sudo apt install -yf
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Docker installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+}
+
+# #########################################################################
+# Install Dropbox repository
+function dropboxRepo {
+  log_info "Dropbox"
+  println_blue "Dropbox"
+  sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
+  # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
+  sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
+  log_warning "Change Dropbox to $ltsReleaseName"
+  println_blue "Change Dropbox to $ltsReleaseName"
+  changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
+}
+# #########################################################################
+# Install Dropbox Application
+function dropboxAppInstall {
+  sudo apt install -y dropbox
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Dropbox installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -818,6 +894,11 @@ installDigikamApp () {
   # sudo apt install -yf
 	sudo apt install -yf digikam digikam-doc digikam-data
   # sudo apt install -yf
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Digikam installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
 }
 # #########################################################################
 # Install photo apps repository
@@ -851,6 +932,10 @@ photoAppsInstall () {
   python3 install.py
 
   sudo apt install -y rawtherapee graphicsmagick imagemagick darktable;
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Photo Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 
   cd "$currentPath" || return
 }
@@ -1023,7 +1108,7 @@ addRepositories () {
     log_warning "Repos not available as yet, downgrade the apt sources."
     println_red "Repos not available as yet, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/getdeb.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
@@ -1035,7 +1120,8 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager oracle-java9-installer boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs;
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-9-jdk openjdk-9-jre;
+
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
@@ -1059,6 +1145,10 @@ installApps () {
 			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
 			;;
 	esac
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "General Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
 }
 
 # ############################################################################
@@ -1078,9 +1168,17 @@ installOtherApps () {
     2    : VirtualBox Guest
     3    : Development Apps
     4    : Photography Apps
-    5    : Dropbox
     6    : Image Editing Applications
     7    : Music and Video Applications
+    8    : Oracle Java
+    10   : Laptop Display Drivers for Intel en Nvidia
+    11   : DisplayLink
+    12   : ownCloudClient
+    13   : Google Chrome browser
+    14   : Digikam
+    15   : Docker
+    16   : Dropbox
+    19   : Install extra fonts
     20   : Sunflower
     21   : LibreCAD
     22   : Calibre
@@ -1098,113 +1196,271 @@ installOtherApps () {
     # take inputs and perform as necessary
     case "$choiceApps" in
       1 )
-        sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $stableReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox.org.list"
-        wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
-        repoUpdate
-        # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
-        sudo apt install virtualbox-5.1 dkms
-        case $desktopEnvironment in
-          "kde" )
-          # sudo apt install -y virtualbox-qt;
-          ;;
-        esac
+        # VirtualBox Host
+        read -rp "Do you want to install VirtualBox Host? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $stableReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox.org.list"
+          wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
+          repoUpdate
+          # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
+          sudo apt install virtualbox-5.1 dkms
+          case $desktopEnvironment in
+            "kde" )
+            # sudo apt install -y virtualbox-qt;
+            ;;
+          esac
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "VirtualBox Host Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       2 )
-        repoUpdate
-        sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+        # VirtualBox Guest
+        read -rp "Do you want to install VirtualBox Guest? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          repoUpdate
+          sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       3 )
-        devAppsRepos
-        devAppsInstall
+        # Development Applications
+        read -rp "Do you want to install Development Applications? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          devAppsRepos
+          devAppsInstall
+        fi
       ;;
       4 )
-        photoAppsRepo
-        photoAppsInstall
-      ;;
-      5 )
-        # Dropbox
-        log_info "Dropbox"
-        println_blue "Dropbox"
-        sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
-        # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
-        # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
-        # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
-        # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
-        sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
-        log_warning "Change Dropbox to $ltsReleaseName"
-        println_blue "Change Dropbox to $ltsReleaseName"
-        changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
-
-        repoUpdate
-
-        sudo apt install -y dropbox
+        # Photography Applications
+        read -rp "Do you want to install Photography Applications? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          photoAppsRepo
+          photoAppsInstall
+        fi
       ;;
       6 )
         # Imaging Editing Applications
-        log_info "Imaging Editing Applications"
-        println_blue "Imaging Editing Applications"
-        sudo apt install -y dia-gnome gimp gimp-plugin-registry
+        read -rp "Do you want to install Imaging Editing Applications? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Imaging Editing Applications"
+          println_blue "Imaging Editing Applications"
+          sudo apt install -y dia-gnome gimp gimp-plugin-registry
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Image Editing Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       7 )
         # Music and Video apps
-        log_info "Music and Video apps"
-        println_blue "Music and Video apps"
-        sudo apt install -y vlc browser-plugin-vlc easytag
-        # clementine
-        sudo snap install clementine
+        read -rp "Do you want to install Music and Video Apps? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Music and Video apps"
+          println_blue "Music and Video apps"
+          sudo apt install -y vlc browser-plugin-vlc easytag
+          # clementine
+          sudo snap install clementine
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Music and Video Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
+      ;;
+      8)
+        # Oracle Java
+        read -rp "Do you want to install Oracle Java? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Install Oracle Java"
+          println_blue "Install Oracle Java"
+          sudo apt install -y oracle-java9-installer
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Oracle Java installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
+
       ;;
       10 )
         # Freeplane
-        log_info "Freeplane"
-        println_blue "Freeplane"
-        sudo apt install -y freeplane
+        read -rp "Do you want to install Freeplane? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Freeplane"
+          println_blue "Freeplane"
+          sudo apt install -y freeplane
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Freeplane installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
+      ;;
+      10)
+        # Laptop Drivers
+        read -rp "Do you want to install Nvidia and Intel Drivers? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          laptopDisplayDrivers
+        fi
+      ;;
+      11)
+        # DisplayLink
+        read -rp "Do you want to install DisplayLink Drivers? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          displayLinkInstallApp
+        fi
+      ;;
+      12 )
+        # ownCloudClient
+        read -rp "Do you want to install ownCloudClient? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          ownCloudClientRepo
+          repoUpdate
+          ownCloudClientInstallApp
+        fi
+      ;;
+      13 )
+        # Google Chrome
+        read -rp "Do you want to install Google Chrome? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          googleChromeInstall
+        fi
+      ;;
+      14 )
+        # DigiKam
+        read -rp "Do you want to install DigiKam? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          installDigikamRepo
+          repoUpdate
+          installDigikamApp
+        fi
+      ;;
+      15 )
+        # Docker
+        read -rp "Do you want to install Docker? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          configureDockerRepo
+          repoUpdate
+          configureDockerInstall
+        fi
+      ;;
+      16 )
+      # Dropbox
+        read -rp "Do you want to install Dropbox? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          dropboxRepo
+          repoUpdate
+          dropboxAppInstall
+        fi
+      ;;
+      19 )
+        # ExtraFonts
+        read -rp "Do you want to install extra Fonts? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          installFonts
+        fi
       ;;
       20 )
         # Sunflower
-        log_info "Sunflower"
-        println_blue "Sunflower"
-        sudo add-apt-repository -y ppa:atareao/sunflower
-        log_warning "Change Sunflower to $ltsReleaseName"
-        println_blue "Change Sunflower to $ltsReleaseName"
-        changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+        read -rp "Do you want to install Sunflower? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Sunflower"
+          println_blue "Sunflower"
+          sudo add-apt-repository -y ppa:atareao/sunflower
+          log_warning "Change Sunflower to $ltsReleaseName"
+          println_blue "Change Sunflower to $ltsReleaseName"
+          changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
 
-        repoUpdate
+          repoUpdate
 
-        sudo apt install -y sunflower
+          sudo apt install -y sunflower
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Sunflower installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       21 )
         # [?] LibreCAD
-        sudo add-apt-repository ppa:librecad-dev/librecad-stable
-        changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+        read -rp "Do you want to install LibreCAD? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo add-apt-repository ppa:librecad-dev/librecad-stable
+          changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 
-        repoUpdate
+          repoUpdate
 
-        sudo apt install -y librecad
+          sudo apt install -y librecad
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Librecad installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       22 )
         # Calibre
-        log_info "Calibre"
-        println_blue "Calibre"
-        # sudo apt install calibre
-        sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+        read -rp "Do you want to install Calibre? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          log_info "Calibre"
+          println_blue "Calibre"
+          # sudo apt install calibre
+          sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Calibre installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       23)
-        sudo apt install -y freefilesync
+        # FreeFileSync
+        read -rp "Do you want to install FreeFileSync? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo apt install -y freefilesync
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "FreeFileSync installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       30 )
-        sudo apt install -y gitk git-flow giggle gitk gitg
-        wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
-        sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
-        sudo apt install -yf
+        # Git
+        read -rp "Do you want to install Git? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo apt install -y gitk git-flow giggle gitk gitg
+          wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
+          sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+          sudo apt install -yf
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Git Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       31 )
-        sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
-        sudo gem install -y bundler
+        # AsciiDoc
+        read -rp "Do you want to install AsciiDoc? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
+          sudo gem install -y bundler
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
       32 )
-        sudo apt install -y vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
-        vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network
-        sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
+        # Vagrant
+        read -rp "Do you want to install Vagrant? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          sudo apt install -y vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
+          vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network
+          sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
+          if [[ "$noPrompt" -ne 1 ]]; then
+            read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
+            printf "%s" "$nullEntry"
+          fi
+        fi
       ;;
     	0|q);;
     	*)
@@ -1234,13 +1490,6 @@ installOptions () {
     7    : Upgrade KDE to KDE on backports
     8    : Install Gnome Desktop from backports
     9    : Install KDE Desktop from backports
-    10   : Install Laptop Display Drivers for Intel en Nvidia
-    11   : Install DisplayLink
-    12   : Install ownCloudClient
-    13   : Install Google Chrome browser
-    14   : Install Digikam
-    15   : Install Docker
-    16   : Install extra fonts
     17   : Setup for a Vmware guest
     18   : Setup for a VirtualBox guest
     19   : Install Development Apps and IDEs
@@ -1325,49 +1574,6 @@ installOptions () {
         if [[ $answer = [Yy1] ]]; then
           # kdeBackportsRepo
           kdeBackportsApps
-        fi
-      ;;
-      10)
-        laptopDisplayDrivers
-    		echo "Installed Laptop Display Drivers."
-    		;;
-    	11)
-        displayLinkInstallApp
-    	;;
-      12 )
-        read -rp "Do you want to install ownCloudClient? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          ownCloudClientRepo
-          repoUpdate
-          ownCloudClientInstallApp
-        fi
-      ;;
-      13 )
-        read -rp "Do you want to install Google Chrome? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          googleChromeInstall
-        fi
-      ;;
-      14 )
-        read -rp "Do you want to install DigiKam? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          installDigikamRepo
-          repoUpdate
-          installDigikamApp
-        fi
-      ;;
-      15 )
-        read -rp "Do you want to install Docker? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          configureDockerRepo
-          repoUpdate
-          configureDockerInstall
-        fi
-      ;;
-      16 )
-        read -rp "Do you want to install extra Fonts? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          installFonts
         fi
       ;;
       17 )
@@ -1829,8 +2035,9 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
   log_info "Start of BuildMan"
   log_info "===================================================================="
   clear
-  println_banner_yellow "Start of BuildMan                                                    "
-  println_banner_yellow "====================================================================="
+  println_info "\n\n"
+  println_info "Start of BuildMan                                                    "
+  println_info "====================================================================="
 
   # ########################################################
   # Set global variables
