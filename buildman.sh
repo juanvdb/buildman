@@ -1497,6 +1497,9 @@ installOptions () {
 
     30   : Set options for an Ubuntu Beta install with PPA references to a previous version
 
+    50   : Change that you don't get any questions
+    51   : Change that you get questioned
+
     0/q  : Quit this program
 
     "
@@ -1743,6 +1746,18 @@ installOptions () {
             esac
           done
         fi
+      ;;
+      50)
+        answer=y
+        noPrompt=1
+        println_blue "Questions asked OFF\n No questions will be asked"
+        log_debug "Questions asked OFF\n No questions will be asked"
+      ;;
+      51)
+        answer=n
+        noPrompt=0
+        println_blue "Questions asked ON\n All questions will be asked"
+        log_debug "Questions asked ON\n All questions will be asked"
       ;;
     	0|q);;
     	*)
