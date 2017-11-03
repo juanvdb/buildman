@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DateVer 2017/10/23
-# Buildman V1.2.7
+# DateVer 2017/11/04
+# Buildman V1.2.8
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -812,7 +812,7 @@ configureDockerInstall () {
 	# Un comment the following if it is a new install and comment the rm line
 	# sudo mv /var/lib/docker /data/docker
   if [ -d "/data" ]; then
-  # if /data exists then move docker directory to /data/docker.
+  # if /data exists then link docker directory to /data/docker.
     if [[ $(sudo docker ps -q) = 1 ]]; then
       sudo docker ps -q | xargs docker kill
     fi
@@ -820,8 +820,8 @@ configureDockerInstall () {
     sudo systemctl stop docker
     # sudo cd /var/lib/docker/devicemapper/mnt
     # sudo umount ./*
-    sudo mv /var/lib/docker/ /data/docker/
-    # sudo rm -R /var/lib/docker
+    # sudo mv /var/lib/docker/ /data/docker/
+    sudo rm -Rf /var/lib/docker
     sudo ln -s /data/docker /var/lib/docker
 
     #Add the new /data/docker directory to the config file
@@ -910,9 +910,9 @@ photoAppsRepo () {
   log_info "Darktable"
   println_blue "Darktable"
   sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, downgrade the apt sources."
-    println_red "Beta Code, downgrade the apt sources."
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, downgrade the apt sources."
+    println_red "Beta Code or no new repo, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
