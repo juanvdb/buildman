@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# DateVer 2017/11/04
-# Buildman V1.2.8
+# DateVer 2017/11/07
+# Buildman V1.2.9
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -176,12 +176,12 @@ println() {
   return 0;
 }
 
-println_info()      { println "$@"; }
+println_info()            { println "$@"; }
 println_banner_yellow()   { println "$1" "${BANNER_YELLOW}"; }
-println_banner_blue()   { println "$1" "${BANNER_BLUE}"; }
-println_red()     { println "$1" "${LOG_ERROR_COLOR}"; }
-println_yellow()   { println "$1" "${LOG_WARN_COLOR}"; }
-println_blue()     { println "$1" "${LOG_DEBUG_COLOR}"; }
+println_banner_blue()     { println "$1" "${BANNER_BLUE}"; }
+println_red()             { println "$1" "${LOG_ERROR_COLOR}"; }
+println_yellow()          { println "$1" "${LOG_WARN_COLOR}"; }
+println_blue()            { println "$1" "${LOG_DEBUG_COLOR}"; }
 
 
 # ############################################################################
@@ -193,9 +193,62 @@ println_blue()     { println "$1" "${LOG_DEBUG_COLOR}"; }
 die() { echo "$*" >&2; exit 1; }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# O                  Update and upgrade                                      O
+# O                   Check system                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
+############################################################################
+# Desktop environment check and return desktop environment
+desktopEnvironmentCheck () {
+  log_info "Desktop environment check"
+  # println_banner_yellow "Desktop environment check                                            "
+  # another way for ssh terminals
+
+  if [[ -z "$XDG_CURRENT_DESKTOP" ]];
+  then
+    # shellcheck disable=SC2001 disable=SC2143
+    if [[ -z $(echo "$XDG_DATA_DIRS" | grep -Eo 'xfce|kde|gnome') ]]; then
+      # desktop=$(pgrep -l "compiz|metacity|mutter|kwin|sawfish|fluxbox|openbox|xmonad")
+      desktop=$(pgrep -l "gnome|kde|mate|cinnamon")
+      case $desktop in
+        *"startkde"* )
+        desktop="kde"
+        ;;
+        *"gnome-shell"* )
+        desktop="gnome"
+        ;;
+      esac
+    else
+      desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
+    fi
+  else
+    desktop=$XDG_CURRENT_DESKTOP
+  fi
+  # convert to lower case
+  desktop=${desktop,,}
+
+  # debug "desktopEnvironmentCheck -GDMSESSION = $GDMSESSION"
+  case $desktop in
+    "kde" | "plasma")
+    desktopEnvironment="kde"
+    ;;
+    "gnome" )
+    desktopEnvironment="gnome"
+    ;;
+    "xfce" )
+    desktopEnvironment="xubuntu"
+    ;;
+    "ubuntu:GNOME" )
+    desktopEnvironment="ubuntu"
+    ;;
+    * )
+    desktopEnvironment="kde"
+    ;;
+  esac
+}
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                  Update and upgrade                                      O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
 # Update the repositories
@@ -491,70 +544,9 @@ dataDirLinksSetup () {
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# O                 Development Apps                                         O
-# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# ############################################################################
-# Development packages repositories
-devAppsRepos () {
-  # Brackets
-  log_info "Brackets Repo"
-  println_blue "Brackets Repo"
-  sudo add-apt-repository -y ppa:webupd8team/brackets
-  # Atom
-  log_info "Atom Repo"
-  println_blue "Atom Repo"
-  sudo add-apt-repository -y ppa:webupd8team/atom
-  # LightTable
-  log_info "LightTable"
-  println_blue "LightTable"
-  sudo add-apt-repository -y ppa:dr-akulavich/lighttable
-  log_warning "Change Lighttable to $ltsReleaseName"
-  println_blue "Change Lighttable to $ltsReleaseName"
-  changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
-  if [[ $betaAns == 1 ]]; then
-    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-
-  fi
-
-}
-
-# ############################################################################
-# Development packages installation
-devAppsInstall(){
-  currentPath=$(pwd)
-  log_info "Dev Apps install"
-  println_banner_yellow "Dev Apps install                                                     "
-
-	# install bashdb and ddd
-	# printf "Please check ddd-3 version"
-	# sudo apt build-dep ddd
-	# sudo apt install -y libmotif-dev
-	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
-	# wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
-	# tar xvf ~/tmp/ddd-3.3.9.tar.gz
-	# cd ~/tmp/ddd-3.3.12 || return
-	# ./configure
-	# make
-	# sudo make install
-
-  repoUpdate
-  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
-  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
-  sudo apt install -yf;
-  # The following packages was installed in the past but never used or I could not figure out how to use them.
-  #
-  # sudo snap install --classic --beta atom
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Development Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
-	cd "$currentPath" || return
-}
-
-# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                 Physical Machine Setup                                   O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # ownCloud Client repository
 ownCloudClientRepo () {
@@ -563,7 +555,6 @@ ownCloudClientRepo () {
     sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
   wget -q -O - "http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
-
 # ############################################################################
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
@@ -619,55 +610,6 @@ laptopDisplayDrivers () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                   Window Managers Backports                              O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-############################################################################
-# Desktop environment check and return desktop environment
-desktopEnvironmentCheck () {
-  log_info "Desktop environment check"
-  # println_banner_yellow "Desktop environment check                                            "
-	# another way for ssh terminals
-
-	if [[ -z "$XDG_CURRENT_DESKTOP" ]];
-	then
-    # shellcheck disable=SC2001 disable=SC2143
-    if [[ -z $(echo "$XDG_DATA_DIRS" | grep -Eo 'xfce|kde|gnome') ]]; then
-      # desktop=$(pgrep -l "compiz|metacity|mutter|kwin|sawfish|fluxbox|openbox|xmonad")
-      desktop=$(pgrep -l "gnome|kde|mate|cinnamon")
-      case $desktop in
-        *"startkde"* )
-          desktop="kde"
-        ;;
-        *"gnome-shell"* )
-          desktop="gnome"
-        ;;
-      esac
-    else
-	     desktop=$(echo "$XDG_DATA_DIRS" | sed 's/.*\(xfce\|kde\|plasma\|gnome\).*/\1/')
-    fi
-	else
-	  desktop=$XDG_CURRENT_DESKTOP
-	fi
-  # convert to lower case
-	desktop=${desktop,,}
-
-  # debug "desktopEnvironmentCheck -GDMSESSION = $GDMSESSION"
-	case $desktop in
-	 	"kde" | "plasma")
-	   	desktopEnvironment="kde"
-	 		;;
-    "gnome" )
-      desktopEnvironment="gnome"
-      ;;
-	 	"xfce" )
-	   	desktopEnvironment="xubuntu"
-	 		;;
-    "ubuntu:GNOME" )
-      desktopEnvironment="ubuntu"
-    ;;
-    * )
-      desktopEnvironment="kde"
-      ;;
-  esac
-}
 
 # ############################################################################
 # gnome3BackportsRepo
@@ -698,7 +640,6 @@ gnome3BackportsApps () {
   fi
 
 }
-
 # ############################################################################
 # gnome3Settings
 gnome3Settings () {
@@ -706,7 +647,6 @@ gnome3Settings () {
   println_blue "Change Gnome3 settings                                               "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
 }
-
 
 # ############################################################################
 # kdeBackportsRepo
@@ -720,7 +660,6 @@ kdeBackportsRepo () {
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
-
 # ############################################################################
 # kdeBackportsRepo
 kdeBackportsApps () {
@@ -730,8 +669,71 @@ kdeBackportsApps () {
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O                 Development Apps                                         O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+# ############################################################################
+# Development packages repositories
+devAppsRepos () {
+  # Brackets
+  log_info "Brackets Repo"
+  println_blue "Brackets Repo"
+  sudo add-apt-repository -y ppa:webupd8team/brackets
+  # Atom
+  log_info "Atom Repo"
+  println_blue "Atom Repo"
+  sudo add-apt-repository -y ppa:webupd8team/atom
+  # LightTable
+  log_info "LightTable"
+  println_blue "LightTable"
+  sudo add-apt-repository -y ppa:dr-akulavich/lighttable
+  log_warning "Change Lighttable to $ltsReleaseName"
+  println_blue "Change Lighttable to $ltsReleaseName"
+  changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+  if [[ $betaAns == 1 ]]; then
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+
+  fi
+
+}
+# ############################################################################
+# Development packages installation
+devAppsInstall(){
+  currentPath=$(pwd)
+  log_info "Dev Apps install"
+  println_banner_yellow "Dev Apps install                                                     "
+
+  # install bashdb and ddd
+  # printf "Please check ddd-3 version"
+  # sudo apt build-dep ddd
+  # sudo apt install -y libmotif-dev
+  # wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
+  # wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
+  # tar xvf ~/tmp/ddd-3.3.9.tar.gz
+  # cd ~/tmp/ddd-3.3.12 || return
+  # ./configure
+  # make
+  # sudo make install
+
+  repoUpdate
+  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
+  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+  sudo apt install -yf;
+  # The following packages was installed in the past but never used or I could not figure out how to use them.
+  #
+  # sudo snap install --classic --beta atom
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Development Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+  cd "$currentPath" || return
+}
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                   Apps Install                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # Google Chrome Install
 googleChromeInstall () {
@@ -787,7 +789,6 @@ dockerRepo () {
     sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable' >> /etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
   fi
 }
-
 # ############################################################################
 # Configure DockerInstall
 dockerInstall () {
@@ -884,7 +885,7 @@ rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
 
-  sudo apt-add-repository ppa:brightbox/ruby-ng
+  sudo apt-add-repository -y ppa:brightbox/ruby-ng
 }
 
 # ############################################################################
@@ -906,6 +907,7 @@ vagrantInstall () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O               Photography Apps                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # #########################################################################
 # Install digikam repository
 digikamRepo () {
@@ -971,6 +973,7 @@ photoAppsInstall () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O           General Apps Install                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # #########################################################################
 # changeAptSource
 changeAptSource () {
@@ -1175,6 +1178,10 @@ installApps () {
     printf "%s" "$nullEntry"
   fi
 }
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           Other Appslications Install                                    O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
 # Install other applications individually
@@ -1510,6 +1517,10 @@ installOtherApps () {
   done
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           Install group apps and other settings                          O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # Install settings and applications one by one by selecting options
 installOptions () {
@@ -1807,6 +1818,10 @@ installOptions () {
   done
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           Automated Apps Install                                         O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
 questionRun () {
@@ -2090,47 +2105,52 @@ autoRun () {
   # end of run
 }
 
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           Main Script                                                    O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
 # ############################################################################
 # Here is where the main script starts
 # Above were the functions to be used
+# ########################################################
+# Set global variables
+desktopEnvironmentCheck
+
+if [[ ("$betaReleaseName" == "$distReleaseName") || ("$betaReleaseVer" == "$distReleaseVer") ]]; then
+  betaAns=1
+else
+  stableReleaseVer=$distReleaseVer
+  stableReleaseName=$distReleaseName
+fi
+log_warning "desktopEnvironment=$desktopEnvironment"
+log_warning "distReleaseVer=$distReleaseVer"
+log_warning "distReleaseName=$distReleaseName"
+# log_warning "stableReleaseVer=$stableReleaseVer"
+# log_warning "stableReleaseName=$stableReleaseName"
+# log_warning "ltsReleaseName=$ltsReleaseName"
+# log_warning "betaReleaseName=$betaReleaseName"
+log_warning "betaAns=$betaAns"
+
+log_info "Start of BuildMan"
+log_info "===================================================================="
+
+# println_yellow "desktopEnvironment=$desktopEnvironment"
+# println_yellow "distReleaseVer=$distReleaseVer"
+# println_yellow "distReleaseName=$distReleaseName"
+# println_yellow "stableReleaseVer=$stableReleaseVer"
+# println_yellow "stableReleaseName=$stableReleaseName"
+# println_yellow "ltsReleaseName=$ltsReleaseName"
+# println_yellow "betaReleaseName=$betaReleaseName"
+# println_yellow "betaAns=$betaAns"
+
 choiceMain=NULL
 
 until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
-
-  log_info "Start of BuildMan"
-  log_info "===================================================================="
   clear
   println_info "\n\n"
-  println_info "Start of BuildMan                                                    "
+  println_info "BuildMan                                                    "
   println_info "====================================================================="
 
-  # ########################################################
-  # Set global variables
-  desktopEnvironmentCheck
-
-  if [[ ("$betaReleaseName" == "$distReleaseName") || ("$betaReleaseVer" == "$distReleaseVer") ]]; then
-    betaAns=1
-  else
-    stableReleaseVer=$distReleaseVer
-    stableReleaseName=$distReleaseName
-  fi
-  log_warning "desktopEnvironment=$desktopEnvironment"
-  log_warning "distReleaseVer=$distReleaseVer"
-  log_warning "distReleaseName=$distReleaseName"
-  log_warning "stableReleaseVer=$stableReleaseVer"
-  log_warning "stableReleaseName=$stableReleaseName"
-  log_warning "ltsReleaseName=$ltsReleaseName"
-  log_warning "betaReleaseName=$betaReleaseName"
-  log_warning "betaAns=$betaAns"
-
-  # println_yellow "desktopEnvironment=$desktopEnvironment"
-  # println_yellow "distReleaseVer=$distReleaseVer"
-  # println_yellow "distReleaseName=$distReleaseName"
-  # println_yellow "stableReleaseVer=$stableReleaseVer"
-  # println_yellow "stableReleaseName=$stableReleaseName"
-  # println_yellow "ltsReleaseName=$ltsReleaseName"
-  # println_yellow "betaReleaseName=$betaReleaseName"
-  # println_yellow "betaAns=$betaAns"
 
 
   echo -e "
