@@ -325,7 +325,7 @@ virtalBoxGuestSetup () {
 
 # ############################################################################
 # Links directories to data disk if exists
-setupDataDirLinks () {
+dataDirLinksSetup () {
   log_info "XPS Data Dir links"
 	currentPath=$(pwd)
   cd "$HOME" || exit
@@ -538,7 +538,7 @@ devAppsInstall(){
 	# sudo make install
 
   repoUpdate
-  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven;
+  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
   wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
   sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
   sudo apt install -yf;
@@ -753,7 +753,7 @@ googleChromeInstall () {
 
 # ############################################################################
 # Install Fonts
-installFonts () {
+fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
 	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
@@ -766,7 +766,7 @@ installFonts () {
 
 # ############################################################################
 # Configure DockerRepo
-configureDockerRepo () {
+dockerRepo () {
   log_info "Configure Docker Repo"
   println_blue "Configure Docker Repo"
 	# Setup App repository
@@ -790,7 +790,7 @@ configureDockerRepo () {
 
 # ############################################################################
 # Configure DockerInstall
-configureDockerInstall () {
+dockerInstall () {
   currentPath=$(pwd)
   log_info "Configure Docker Install"
   println_blue "Configure Docker Install"
@@ -853,9 +853,9 @@ configureDockerInstall () {
 
 # #########################################################################
 # Install Dropbox repository
-function dropboxRepo {
-  log_info "Dropbox"
-  println_blue "Dropbox"
+dropboxRepo () {
+  log_info "Dropbox Repo setup"
+  println_blue "Dropbox Repo setup"
   sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
   # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
   # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
@@ -868,10 +868,37 @@ function dropboxRepo {
 }
 # #########################################################################
 # Install Dropbox Application
-function dropboxAppInstall {
+dropboxInstall () {
+  log_info "Dropbox Install"
+  println_blue "Dropbox Install"
   sudo apt install -y dropbox
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Dropbox installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+}
+
+# ############################################################################
+# Vagrant Install, vmtools, nfs directories to host
+rubyRepo () {
+  log_info "Ruby Repo"
+  println_blue "Ruby Repo"
+
+  sudo apt-add-repository ppa:brightbox/ruby-ng
+}
+
+# ############################################################################
+# Vagrant Install, vmtools, nfs directories to host
+vagrantInstall () {
+  log_info "Vagrant Applications Install"
+  println_blue "Vagrant Applications Install                                               "
+
+  sudo apt install -y libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby;
+  sudo apt install -yf ifupdown numad radvd auditd systemtap zfsutils pm-utils;
+  vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
+  sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
   fi
 }
@@ -881,14 +908,14 @@ function dropboxAppInstall {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # #########################################################################
 # Install digikam repository
-installDigikamRepo () {
+digikamRepo () {
   log_info "Digikam Repo"
   println_blue "Digikam Repo"
 	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
 }
 # #########################################################################
 # Install digikam Application
-installDigikamApp () {
+digikamInstall () {
   log_info "Digikam Install"
   println_blue "Digikam Install"
   # sudo apt install -yf
@@ -905,7 +932,7 @@ installDigikamApp () {
 photoAppsRepo () {
   log_info "Photo Apps Repositories"
   println_blue "Photo Apps Repositories                                              "
-  installDigikamRepo
+  digikamRepo
   # Darktable
   log_info "Darktable"
   println_blue "Darktable"
@@ -923,7 +950,7 @@ photoAppsInstall () {
   log_info "Photo Apps install"
   println_blue "Photo Apps install                                                   "
 
-  installDigikamApp
+  digikamInstall
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
@@ -931,7 +958,7 @@ photoAppsInstall () {
   cd ~/tmp || return
   python3 install.py
 
-  sudo apt install -y rawtherapee graphicsmagick imagemagick darktable;
+  sudo apt install -y rawtherapee graphicsmagick imagemagick darktable ufraw;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Photo Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -1037,7 +1064,7 @@ addRepositories () {
 
 }
 
-  downgradeAptDistro () {
+downgradeAptDistro () {
   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
     log_info "Change Repos for which there aren't new repos."
@@ -1048,8 +1075,6 @@ addRepositories () {
       "kde" )
         ;;
       "gnome" )
-        log_info "Change Happy Themes to Xenial"
-        println_blue "Change Happy Themes to Xenial"
         ;;
       "xubuntu" )
         ;;
@@ -1120,7 +1145,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-9-jdk openjdk-9-jre;
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-9-jdk openjdk-9-jre dnsutils;
 
 
   # older packages that will not install on new releases
@@ -1199,16 +1224,22 @@ installOtherApps () {
         # VirtualBox Host
         read -rp "Do you want to install VirtualBox Host? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $stableReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox.org.list"
+          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $distReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
           wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
+          if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+            log_warning "Beta Code or no new repo, downgrade the apt sources."
+            println_red "Beta Code or no new repo, downgrade the apt sources."
+            changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+          fi
+
           repoUpdate
           # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
           sudo apt install virtualbox-5.1 dkms
-          case $desktopEnvironment in
-            "kde" )
-            # sudo apt install -y virtualbox-qt;
-            ;;
-          esac
+          # case $desktopEnvironment in
+          #   "kde" )
+          #   # sudo apt install -y virtualbox-qt;
+          #   ;;
+          # esac
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "VirtualBox Host Applications installed. Press ENTER to continue." nullEntry
             printf "%s" "$nullEntry"
@@ -1249,7 +1280,7 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           log_info "Imaging Editing Applications"
           println_blue "Imaging Editing Applications"
-          sudo apt install -y dia-gnome gimp gimp-plugin-registry
+          sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "Image Editing Applications installed. Press ENTER to continue." nullEntry
             printf "%s" "$nullEntry"
@@ -1332,18 +1363,18 @@ installOtherApps () {
         # DigiKam
         read -rp "Do you want to install DigiKam? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          installDigikamRepo
+          digikamRepo
           repoUpdate
-          installDigikamApp
+          digikamInstall
         fi
       ;;
       15 )
         # Docker
         read -rp "Do you want to install Docker? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          configureDockerRepo
+          dockerRepo
           repoUpdate
-          configureDockerInstall
+          dockerInstall
         fi
       ;;
       16 )
@@ -1352,14 +1383,14 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           dropboxRepo
           repoUpdate
-          dropboxAppInstall
+          dropboxInstall
         fi
       ;;
       19 )
         # ExtraFonts
         read -rp "Do you want to install extra Fonts? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          installFonts
+          fontsInstall
         fi
       ;;
       20 )
@@ -1386,6 +1417,9 @@ installOtherApps () {
         # [?] LibreCAD
         read -rp "Do you want to install LibreCAD? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
+          log_info "Install LibreCAD"
+          println_blue "Install LibreCAD"
+
           sudo add-apt-repository ppa:librecad-dev/librecad-stable
           changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 
@@ -1416,6 +1450,9 @@ installOtherApps () {
         # FreeFileSync
         read -rp "Do you want to install FreeFileSync? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
+          log_info "Install FreeFileSync"
+          println_blue "Install FreeFileSync"
+
           sudo apt install -y freefilesync
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "FreeFileSync installed. Press ENTER to continue." nullEntry
@@ -1427,6 +1464,9 @@ installOtherApps () {
         # Git
         read -rp "Do you want to install Git? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
+          log_info "Install Git"
+          println_blue "Install Git"
+
           sudo apt install -y gitk git-flow giggle gitk gitg
           wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
           sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
@@ -1441,8 +1481,12 @@ installOtherApps () {
         # AsciiDoc
         read -rp "Do you want to install AsciiDoc? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor-plantuml ruby
-          sudo gem install -y bundler
+          log_info "Install AsciiDoc"
+          println_blue "Install AsciiDoc"
+          rubyRepo
+          repoUpdate
+          sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
+          sudo gem install bundler asciidoctor-plantuml guard rake
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
             printf "%s" "$nullEntry"
@@ -1453,13 +1497,9 @@ installOtherApps () {
         # Vagrant
         read -rp "Do you want to install Vagrant? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          sudo apt install -y vagrant-cachier vagrant-sshfs vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs dig ruby-dns ruby ruby-dev dnsutils
-          vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network
-          sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          rubyRepo
+          repoUpdate
+          vagrantInstall
         fi
       ;;
     	0|q);;
@@ -1595,7 +1635,7 @@ installOptions () {
       20 )
         read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          setupDataDirLinks
+          dataDirLinksSetup
         fi
       ;;
       19 )
@@ -1748,13 +1788,13 @@ installOptions () {
         fi
       ;;
       50)
-        answer=y
+        # answer=y
         noPrompt=1
         println_blue "Questions asked OFF\n No questions will be asked"
         log_debug "Questions asked OFF\n No questions will be asked"
       ;;
       51)
-        answer=n
+        # answer=n
         noPrompt=0
         println_blue "Questions asked ON\n All questions will be asked"
         log_debug "Questions asked ON\n All questions will be asked"
@@ -1844,6 +1884,10 @@ questionRun () {
   if [[ $answer = [Yy1] ]]; then
     dockerAns=1
   fi
+  read -rp "Do you want to install Dropbox? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    dropboxAns=1
+  fi
   read -rp "Do you want to install extra Fonts? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     fontsAns=1
@@ -1891,7 +1935,10 @@ questionRun () {
       ownCloudClientRepo
     fi
     if [[ $dockerAns = 1 ]]; then
-      configureDockerRepo
+      dockerRepo
+    fi
+    if [[ $dropboxAns = 1 ]]; then
+      dropboxRepo
     fi
     case $desktopEnvironment in
       gnome )
@@ -1944,10 +1991,13 @@ questionRun () {
       googleChromeInstall
     fi
     if [[ $digiKamAns = 1 ]]; then
-      installDigikamApp
+      digikamInstall
     fi
     if [[ $dockerAns = 1 ]]; then
-      configureDockerInstall
+      dockerInstall
+    fi
+    if [[ $dropboxAns = 1 ]]; then
+      dropboxInstall
     fi
     if [[ $desktopEnvironment = "gnome" ]]; then
       if [[ $gnomeBackportsAns = 1 ]]; then
@@ -1958,11 +2008,11 @@ questionRun () {
       fi
     fi
     if [[ $fontsAns = 1 ]]; then
-      installFonts
+      fontsInstall
     fi
     installApps
     if [[ $homeDataDirAns = 1 ]]; then
-      setupDataDirLinks
+      dataDirLinksSetup
     fi
   fi
 
@@ -1983,7 +2033,7 @@ autoRun () {
   case $1 in
     [lw] )
       ownCloudClientRepo
-      configureDockerRepo
+      dockerRepo
       ;;
   esac
   case $desktopEnvironment in
@@ -2004,14 +2054,14 @@ autoRun () {
     ;;
     kde )
     if [[ $1 = [lw] ]]; then
-      installDigikamApp
+      digikamInstall
     fi
     ;;
   esac
 
   googleChromeInstall
 
-  installFonts
+  fontsInstall
   installApps
 
   case $1 in
@@ -2025,13 +2075,13 @@ autoRun () {
       laptopDisplayDrivers
       displayLinkInstallApp
       ownCloudClientInstallApp
-      configureDockerInstall
-      setupDataDirLinks
+      dockerInstall
+      dataDirLinksSetup
     ;;
     pc )
       ownCloudClientInstallApp
-      configureDockerInstall
-      setupDataDirLinks
+      dockerInstall
+      dataDirLinksSetup
     ;;
   esac
 
