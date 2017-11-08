@@ -42,6 +42,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: false
   config.vm.synced_folder "../../../", "/srv/share/build", disabled: false, type: "nfs"
   config.vm.synced_folder "../../../../is/oss/automationandmessaging/jbossintegrationpatterns/", "/srv/share/ascidoc", disabled: false, type: "nfs"
+  config.vm.synced_folder "../../../../ansible", "/srv/share/ansible", disabled: false, type: "nfs"
   config.vm.synced_folder "/home/juan/Downloads/", "/srv/share/downloads", disabled: false, type: "nfs"
 
   # Do an update, upgrade and virtualbox additions
