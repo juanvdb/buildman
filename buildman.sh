@@ -353,7 +353,7 @@ vmwareGuestSetup () {
 
 # ############################################################################
 # VirtualBox Guest Setup, vmtools, nfs directories to host
-virtalBoxGuestSetup () {
+virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
@@ -1258,7 +1258,8 @@ installOtherApps () {
         read -rp "Do you want to install VirtualBox Guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           repoUpdate
-          sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+          # sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+          virtualboxGuestSetup
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
             printf "%s" "$nullEntry"
@@ -1639,7 +1640,7 @@ installOptions () {
       18 )
         read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          virtalBoxGuestSetup
+          virtualboxGuestSetup
       fi
       ;;
 
@@ -1991,7 +1992,7 @@ questionRun () {
       vmwareGuestSetup
     fi
     if [[ $virtualBoxGuestSetupAns = 1 ]]; then
-      virtalBoxGuestSetup
+      virtualboxGuestSetup
     fi
     if [[ $displayDriversAns = 1 ]]; then
       laptopDisplayDrivers
@@ -2084,7 +2085,7 @@ autoRun () {
       vmwareGuestSetup
     ;;
     vb )
-      virtalBoxGuestSetup
+      virtualboxGuestSetup
     ;;
     laptop )
       laptopDisplayDrivers
