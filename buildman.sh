@@ -269,6 +269,7 @@ repoUpdate () {
 repoUpgrade () {
   log_info "Repo Upgrade"
   println_banner_yellow "Repo Upgrade                                                         "
+  sudo apt install -yf;
   sudo apt upgrade -y;
   sudo apt full-upgrade -y;
   sudo apt dist-upgrade -y;
@@ -286,15 +287,15 @@ repoUpgrade () {
 
 # ############################################################################
 # Setup Kernel
-kernelUpdate () {
-  log_info "Kernel Update"
-  println_banner_yellow "Kernel Update                                                        "
+kernelUprade () {
+  log_info "Kernel Upgrade"
+  println_banner_yellow "Kernel Upgrade                                                        "
   # if [[ "$noPrompt" -ne 1 ]]; then
-  #   read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
+  #   read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
   # else
   #   answer=1
   # fi
-  read -rp "Do you want to go ahead with the kernel and packages update, and possibly will have to reboot (y/n)?" answer
+  read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
   if [[ $answer = [Yy1] ]]; then
     sudo apt update -y;
     if [[ "$noPrompt" -ne 1 ]]; then
@@ -306,7 +307,7 @@ kernelUpdate () {
     sudo apt full-upgrade -y;
     sudo apt dist-upgrade -y;
     if [[ "$noPrompt" -ne 1 ]]; then
-      read -rp "Kernel Updates installed. Press ENTER to continue." nullEntry
+      read -rp "Kernel Upgrades installed. Press ENTER to continue." nullEntry
       printf "%s" "$nullEntry"
     fi
     # if [[ "$noPrompt" -ne 1 ]]; then
@@ -698,7 +699,7 @@ devAppsRepos () {
 }
 # ############################################################################
 # Development packages installation
-devAppsInstall(){
+devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
@@ -725,6 +726,24 @@ devAppsInstall(){
   # sudo snap install --classic --beta atom
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Development Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+  cd "$currentPath" || return
+}
+
+# ############################################################################
+# Git packages installation
+gitInstall() {
+  currentPath=$(pwd)
+  log_info "Git Apps install"
+  println_banner_yellow "Git Apps install                                                     "
+  sudo apt install -y gitk git-flow giggle gitk gitg
+  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+  sudo apt install -yf
+
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
   fi
   cd "$currentPath" || return
@@ -902,6 +921,25 @@ vagrantInstall () {
     read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
   fi
+}
+
+# ############################################################################
+# AsciiDoc packages installation
+asciiDocInstall() {
+  currentPath=$(pwd)
+  log_info "AsciiDoc Apps install"
+  println_banner_yellow "AsciiDoc Apps install                                                     "
+
+  rubyRepo
+  repoUpdate
+  sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
+  sudo gem install bundler asciidoctor-plantuml guard rake
+
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+  cd "$currentPath" || return
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1472,33 +1510,14 @@ installOtherApps () {
         # Git
         read -rp "Do you want to install Git? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          log_info "Install Git"
-          println_blue "Install Git"
-
-          sudo apt install -y gitk git-flow giggle gitk gitg
-          wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
-          sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
-          sudo apt install -yf
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Git Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          gitInstall
         fi
       ;;
       31 )
         # AsciiDoc
         read -rp "Do you want to install AsciiDoc? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          log_info "Install AsciiDoc"
-          println_blue "Install AsciiDoc"
-          rubyRepo
-          repoUpdate
-          sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
-          sudo gem install bundler asciidoctor-plantuml guard rake
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          asciiDocInstall
         fi
       ;;
       32 )
@@ -1564,7 +1583,7 @@ installOptions () {
       1|krnl )
         read -rp "Do you want to do a Kernel update that includes a reboot? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          kernelUpdate
+          kernelUprade
         fi
       ;;
       2|updt )
@@ -1573,7 +1592,7 @@ installOptions () {
       3|upgr )
         read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          kernelUpdate
+          kernelUprade
         fi
       ;;
       4|addrepos)
@@ -1829,7 +1848,7 @@ questionRun () {
   printf "Question before install asking for each type of install type\n"
   read -rp "Do you want to do a Kernel update? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    kernelUpdateAns=1
+    kernelUpradeAns=1
   else
     read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
     if [[ $answer = [Yy1] ]]; then
@@ -1904,6 +1923,26 @@ questionRun () {
   if [[ $answer = [Yy1] ]]; then
     dropboxAns=1
   fi
+  read -rp "Do you want to install Photography Apps? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    photoAns=1
+  fi
+  read -rp "Do you want to install AsciiDoc? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    asciiDocAns=1
+  fi
+  # read -rp "Do you want to install Vagrant? (y/n)" answer
+  # if [[ $answer = [Yy1] ]]; then
+  #   vagrantAns=1
+  # fi
+  read -rp "Do you want to install Development Apps? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    devAppsAns=1
+    read -rp "Do you want to install Git? (y/n)" answer
+    if [[ $answer = [Yy1] ]]; then
+      gitAns=1
+    fi
+  fi
   read -rp "Do you want to install extra Fonts? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     fontsAns=1
@@ -1941,8 +1980,8 @@ questionRun () {
   #   exit 0;
   # fi
 
-  if [[ $kernelUpdateAns = 1 || $startUpdateAns = 1 ]]; then
-    kernelUpdate
+  if [[ $kernelUpradeAns = 1 || $startUpdateAns = 1 ]]; then
+    kernelUprade
   fi
   # start of repositories setup
   if [[ $addRepoAns = 1 ]]; then
@@ -1955,6 +1994,16 @@ questionRun () {
     fi
     if [[ $dropboxAns = 1 ]]; then
       dropboxRepo
+    fi
+    if [[ $devAppsAns = 1 ]]; then
+      devAppsRepos
+      rubyRepo
+    fi
+    if [[ $dropboxAns = 1 ]]; then
+      dropboxRepo
+    fi
+    if [[ $photoAns = 1 ]]; then
+      photoAppsRepo
     fi
     case $desktopEnvironment in
       gnome )
@@ -1988,6 +2037,9 @@ questionRun () {
   if [[ $installAppsAns = 1 ]]; then
     log_info "Start Applications installation"
     println_banner_yellow "Start Applications installation                                    "
+    if [[ $homeDataDirAns = 1 ]]; then
+      dataDirLinksSetup
+    fi
     if [[ $vmwareGuestSetupAns = 1 ]]; then
       vmwareGuestSetup
     fi
@@ -2023,13 +2075,22 @@ questionRun () {
         gnome3Settings
       fi
     fi
+    if [[ $photoAns = 1 ]]; then
+      photoAppsInstall
+    fi
+    if [[ $devAppsAns = 1 ]]; then
+      devAppsInstall
+    fi
+    if [[ $gitAns = 1 ]]; then
+      gitInstall
+    fi
+    if [[ $asciiDocAns = 1 ]]; then
+      asciiDocInstall
+    fi
     if [[ $fontsAns = 1 ]]; then
       fontsInstall
     fi
     installApps
-    if [[ $homeDataDirAns = 1 ]]; then
-      dataDirLinksSetup
-    fi
   fi
 
   # update distro
@@ -2045,11 +2106,16 @@ autoRun () {
   log_info "Start Auto Applications installation"
   println_banner_yellow "Start Auto Applications installation                                 "
   noPrompt=1
-  kernelUpdate
+  kernelUprade
   case $1 in
-    [lw] )
+    [lw|vagranttest] )
       ownCloudClientRepo
       dockerRepo
+      dropboxRepo
+      rubyRepo
+      digikamRepo
+      photoAppsRepo
+      devAppsRepos
       ;;
   esac
   case $desktopEnvironment in
@@ -2069,11 +2135,14 @@ autoRun () {
       gnome3Settings
     ;;
     kde )
-    if [[ $1 = [lw] ]]; then
-      digikamInstall
-    fi
+      kdeBackportsApps
+      if [[ ($1 = [lw]) || ($1 = vagranttest) ]]; then
+        digikamInstall
+      fi
     ;;
   esac
+
+  repoUpgrade
 
   googleChromeInstall
 
@@ -2085,25 +2154,48 @@ autoRun () {
       vmwareGuestSetup
     ;;
     vb )
-      virtualboxGuestSetup
+      # virtualboxGuestSetup
     ;;
-    laptop )
+    l )
+      dataDirLinksSetup
       laptopDisplayDrivers
-      displayLinkInstallApp
+      # displayLinkInstallApp
       ownCloudClientInstallApp
       dockerInstall
-      dataDirLinksSetup
+      dropboxInstall
+      devAppsInstall
+      photoAppsInstall
+      gitInstall
+      asciiDocInstall
+      vagrantInstall
     ;;
-    pc )
+    w )
+      dataDirLinksSetup
       ownCloudClientInstallApp
       dockerInstall
+      dropboxInstall
+      devAppsInstall
+      photoAppsInstall
+      gitInstall
+      asciiDocInstall
+      vagrantInstall
+    ;;
+    vagranttest)
       dataDirLinksSetup
+      ownCloudClientInstallApp
+      dockerInstall
+      dropboxInstall
+      devAppsInstall
+      photoAppsInstall
+      gitInstall
+      asciiDocInstall
     ;;
   esac
 
   # update distro
   repoUpgrade
   # end of run
+  noPrompt=0
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -2243,6 +2335,9 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
     11)
     echo "Selecting itemized installations"
     installOptions
+    ;;
+    99)
+      autorun vagranttest
     ;;
     0|q);;
     *);;
