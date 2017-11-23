@@ -4,6 +4,8 @@ Kubuntu Artful vagrant virtual machine
 
 ## Summary of the machine
 
+Use this machine to test dotfile links
+
 The following has been installed:
 - Full Buildman with all the apps in buildman for a VirtualBox installation, exept the VirtualBox tools from Buildman as it breaks the video.
 
@@ -13,6 +15,8 @@ The following has been installed:
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
 ### Installed
+
+Data dir linked.
 
 List of installations done:
 - Buildman VirtualBox build

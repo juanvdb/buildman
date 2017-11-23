@@ -1,12 +1,11 @@
-# kartful 1
+# kartful 2
 
-Kubuntu Artful vagrant virtual machine
+Kubuntu Artful vagrant virtual machine for dotfiles sort
 
 ## Summary of the machine
 
 The following has been installed:
-- Full Buildman with all the apps in buildman for a VirtualBox installation, exept the VirtualBox tools from Buildman as it breaks the video.
- 
+- full auto buildman for vagrant test
 
 ## Getting Started
 

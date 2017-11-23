@@ -2108,7 +2108,7 @@ autoRun () {
   noPrompt=1
   kernelUprade
   case $1 in
-    [lw|vagranttest] )
+    [lwv] )
       ownCloudClientRepo
       dockerRepo
       dropboxRepo
@@ -2136,7 +2136,7 @@ autoRun () {
     ;;
     kde )
       kdeBackportsApps
-      if [[ ($1 = [lw]) || ($1 = vagranttest) ]]; then
+      if [[ $1 = [lwv] ]]; then
         digikamInstall
       fi
     ;;
@@ -2180,7 +2180,7 @@ autoRun () {
       asciiDocInstall
       vagrantInstall
     ;;
-    vagranttest)
+    v)
       dataDirLinksSetup
       ownCloudClientInstallApp
       dockerInstall
@@ -2315,32 +2315,32 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
     ;;
     # ############################################################################
     6)
-    printf "Vmware install asking questions as to which apps to install for the run"
-    questionRun vm
-    ;;
-    # ############################################################################
+      printf "Vmware install asking questions as to which apps to install for the run"
+      questionRun vm
+      ;;
+      # ############################################################################
     7)
-    printf "Automated install for a VirtualBox virtual machine\n"
-    autoRun vb
-    echo "Operation completed successfully."
+      printf "Automated install for a VirtualBox virtual machine\n"
+      autoRun vb
+      echo "Operation completed successfully."
     ;;
     # ############################################################################
     8)
-    printf "VirtualBox install asking questions as to which apps to install for the run"
-    questionRun vb
+      printf "VirtualBox install asking questions as to which apps to install for the run"
+      questionRun vb
     ;;
     10)
-    installOtherApps
+      installOtherApps
     ;;
-    11)
-    echo "Selecting itemized installations"
-    installOptions
+    11 )
+      echo "Selecting itemized installations"
+      installOptions
     ;;
-    99)
-      autorun vagranttest
+    99 )
+      autoRun v
     ;;
     0|q);;
-    *);;
+    # *);;
   esac
 done
 
