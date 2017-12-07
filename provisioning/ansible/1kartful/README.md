@@ -36,7 +36,9 @@ A step by step series of examples that tell you have to get a development env ru
 Say what the step will be
 
 ```
-Give the example
+# vagrant ssh -c "/srv/share/buildman/buildman.sh"
+# vagrant ssh -c "tail -f buildmandebug.log"
+
 ```
 
 And repeat
@@ -47,9 +49,14 @@ until finished
 
 End with an example of getting some data out of the system or using it for a little demo
 
-## Running the tests
+## Updating
 
-Explain how to run the automated tests for this system
+Update from the command line:
+
+```
+# vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt install -yf"
+
+```
 
 ### Break down into end to end tests
 

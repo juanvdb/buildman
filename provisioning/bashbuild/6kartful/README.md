@@ -1,7 +1,7 @@
-# kartful 1
+# kartful 6 
 
-Kubuntu Artful vagrant virtual machine
-
+Kubuntu Artful vagrant virtual machine final buildman test full auto install before we install xps directories, sdb3 and sdb5
+plus data dir links and dotfiles
 ## Summary of the machine
 
 The following has been installed:
@@ -15,10 +15,9 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installed
 
 List of installations done:
-- Buildman VirtualBox build
-- Development apps
--
-
+- Buildman
+-- full auto install
+-- Gnome/Ununtu Desktop install
 
 ### Prerequisites
 
@@ -36,7 +35,8 @@ A step by step series of examples that tell you have to get a development env ru
 Say what the step will be
 
 ```
-Give the example
+# vagrant ssh -c "/srv/share/buildman/buildman.sh"
+# vagrant ssh -c "tail -f buildmandebug.log"
 ```
 
 And repeat
@@ -56,7 +56,7 @@ Explain how to run the automated tests for this system
 Explain what these tests test and why
 
 ```
-Give an example
+# vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt install -yf"
 ```
 
 ### And coding style tests

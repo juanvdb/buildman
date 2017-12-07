@@ -17,6 +17,10 @@ These instructions will get you a copy of the project up and running on your loc
 ### Installed
 
 Data dir linked.
+Create /data/.dotfiles and git init
+Move .files from $HOME to /data/.dotfiles
+linked all files back to home
+
 
 List of installations done:
 - Buildman VirtualBox build
