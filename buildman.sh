@@ -777,7 +777,7 @@ googleChromeInstall () {
 fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
-	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-aenigma;
+	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-dejavu-udeb ttf-dejavu-mono-udeb ttf-aenigma fonts-firacode;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Fonts installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -1081,6 +1081,7 @@ addRepositories () {
 	log_info "Variety"
 	println_blue "Variety"
 	sudo add-apt-repository -y ppa:peterlevi/ppa
+  # sudo add-apt-repository -y ppa:variety/daily
 	case $desktopEnvironment in
 		"kde" )
       sudo add-apt-repository -y ppa:rikmills/latte-dock
@@ -1186,8 +1187,8 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-9-jdk openjdk-9-jre dnsutils;
-
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils;
+  sudo pip3 install ndg-httpsclient # For variety
 
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
@@ -1354,7 +1355,9 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           log_info "Install Oracle Java"
           println_blue "Install Oracle Java"
+          echo oracle-java9-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
           sudo apt install -y oracle-java9-installer
+          sudo apt-get install oracle-java9-set-default
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "Oracle Java installed. Press ENTER to continue." nullEntry
             printf "%s" "$nullEntry"
