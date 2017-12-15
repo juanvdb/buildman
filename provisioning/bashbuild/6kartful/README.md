@@ -17,7 +17,7 @@ These instructions will get you a copy of the project up and running on your loc
 List of installations done:
 - Buildman
 -- full auto install
--- Gnome/Ununtu Desktop install
+-- Ununtu Desktop install
 
 ### Prerequisites
 

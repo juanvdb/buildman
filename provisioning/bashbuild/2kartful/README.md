@@ -1,18 +1,30 @@
-# kartful 2
+# kartful 2 
 
-Kubuntu Artful vagrant virtual machine for dotfiles sort
+Kubuntu Artful vagrant virtual machine Base with buildman vagrant full install for dotfiles sort
+
+
 
 ## Summary of the machine
 
 The following has been installed:
-- full auto buildman for vagrant test - hidden option 99
+- Full Buildman with all the apps in buildman for a VirtualBox installation, exept the VirtualBox tools from Buildman as it breaks the video.
+
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+### Installed
+
+List of installations done:
+- Buildman
+-- Kernel Update
+-- KDE Updates
+-- Update, disk update and full update
+
 ### Prerequisites
 
-The software you need to install and how to install them:
+buildmanbuildman  The software you need to install and how to install them:
 
 ```
 VirtualBox
@@ -26,7 +38,8 @@ A step by step series of examples that tell you have to get a development env ru
 Say what the step will be
 
 ```
-Give the example
+# vagrant ssh -c "/srv/share/buildman/buildman.sh"
+# vagrant ssh -c "tail -f buildmandebug.log"
 ```
 
 And repeat
@@ -46,7 +59,7 @@ Explain how to run the automated tests for this system
 Explain what these tests test and why
 
 ```
-Give an example
+# vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt install -yf"
 ```
 
 ### And coding style tests

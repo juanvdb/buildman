@@ -1,7 +1,8 @@
-# kartful 6 
+# kartful 7 
 
-Kubuntu Artful vagrant virtual machine final buildman test full auto install before we install xps directories, sdb3 and sdb5
-plus data dir links and dotfiles
+Kubuntu Artful vagrant virtual machine Base with kernel updates, KDE Backports and KDE Updates.
+
+
 ## Summary of the machine
 
 The following has been installed:
@@ -16,8 +17,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 List of installations done:
 - Buildman
--- full auto install
--- Gnome/Ununtu Desktop install
+-- Kernel Update
+-- KDE Updates
+-- Update, disk update and full update
 
 ### Prerequisites
 
