@@ -854,6 +854,7 @@ dockerInstall () {
   fi
 
 	# Create docker group and add juanb
+  sudo groupadd docker
 	sudo usermod -aG docker "$USER"
 	printf "Logout and login for the user to be added to the group"
 	printf "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup"
@@ -1187,7 +1188,9 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils;
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh
+  network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget
+
   sudo pip3 install ndg-httpsclient # For variety
 
   # older packages that will not install on new releases
@@ -1268,10 +1271,17 @@ installOtherApps () {
     case "$choiceApps" in
       1 )
         # VirtualBox Host
-        read -rp "Do you want to install VirtualBox Host? (y/n)" answer
+        if [[ "$noPrompt" -ne 1 ]]; then
+          read -rp "Do you want to install VirtualBox Host? (y/n)" answer
+        else
+          answer="Y"
+        fi
         if [[ $answer = [Yy1] ]]; then
-          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $distReleaseName non-free contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
-          wget -q -O - http://download.virtualbox.org/virtualbox/debian/oracle_vbox_2016.asc | sudo apt-key add -
+          # sudo apt-add-repository "deb http://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" # Place entry in sources.list file
+          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $distReleaseName contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
+          wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+          wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+
           if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
             log_warning "Beta Code or no new repo, downgrade the apt sources."
             println_red "Beta Code or no new repo, downgrade the apt sources."
@@ -1280,7 +1290,7 @@ installOtherApps () {
 
           repoUpdate
           # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
-          sudo apt install virtualbox-5.1 dkms
+          sudo apt install virtualbox-5.2 dkms
           # case $desktopEnvironment in
           #   "kde" )
           #   # sudo apt install -y virtualbox-qt;
@@ -1291,6 +1301,7 @@ installOtherApps () {
             printf "%s" "$nullEntry"
           fi
         fi
+        answer=0
       ;;
       2 )
         # VirtualBox Guest
