@@ -1083,6 +1083,11 @@ addRepositories () {
 	println_blue "Variety"
 	sudo add-apt-repository -y ppa:peterlevi/ppa
   # sudo add-apt-repository -y ppa:variety/daily
+  # Variety
+  log_info "UGet Chrome Wrapper"
+  println_blue "UGet Chrome Wrapper"
+  sudo add-apt-repository -y ppa:slgobinath/uget-chrome-wrapper
+
 	case $desktopEnvironment in
 		"kde" )
       sudo add-apt-repository -y ppa:rikmills/latte-dock
@@ -1175,7 +1180,7 @@ downgradeAptDistro () {
   if [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Repos not available as yet, downgrade the apt sources."
     println_red "Repos not available as yet, downgrade the apt sources."
-    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
@@ -1188,8 +1193,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh
-  network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper
 
   sudo pip3 install ndg-httpsclient # For variety
 
