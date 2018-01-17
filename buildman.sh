@@ -1205,6 +1205,8 @@ installApps () {
 	case $desktopEnvironment in
 		"kde" )
 			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde;
+      kwriteconfig5 --file ~/.config/kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
+      qdbus org.kde.KWin /KWin reconfigure
 			;;
 		"gnome" )
 			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
@@ -1294,7 +1296,8 @@ installOtherApps () {
 
           repoUpdate
           # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
-          sudo apt install virtualbox-5.2 dkms
+          # sudo apt install virtualbox-5.2 dkms
+          sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
           # case $desktopEnvironment in
           #   "kde" )
           #   # sudo apt install -y virtualbox-qt;
