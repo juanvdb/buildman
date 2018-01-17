@@ -43,31 +43,31 @@ echo 'done'
   271  rm .vimrc
   272  touch .vimrc
   273  ll
-  274  rm .vimrc.after 
-  275  touch .vimrc.after 
-  276  rm .gitignore 
-  277  touch .gitignore 
+  274  rm .vimrc.after
+  275  touch .vimrc.after
+  276  rm .gitignore
+  277  touch .gitignore
   278  ll
   279  ln -s .bash_profile /media/juan/Kubuntu2-1710/home/juan/
   280  ln --help
   281  ln -sf .bash_profile /media/juan/Kubuntu2-1710/home/juan/
   282  ln -sf .bash_profile /media/juan/Kubuntu2-1710/home/juan/.bash_profile
   283  cd /media/juan/Kubuntu2-1710/home/juan/
-  284  ln -sf /data/dotfiles/sdb3/.bash_aliases ./.bash_aliases 
-  285  ln -sf /data/dotfiles/sdb3/.bash_history ./.bash_history 
-  286  ln -sf /data/dotfiles/sdb3/.bash_profile ./.bash_profile 
-  287  ln -sf /data/dotfiles/sdb3/.bashrc ./.bashrc 
-  288  ln -sf /data/dotfiles/sdb3/.config ./.config 
-  289  ln -sf /data/dotfiles/sdb3/.gconf ./.gconf 
-  290  ln -sf /data/dotfiles/sdb3/.gitconfig ./.gitconfig 
-  291  ln -sf /data/dotfiles/sdb3/.gitignore ./.gitignore 
-  292  ln -sf /data/dotfiles/sdb3/.kde ./.kde 
-  293  ln -sf /data/dotfiles/sdb3/.pki ./.pki 
+  284  ln -sf /data/dotfiles/sdb3/.bash_aliases ./.bash_aliases
+  285  ln -sf /data/dotfiles/sdb3/.bash_history ./.bash_history
+  286  ln -sf /data/dotfiles/sdb3/.bash_profile ./.bash_profile
+  287  ln -sf /data/dotfiles/sdb3/.bashrc ./.bashrc
+  288  ln -sf /data/dotfiles/sdb3/.config ./.config
+  289  ln -sf /data/dotfiles/sdb3/.gconf ./.gconf
+  290  ln -sf /data/dotfiles/sdb3/.gitconfig ./.gitconfig
+  291  ln -sf /data/dotfiles/sdb3/.gitignore ./.gitignore
+  292  ln -sf /data/dotfiles/sdb3/.kde ./.kde
+  293  ln -sf /data/dotfiles/sdb3/.pki ./.pki
   294  ln -sf /data/dotfiles/sdb3/.ssh ./.ssh
   295  ln -sf /data/dotfiles/sdb3/.vimrc ./.vimrc
-  296  ln -sf /data/dotfiles/sdb3/.vimrc.after ./.vimrc.after 
+  296  ln -sf /data/dotfiles/sdb3/.vimrc.after ./.vimrc.after
   297  history
-  298  ln -sf /data/dotfiles/sdb3/.dropbox* ./.dropbox* 
+  298  ln -sf /data/dotfiles/sdb3/.dropbox* ./.dropbox*
   299  ln -sf /data/dotfiles/sdb3/.dropbox ./.dropbox
   300  ln -sf /data/dotfiles/sdb3/.dropbox-dist/ ./.dropbox-dist
   301  ln -sf /data/dotfiles/sdb3/.eclipse ./.eclipse
@@ -100,4 +100,4 @@ echo 'done'
   328  ll
   329  ln -sf /data/dotfiles/sdb3/.face ./.face
   ln -s ownCloud/dev/git ~/git
-
+  ln -sf /data/dotfiles/sdb3/.netrc ~/.netrc
