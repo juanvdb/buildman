@@ -662,7 +662,18 @@ kdeBackportsRepo () {
   fi
 }
 # ############################################################################
-# kdeBackportsRepo
+# kdeBetaBackportsRepo
+kdeBetaBackportsRepo () {
+  log_info "Add KDE Beta Backports Repo"
+  println_blue "Add KDE Beta Backports Repo                                               "
+  sudo add-apt-repository ppa:kubuntu-ppa/beta
+  # if [[ $betaAns == 1 ]]; then
+  #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  # fi
+}
+# ############################################################################
+# kdeBackportsApps
 kdeBackportsApps () {
   repoUpdate
   repoUpgrade
@@ -1193,7 +1204,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak
 
   sudo pip3 install ndg-httpsclient # For variety
 
@@ -1580,8 +1591,9 @@ installOptions () {
     5    : Install the general applications
     6    : Upgrade Gnome to Gnome on backports
     7    : Upgrade KDE to KDE on backports
-    8    : Install Gnome Desktop from backports
-    9    : Install KDE Desktop from backports
+    8    : Upgrae KDE to Beta KDE on backports
+    10   : Install Gnome Desktop from backports
+    11   : Install KDE Desktop from backports
     17   : Setup for a Vmware guest
     18   : Setup for a VirtualBox guest
     19   : Install Development Apps and IDEs
@@ -1647,7 +1659,7 @@ installOptions () {
           gnome3Settings
         fi
       ;;
-      8 )
+      10 )
         read -rp "Do you want to install Gnome from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           # gnome3BackportsRepo
@@ -1664,10 +1676,16 @@ installOptions () {
           kdeBackportsRepo
         fi
       ;;
-      9 )
+      8 )
+        read -rp "Do you want to add the KDE Beta Backports apt sources? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          kdeBetaBackportsRepo
+        fi
+      ;;
+      11 )
         read -rp "Do you want to install KDE from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          # kdeBackportsRepo
+          # kdeBackportsApps
           kdeBackportsApps
         fi
       ;;
