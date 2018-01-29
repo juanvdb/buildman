@@ -420,7 +420,7 @@ dataDirLinksSetup () {
     ".cxoffice"
     ".atom"
     ".nylas"
-    "scripts"
+    "bin"
     )
 
     # DATAHOMEDIRECTORIES=(".local"
@@ -788,7 +788,8 @@ googleChromeInstall () {
 fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
-	sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip ttf-fifthhorseman-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer	ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-dejavu-udeb ttf-dejavu-mono-udeb ttf-aenigma fonts-firacode;
+  sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip fonts-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-aenigma fonts-firacode;
+	# sudo apt install -y  ttf-dejavu-udeb ttf-dejavu-mono-udeb;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Fonts installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -925,7 +926,7 @@ vagrantInstall () {
   log_info "Vagrant Applications Install"
   println_blue "Vagrant Applications Install                                               "
 
-  sudo apt install -y libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby;
+  sudo apt install -y libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev;
   sudo apt install -yf ifupdown numad radvd auditd systemtap zfsutils pm-utils;
   vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
   sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
@@ -945,7 +946,7 @@ asciiDocInstall() {
   rubyRepo
   repoUpdate
   sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
-  sudo gem install bundler asciidoctor-plantuml guard rake
+  sudo gem install bundler guard rake asciidoctor-diagram asciidoctor-plantuml
 
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
