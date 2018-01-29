@@ -33,7 +33,7 @@ sudo apt clean
 sudo apt autoremove
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
-sudo rm -f /EMPTY
+
 # Shutdown the machine
 sudo shutdown -h now
 
@@ -51,3 +51,7 @@ Edit Vagrant file and add
   end
 
 vagrant up
+
+sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
+sudo flatpak update
+sudo snap refresh
