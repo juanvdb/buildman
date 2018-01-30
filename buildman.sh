@@ -1216,7 +1216,7 @@ installApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde kcron;
       kwriteconfig5 --file ~/.config/kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
       qdbus org.kde.KWin /KWin reconfigure
 			;;
