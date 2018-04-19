@@ -553,8 +553,8 @@ dataDirLinksSetup () {
 ownCloudClientRepo () {
   log_info "ownCloud Repo"
   println_blue "ownCloud Repo                                                        "
-    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-client-$stableReleaseName.list"
-  wget -q -O - "http://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
+    sudo sh -c "echo 'deb http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-$stableReleaseName.list"
+  wget -q -O - "https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
 # ############################################################################
 # ownCloud Client Application Install
@@ -1205,7 +1205,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
 
   sudo pip3 install ndg-httpsclient # For variety
 
