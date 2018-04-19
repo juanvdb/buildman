@@ -2,3 +2,4 @@ buildman_error.log
 buildmanerror.log
 buildman_debug.log
 buildmandebug.log
+provisioning/ansible/playbooks/*
