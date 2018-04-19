@@ -551,11 +551,14 @@ dataDirLinksSetup () {
 # ############################################################################
 # ownCloud Client repository
 ownCloudClientRepo () {
-  log_info "ownCloud Repo"
-  println_blue "ownCloud Repo                                                        "
-    sudo sh -c "echo 'deb http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-$stableReleaseName.list"
-  wget -q -O - "https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
+log_info "ownCloud Repo" println_blue "ownCloud Repo                                                        "
+sudo sh -c "echo 'deb
+http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >>
+/etc/apt/sources.list.d/owncloud-$stableReleaseName.list" wget -q -O -
+"https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" |
+sudo apt-key add -
 }
+
 # ############################################################################
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {

@@ -1,4 +1,6 @@
-# kartful 7
+# kartful X
+
+2018-01-31
 
 Kubuntu Artful vagrant virtual machine.
 Base with kernel updates, KDE Backports and KDE Updates.
@@ -14,7 +16,7 @@ List of installations done:
 ### Installing
 
 ```
-# vagrant ssh -c "/srv/share/buildman/buildman.sh"
+# vagrant ssh -c "/srv/share/build/buildman.sh"
 # vagrant ssh -c "tail -f buildmandebug.log"
 ```
 Final update and upgrade
