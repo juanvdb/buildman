@@ -29,11 +29,11 @@
 # ==> set global Variables
 
 # Ready for Artful
-betaReleaseName="bionic"
-betaReleaseVer="18.04"
-stableReleaseName="artful"
-stableReleaseVer="17.10"
-previousStableReleaseName="zesty"
+betaReleaseName="cosmic"
+betaReleaseVer="18.10"
+stableReleaseName="bionic"
+stableReleaseVer="18.04"
+previousStableReleaseName="artful"
 noCurrentReleaseRepo=1
 # Settings for Zesty
 # betaReleaseName="artful"
@@ -1195,8 +1195,10 @@ downgradeAptDistro () {
   if [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Repos not available as yet, downgrade the apt sources."
     println_red "Repos not available as yet, downgrade the apt sources."
-    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-bionic.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-bionic.list" "$distReleaseName" "$stableReleaseName"
     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
