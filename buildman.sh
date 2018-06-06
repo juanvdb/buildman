@@ -644,11 +644,12 @@ displayLinkInstallApp () {
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd "$HOME/tmp" || return
-	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=1057
+	wget -r -t 10 --output-document=displaylink.zip
+  http://assets.displaylink.com/live/downloads/software/f1123_DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu%204.2.zip?AWSAccessKeyId=AKIAJHGQWPVXWHEDJUEA&Expires=1528282163&Signature=6iFtTPg8UqHiaow%2F4Kjqk9jD1M0%3D
   mkdir -p "$HOME/tmp/displaylink"
   unzip displaylink.zip -d "$HOME/tmp/displaylink/"
-  chmod +x "$HOME/tmp/displaylink/displaylink-driver-1.3.52.run"
-  sudo "$HOME/tmp/displaylink/displaylink-driver-1.3.52.run"
+  chmod +x "$HOME/tmp/displaylink/displaylink-driver-4.2.run"
+  sudo "$HOME/tmp/displaylink/displaylink-driver-4.2.run"
 
   sudo chown -R "$USER":"$USER" "$HOME/tmp/displaylink/"
   cd "$currentPath" || return
@@ -1131,7 +1132,8 @@ addRepositories () {
   # doublecmd
   log_info "doublecmd"
   println_blue "doublecmd"
-  wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add - 
+  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
+  wget -q https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O- | sudo apt-key add -
   if [[ $betaAns != 1 ]]; then
     sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /' > /etc/apt/sources.list.d/Alexx2000.list"
   else
@@ -1265,14 +1267,14 @@ downgradeAptDistro () {
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the apt sources."
     println_red "Beta Code, downgrade the apt sources."
-    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
   if [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Repos not available as yet, downgrade the apt sources."
     println_red "Repos not available as yet, downgrade the apt sources."
-    changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     #changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1298,7 +1300,7 @@ installApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde kcron;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt5 doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde kcron;
       kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
       qdbus org.kde.KWin /KWin reconfigure
 			;;
