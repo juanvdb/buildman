@@ -28,31 +28,25 @@
 # ############################################################################
 # ==> set global Variables
 
-# Ready for Artful
+# Ready for Bionic
 betaReleaseName="cosmic"
 betaReleaseVer="18.10"
 stableReleaseName="bionic"
 stableReleaseVer="18.04"
 previousStableReleaseName="artful"
 noCurrentReleaseRepo=1
-# Settings for Zesty
-# betaReleaseName="artful"
-# betaReleaseVer="17.10"
-# stableReleaseName="zesty"
-# stableReleaseVer="17.04"
-# previousStableReleaseName="yakkety"
 
-ltsReleaseName="xenial"
+ltsReleaseName="bionic"
 desktopEnvironment=""
 kernelRelease=$(uname -r)
 distReleaseVer=$(lsb_release -sr)
 distReleaseName=$(lsb_release -sc)
 noPrompt=0
-debugLogFile="buildmandebug.log"
-errorLogFile="buildmanerror.log"
+debugLogFile="buildman.log"
+errorLogFile="buildman_error.log"
 
-mkdir -p ~/tmp
-sudo chown "$USER":"$USER" ~/tmp
+mkdir -p "$HOME/tmp"
+sudo chown "$USER":"$USER" "$HOME/tmp"
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                          Debug                                           O
@@ -333,8 +327,8 @@ vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
   println_blue "VMware setup with Open VM Tools and NFS file share to host           "
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
-  mkdir -p ~/hostfiles/home
-  mkdir -p ~/hostfiles/data
+  mkdir -p "$HOME/hostfiles/home"
+  mkdir -p "$HOME/hostfiles/data"
   LINE1="172.22.8.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="172.22.8.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
@@ -343,7 +337,7 @@ vmwareGuestSetup () {
   sudo sed -i -e "\|$LINE3|h; \${x;s|$LINE3||;{g;t};a\\" -e "$LINE3" -e "}" /etc/fstab
   LINE4="172.22.1.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" ~/hostfiles
+  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "VMware Guest Applications installed. Press ENTER to continue." nullEntry
@@ -358,13 +352,13 @@ virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
-  mkdir -p ~/hostfiles/home
-  mkdir -p ~/hostfiles/data
+  mkdir -p "$HOME/hostfiles/home"
+  mkdir -p "$HOME/hostfiles/data"
   LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
   LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" ~/hostfiles
+  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
@@ -376,6 +370,81 @@ virtualboxGuestSetup () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                     Home directory setup                                 O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+# ############################################################################
+# Create directories on data disk for testing
+createTestDataDirs () {
+  log_info "XPS Data Dir links"
+  currentPath=$(pwd)
+  cd "$HOME" || exit
+
+  if [ -d "/data" ]; then
+    sourceDataDirectory="data"
+    sudo chown -R "$USER:$USER" /data
+    if [ -d "$HOME/$sourceDataDirectory" ]; then
+      if [ -L "$HOME/$sourceDataDirectory" ]; then
+        # It is a symlink!
+        log_info "Keep symlink $HOME/data"
+        # log_debug "Remove symlink $HOME/data"
+        # rm "$HOME/$sourceDataDirectory"
+        # ln -s "/data" "$HOME/$sourceDataDirectory"
+      else
+        # It's a directory!
+        log_debug "Remove directory $HOME/data"
+        rm -R "${HOME/$sourceDataDirectory:?}"
+        ln -s "/data" "$HOME/$sourceDataDirectory"
+      fi
+    else
+      log_debug "Link directory $HOME/data"
+      ln -s "/data" "$HOME/$sourceDataDirectory"
+    fi
+
+    linkDataDirectories=(
+    "Documents"
+    "Downloads"
+    "Music"
+    "Pictures"
+    "Videos"
+    "ownCloud"
+    "VirtualMachines"
+    "Dropbox"
+    "GoogleDrive"
+    "SpiderOak Hive"
+    "Software"
+    ".mozilla"
+    ".thunderbird"
+    ".cxoffice"
+    ".atom"
+    ".nylas"
+    "scripts"
+    "dev"
+    )
+
+    log_info "linkDataDirectories ${linkDataDirectories[*]}"
+
+    for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
+      log_debug "Link directory = $sourceLinkDirectory"
+      mkdir -p "/data/$sourceLinkDirectory"
+    done
+
+    # Link DataDirectories from sub dirs to specified home dir
+    linkDataDirectories=(
+    "vagrant/vagrant" "vagrant"
+    "vagrant/.vagrant.d" ".vagrant.d"
+    )
+
+    log_info "linkDataDirectories ${linkDataDirectories[*]}"
+    count=$(((${#linkDataDirectories[@]}+1)/2))
+
+    for (( i = 0; i <= count; i+=2 )); do
+      sourceLinkDirectory=${linkDataDirectories[i]}
+      targetLinkDirectory=${linkDataDirectories[i+1]}
+      # remove after testing
+      mkdir -p "/data/$sourceLinkDirectory"
+      # up to here
+    done
+  fi
+}
 
 # ############################################################################
 # Links directories to data disk if exists
@@ -390,9 +459,10 @@ dataDirLinksSetup () {
     if [ -d "$HOME/$sourceDataDirectory" ]; then
       if [ -L "$HOME/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_debug "Remove symlink $HOME/data"
-        rm "$HOME/$sourceDataDirectory"
-        ln -s "/data" "$HOME/$sourceDataDirectory"
+        log_info "Keep symlink $HOME/data"
+        # log_warning "Remove symlink $HOME/data"
+        # rm "$HOME/$sourceDataDirectory"
+        # ln -s "/data" "$HOME/$sourceDataDirectory"
       else
         # It's a directory!
         log_debug "Remove directory $HOME/data"
@@ -423,17 +493,12 @@ dataDirLinksSetup () {
     "bin"
     )
 
-    # DATAHOMEDIRECTORIES=(".local"
-    # ".config"
-    #
-    # )
-
     log_info "linkDataDirectories ${linkDataDirectories[*]}"
 
     for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
       log_debug "Link directory = $sourceLinkDirectory"
       # remove after testing
-      mkdir -p "/data/$sourceLinkDirectory"
+      # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       if [ -e "$HOME/$sourceLinkDirectory" ]; then
         if [ -d "$HOME/$sourceLinkDirectory" ]; then
@@ -524,14 +589,14 @@ dataDirLinksSetup () {
     if [[ "$noPrompt" -ne 1 ]]; then
       read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
       if [[ $qfirefox = [Yy1] ]]; then
-        sourceLinkDirectory=~/.mozilla
+        sourceLinkDirectory="$HOME/.mozilla"
         if [ -d "$sourceLinkDirectory" ]; then
           rm -R "$sourceLinkDirectory"
           ln -s /data/.mozilla "$sourceLinkDirectory"
         fi
       fi
     else
-      sourceLinkDirectory=~/.mozilla
+      sourceLinkDirectory"$HOME/.mozilla"
       if [ -d "$sourceLinkDirectory" ]; then
         rm -R "$sourceLinkDirectory"
         ln -s /data/.mozilla "$sourceLinkDirectory"
@@ -551,12 +616,9 @@ dataDirLinksSetup () {
 # ############################################################################
 # ownCloud Client repository
 ownCloudClientRepo () {
-log_info "ownCloud Repo" println_blue "ownCloud Repo                                                        "
-sudo sh -c "echo 'deb
-http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >>
-/etc/apt/sources.list.d/owncloud-$stableReleaseName.list" wget -q -O -
-"https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" |
-sudo apt-key add -
+  log_info "ownCloud Repo" println_blue "ownCloud Repo                                                        "
+  sudo sh -c "echo 'deb http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-$stableReleaseName.list"
+  wget -q -O - "https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
 }
 
 # ############################################################################
@@ -581,14 +643,14 @@ displayLinkInstallApp () {
   println_blue "display Link Install App                                             "
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
-  cd ~/tmp || return
+  cd "$HOME/tmp" || return
 	wget -r -t 10 --output-document=displaylink.zip http://www.displaylink.com/downloads/file?id=1057
-  mkdir -p ~/tmp/displaylink
-  unzip displaylink.zip -d ~/tmp/displaylink/
-  chmod +x ~/tmp/displaylink/displaylink-driver-1.3.52.run
-  sudo ~/tmp/displaylink/displaylink-driver-1.3.52.run
+  mkdir -p "$HOME/tmp/displaylink"
+  unzip displaylink.zip -d "$HOME/tmp/displaylink/"
+  chmod +x "$HOME/tmp/displaylink/displaylink-driver-1.3.52.run"
+  sudo "$HOME/tmp/displaylink/displaylink-driver-1.3.52.run"
 
-  sudo chown -R "$USER":"$USER" ~/tmp/displaylink/
+  sudo chown -R "$USER":"$USER" "$HOME/tmp/displaylink/"
   cd "$currentPath" || return
   sudo apt install -yf
   if [[ "$noPrompt" -ne 1 ]]; then
@@ -663,13 +725,20 @@ kdeBackportsRepo () {
     log_warning "Beta Code, downgrade the KDE Backport apt sources."
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "KDE Backports Repos not available as yet, downgrade the apt sources."
+    println_red "KDE Backports Repos not available as yet, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
+  fi
+
 }
 # ############################################################################
 # kdeBetaBackportsRepo
 kdeBetaBackportsRepo () {
   log_info "Add KDE Beta Backports Repo"
   println_blue "Add KDE Beta Backports Repo                                               "
-  sudo add-apt-repository ppa:kubuntu-ppa/beta
+  sudo add-apt-repository -y ppa:kubuntu-ppa/beta
   # if [[ $betaAns == 1 ]]; then
   #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
   #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
@@ -722,18 +791,18 @@ devAppsInstall() {
   # printf "Please check ddd-3 version"
   # sudo apt build-dep ddd
   # sudo apt install -y libmotif-dev
-  # wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz
-  # wget -P ~/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig
-  # tar xvf ~/tmp/ddd-3.3.9.tar.gz
-  # cd ~/tmp/ddd-3.3.12 || return
+  # wget -P "$HOME/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz"
+  # wget -P "$HOME/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig"
+  # tar xvf "$HOME/tmp/ddd-3.3.9.tar.gz"
+  # cd "$HOME/tmp/ddd-3.3.12" || return
   # ./configure
   # make
   # sudo make install
 
   repoUpdate
   sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
-  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+  wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo apt install -yf;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
@@ -752,8 +821,8 @@ gitInstall() {
   log_info "Git Apps install"
   println_banner_yellow "Git Apps install                                                     "
   sudo apt install -y gitk git-flow giggle gitk gitg
-  wget -P ~/tmp https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  sudo dpkg -i --force-depends ~/tmp/gitkraken-amd64.deb
+  wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo apt install -yf
 
   if [[ "$noPrompt" -ne 1 ]]; then
@@ -776,8 +845,8 @@ googleChromeInstall () {
 	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 	#sudo sh -c 'echo "deb - http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 	#sudo apt install google-chrome-stable
-	wget -P ~/tmp https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	sudo dpkg -i --force-depends ~/tmp/google-chrome-stable_current_amd64.deb
+	wget -P "$HOME/tmp" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+	sudo dpkg -i --force-depends "$HOME/tmp/google-chrome-stable_current_amd64.deb"
   sudo apt install -yf
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Google Chrome installed. Press ENTER to continue." nullEntry
@@ -1010,8 +1079,8 @@ photoAppsInstall () {
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
-  wget -P ~/tmp https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
-  cd ~/tmp || return
+  wget -P "$HOME/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
+  cd "$HOME/tmp" || return
   python3 install.py
 
   sudo apt install -y rawtherapee graphicsmagick imagemagick darktable ufraw;
@@ -1062,7 +1131,13 @@ addRepositories () {
   # doublecmd
   log_info "doublecmd"
   println_blue "doublecmd"
-	sudo apt-add-repository -y ppa:alexx2000/doublecmd
+  wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add - 
+  if [[ $betaAns != 1 ]]; then
+    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /' > /etc/apt/sources.list.d/Alexx2000.list"
+  else
+    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /' > /etc/apt/sources.list.d/Alexx2000.list"
+  fi
+	# sudo apt-add-repository -y ppa:alexx2000/doublecmd
 	# WebUpd8 and SyncWall
 	log_info "WebUpd8: SyncWall, ?WoeUSB?"
 	println_blue "WebUpd8: SyncWall, WoeUSB"
@@ -1078,8 +1153,10 @@ addRepositories () {
 	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
 	log_info "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
 	println_blue "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
-  sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
-	wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+  wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+  sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu zesty-getdeb apps" >> /etc/apt/sources.list.d/getdeb-zesty.list'
+  # Downgrade getdeb as there are no current repos
+  # sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
 	# Grub Customizer
 	log_info "Grub Customizer"
 	println_blue "Grub Customizer"
@@ -1196,9 +1273,9 @@ downgradeAptDistro () {
     log_warning "Repos not available as yet, downgrade the apt sources."
     println_red "Repos not available as yet, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-bionic.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-bionic.list" "$distReleaseName" "$stableReleaseName"
+    #changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
 }
@@ -1210,7 +1287,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-9-jdk openjdk-9-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
 
   sudo pip3 install ndg-httpsclient # For variety
 
@@ -1222,7 +1299,7 @@ installApps () {
 	case $desktopEnvironment in
 		"kde" )
 			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde kcron;
-      kwriteconfig5 --file ~/.config/kwinrc --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
+      kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
       qdbus org.kde.KWin /KWin reconfigure
 			;;
 		"gnome" )
@@ -1362,6 +1439,8 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           log_info "Imaging Editing Applications"
           println_blue "Imaging Editing Applications"
+          sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+          repoUpdate
           sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
           if [[ "$noPrompt" -ne 1 ]]; then
             read -rp "Image Editing Applications installed. Press ENTER to continue." nullEntry
@@ -1604,6 +1683,7 @@ installOptions () {
     18   : Setup for a VirtualBox guest
     19   : Install Development Apps and IDEs
     20   : Setup the home directories to link to the data disk directories
+    21   : Create test data directories on data drive
 
     30   : Set options for an Ubuntu Beta install with PPA references to a previous version
 
@@ -1714,6 +1794,12 @@ installOptions () {
           dataDirLinksSetup
         fi
       ;;
+      21 )
+        read -rp "Do you want to create the test home directories on the data drive? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          createTestDataDirs
+        fi
+      ;;
       19 )
         devAppsRepos
         repoUpdate
@@ -1761,9 +1847,9 @@ installOptions () {
               b)
                 stableReleaseName="bionic"
                 stableReleaseVer="18.04"
-                betaReleaseName="c"
+                betaReleaseName="cosmic"
                 betaReleaseVer="18.10"
-                previousStableReleaseName="zesty"
+                previousStableReleaseName="artful"
                 validchoice=1
               ;;
               a )
@@ -2226,6 +2312,7 @@ autoRun () {
       vagrantInstall
     ;;
     v)
+      createTestDataDirs
       dataDirLinksSetup
       ownCloudClientInstallApp
       dockerInstall
