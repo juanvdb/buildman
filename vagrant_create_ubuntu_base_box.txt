@@ -1,0 +1,62 @@
+#! /bin/bash
+
+sudo apt -y install linux-headers-$(uname -r) build-essential dkms vim openssh-server ssh net-tools
+
+cd /media/vagrant/vboxcd
+sudo ./VBoxLinuxAdditions.run
+
+sudo vim /etc/hosts
+  172.28.128.1 vbhost
+  192.168.56.1 vbhost56
+
+mkdir -p /home/vagrant/.ssh
+wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
+# Ensure we have the correct permissions set
+chmod 0700 /home/vagrant/.ssh
+chmod 0600 /home/vagrant/.ssh/authorized_keys
+chown -R vagrant /home/vagrant/.ssh
+
+sudo visudo
+  vagrant ALL=(ALL) NOPASSWD:ALL
+
+sudo vi /etc/ssh/sshd_config
+  Ensure the following is set:
+    Port 22
+    PubKeyAuthentication yes
+    AuthorizedKeysFile %h/.ssh/authorized_keys
+    PermitEmptyPasswords no
+sudo service ssh restart
+
+sudo apt update
+sudo apt -y upgrade
+sudo apt clean
+sudo apt autoremove
+
+sudo dd if=/dev/zero of=/EMPTY bs=1M
+sudo rm -f /EMPTY
+
+# Disable lock screen and power display off
+
+# Shutdown the machine
+sudo shutdown -h now
+
+ssh juan@vbhost
+
+vagrant package --base <VitualBox VM Name>
+
+vagrant box remove {boxname}
+
+vagrant box add {boxname} package.box
+
+vagrant init {boxname}
+
+Edit Vagrant file and add
+  config.vm.provider "virtualbox" do |v|
+    v.gui = true
+  end
+
+vagrant up
+
+sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
+sudo flatpak update
+sudo snap refresh
