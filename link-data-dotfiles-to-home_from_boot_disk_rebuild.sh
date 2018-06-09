@@ -26,7 +26,6 @@ dotFilesList=(
 "eclipse"
 ".eclipse"
 ".face"
-".face.icon"
 ".gconf"
 ".gem"
 ".gitconfig"
@@ -191,19 +190,19 @@ checkParameters() {
 }
 
 linkDataDir() {
-    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
-      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
+    if [ -d "$HOMEDIR/data" ]; then
+      if [ -L "$HOMEDIR/data" ]; then
         # It is a symlink!
         log_info "Keep symlink $HOMEDIR/data"
       else
         # It's a directory!
         log_warning "Remove directory $HOMEDIR/data"
-        rm -R "${HOMEDIR/$sourceDataDirectory:?}"
-        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+        rm -R "${HOMEDIR/data:?}"
+        ln -s "/data" "$HOMEDIR/data"
       fi
     else
       log_info "Link directory $HOMEDIR/data"
-      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+      ln -s "/data" "$HOMEDIR/data"
     fi
 }
 
@@ -331,12 +330,12 @@ linkGrubDefault() {
         # It's a file!
         log_warning "Remove file $grubFile"
         sudo rm "${grubFile:?}"
-        ln -s "$ETCDIR/default/grub" "$grubFile"
+        sudo ln -s "$ETCDIR/default/grub" "$grubFile"
         log_info "Create symlink grub file ln -s $ETCDIR/default/grub $grubFile"
       fi
     else
       log_info "Link grub file = $grubFile"
-      ln -s "$ETCDIR/default/grub" "$grubFile"
+      sudo ln -s "$ETCDIR/default/grub" "$grubFile"
       log_info "Create symlink grub file ln -s $ETCDIR/default/grub $grubFile"
     fi
   fi

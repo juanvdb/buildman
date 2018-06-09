@@ -34,7 +34,7 @@ betaReleaseVer="18.10"
 stableReleaseName="bionic"
 stableReleaseVer="18.04"
 previousStableReleaseName="artful"
-noCurrentReleaseRepo=1
+noCurrentReleaseRepo=0
 
 ltsReleaseName="bionic"
 desktopEnvironment=""
@@ -71,7 +71,7 @@ scriptDebugToFile="on"
 if [[ $scriptDebugToFile == "on" ]]; then
   if [[ -e $debugLogFile ]]; then
     # >$debugLogFile
-    echo -en "\n \033[1;31m##############################################################\n\033[0m
+    echo -en "\n \033[1;31m   ##############################################################\n\033[0m
     \n
     \033[1;31m START OF NEW RUN\n\033[0m
     \n
@@ -644,8 +644,7 @@ displayLinkInstallApp () {
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd "$HOME/tmp" || return
-	wget -r -t 10 --output-document=displaylink.zip
-  http://assets.displaylink.com/live/downloads/software/f1123_DisplayLink%20USB%20Graphics%20Software%20for%20Ubuntu%204.2.zip?AWSAccessKeyId=AKIAJHGQWPVXWHEDJUEA&Expires=1528282163&Signature=6iFtTPg8UqHiaow%2F4Kjqk9jD1M0%3D
+	wget -r -t 10 --output-document=displaylink.zip  http://www.displaylink.com/downloads/file?id=1123
   mkdir -p "$HOME/tmp/displaylink"
   unzip displaylink.zip -d "$HOME/tmp/displaylink/"
   chmod +x "$HOME/tmp/displaylink/displaylink-driver-4.2.run"
@@ -760,26 +759,11 @@ kdeBackportsApps () {
 # ############################################################################
 # Development packages repositories
 devAppsRepos () {
-  # Brackets
-  log_info "Brackets Repo"
-  println_blue "Brackets Repo"
-  sudo add-apt-repository -y ppa:webupd8team/brackets
   # Atom
   log_info "Atom Repo"
   println_blue "Atom Repo"
   sudo add-apt-repository -y ppa:webupd8team/atom
   # LightTable
-  log_info "LightTable"
-  println_blue "LightTable"
-  sudo add-apt-repository -y ppa:dr-akulavich/lighttable
-  log_warning "Change Lighttable to $ltsReleaseName"
-  println_blue "Change Lighttable to $ltsReleaseName"
-  changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
-  if [[ $betaAns == 1 ]]; then
-    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-
-  fi
-
 }
 # ############################################################################
 # Development packages installation
@@ -801,9 +785,10 @@ devAppsInstall() {
   # sudo make install
 
   repoUpdate
-  sudo apt install -y bashdb abs-guide atom eclipse bashdb ddd idle3 idle3-tools brackets shellcheck eric eric-api-files lighttable-installer gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
-  wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
+  sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
+  # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
+  bashdbInstall
   sudo apt install -yf;
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
@@ -831,6 +816,58 @@ gitInstall() {
     printf "%s" "$nullEntry"
   fi
   cd "$currentPath" || return
+}
+
+# ############################################################################
+# Bashdb packages installation
+bashdbInstall() {
+  currentPath=$(pwd)
+  log_info "Bash Debugger 4.4-0.94 install"
+  # println_banner_yellow "Bash Debugger 4.4-0.94 install                                       "
+  wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
+  tar -xvfz bashdb-4.4-0.94.tar.gz
+  cd bashdb-4.4-0.94.tar.gz || die "Path bashdb-4.4-0.94.tar.gz does not exist"
+  ./configure
+  make
+  sudo make install
+
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+  cd "$currentPath" || return
+}
+
+# ############################################################################
+# LightTable packages installation
+# Very old, suggest install from lightable.com
+lightTableInstall() {
+  currentPath=$(pwd)
+  log_info "LightTable"
+  # println_blue "LightTable"
+  sudo add-apt-repository -y ppa:dr-akulavich/lighttable
+  log_warning "Change Lighttable to $ltsReleaseName"
+  println_blue "Change Lighttable to $ltsReleaseName"
+  changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+  sudo apt install lighttable-installer
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+  cd "$currentPath" || return
+}
+
+# ############################################################################
+# Brackets DevApp installation
+bracketsInstall() {
+  # Brackets
+  println_blue "Brackets"
+  log_info "Brackets"
+  sudo add-apt-repository -y ppa:webupd8team/brackets
+  if [[ $betaAns == 1 ]]; then
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+  sudo apt install brackets
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -861,8 +898,8 @@ googleChromeInstall () {
 fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
-  sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip fonts-dkg-handwriting ttf-isabella ttf-summersby ttf-liberation ttf-sjfonts ttf-mscorefonts-installer ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-freefont ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-aenigma fonts-firacode;
-	# sudo apt install -y  ttf-dejavu-udeb ttf-dejavu-mono-udeb;
+  sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip fonts-dkg-handwriting ttf-isabella ttf-summersby ttf-sjfonts ttf-mscorefonts-installer ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-aenigma fonts-firacode;
+	# sudo apt install -y  ttf-dejavu-udeb ttf-dejavu-mono-udeb ttf-liberation ttf-freefont;
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Fonts installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -886,11 +923,11 @@ dockerRepo () {
       sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
     else
       log_warning "Add Docker to repository, Previous Stable Release, no beta release available."
-      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
+      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
     fi
   else
     log_warning "Add Docker to repository, Change Docker to Previous Stable Release, no current release available."
-    sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable' >> /etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
+    sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
   fi
 }
 # ############################################################################
@@ -962,22 +999,25 @@ dockerInstall () {
 dropboxRepo () {
   log_info "Dropbox Repo setup"
   println_blue "Dropbox Repo setup"
-  sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
+  # sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
   # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
   # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
   # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
   # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
-  sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
-  log_warning "Change Dropbox to $ltsReleaseName"
-  println_blue "Change Dropbox to $ltsReleaseName"
-  changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
+  # sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
+  # log_warning "Change Dropbox to $ltsReleaseName"
+  # println_blue "Change Dropbox to $ltsReleaseName"
+  # changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
 }
 # #########################################################################
 # Install Dropbox Application
 dropboxInstall () {
   log_info "Dropbox Install"
   println_blue "Dropbox Install"
-  sudo apt install -y dropbox
+  #sudo apt install -y dropbox
+  rm -R "${HOMEDIR/.dropbox-dist/*:?}"
+  cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+  ~/.dropbox-dist/dropboxd
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Dropbox installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -1003,6 +1043,7 @@ vagrantInstall () {
   sudo apt install -yf ifupdown numad radvd auditd systemtap zfsutils pm-utils;
   vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
   sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
+  vagrant plugin install vagrant-vbguest
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -1181,6 +1222,9 @@ addRepositories () {
   log_info "UGet Chrome Wrapper"
   println_blue "UGet Chrome Wrapper"
   sudo add-apt-repository -y ppa:slgobinath/uget-chrome-wrapper
+  log_info "UNetbootin"
+  println_blue "UNetbootin"
+  sudo add-apt-repository ppa:gezakovacs/ppa
 
 	case $desktopEnvironment in
 		"kde" )
@@ -1291,16 +1335,25 @@ installApps () {
   sudo apt install -yf
 	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
 
+  # For variety
+  sudo apt install python3-pip
   sudo pip3 install ndg-httpsclient # For variety
 
+  # Older packages...
+  # Still active, but replaced with other apps
+  # unetbootin = etcher
+
+
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64 inkscape
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt5 doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins ufw-kde kcron;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt5 doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins kcron;
+      # Old packages:
+      # ufw-kde
       kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
       qdbus org.kde.KWin /KWin reconfigure
 			;;
@@ -1546,8 +1599,8 @@ installOtherApps () {
       # Dropbox
         read -rp "Do you want to install Dropbox? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          dropboxRepo
-          repoUpdate
+          # dropboxRepo
+          # repoUpdate
           dropboxInstall
         fi
       ;;
@@ -1773,7 +1826,6 @@ installOptions () {
       11 )
         read -rp "Do you want to install KDE from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          # kdeBackportsApps
           kdeBackportsApps
         fi
       ;;
@@ -2104,7 +2156,6 @@ questionRun () {
   if [[ $answer = [Yy1] ]]; then
     installAppsAns=1
   fi
-
   # end of questions
   # debug "You want to stop"
   # printf "######## STOP ##########"
@@ -2113,10 +2164,14 @@ questionRun () {
   #   exit 0;
   # fi
 
-  if [[ $kernelUpradeAns = 1 || $startUpdateAns = 1 ]]; then
+  # start of repositories setup
+  if [[ $kernelUpradeAns = 1 ]]; then
     kernelUprade
   fi
-  # start of repositories setup
+  if [[ $startUpdateAns = 1 ]]; then
+    repoUpdate
+    repoUpgrade
+  fi
   if [[ $addRepoAns = 1 ]]; then
     #statements
     if [[ $ownCloudClientAns = 1 ]]; then
@@ -2126,14 +2181,12 @@ questionRun () {
       dockerRepo
     fi
     if [[ $dropboxAns = 1 ]]; then
-      dropboxRepo
+      log_info "No Dropbox Repo"
+      # dropboxRepo
     fi
     if [[ $devAppsAns = 1 ]]; then
       devAppsRepos
       rubyRepo
-    fi
-    if [[ $dropboxAns = 1 ]]; then
-      dropboxRepo
     fi
     if [[ $photoAns = 1 ]]; then
       photoAppsRepo
@@ -2232,6 +2285,136 @@ questionRun () {
   fi
 }
 
+# ############################################################################
+# Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
+questionRunStep () {
+  printf "Question each step before installing\n"
+  read -rp "Do you want to do a Kernel update? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    kernelUprade
+  fi
+  read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    dataDirLinksSetup
+  fi
+  read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    addRepositories
+  fi
+  read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    downgradeAptDistro
+  fi
+  read -rp "Do you want to do a Repo Update? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    repoUpdate
+  fi
+  read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    repoUpgrade
+  fi
+  read -rp "Do you want to do install the applications? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    installApps
+  fi
+  read -rp "Do you want to install ownCloudClient? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    ownCloudClientRepo
+    ownCloudClientInstallApp
+  fi
+  read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    laptopDisplayDrivers
+  fi
+  read -rp "Do you want to install DisplayLink? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    displayLinkInstallApp
+  fi
+  read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    vmwareGuestSetup
+  fi
+  read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    virtualboxGuestSetup
+  fi
+  case $desktopEnvironment in
+    gnome)
+      read -rp "Do you want to install Gnome Backports? (y/n)" answer
+      if [[ $answer = [Yy1] ]]; then
+        gnome3BackportsRepo
+        gnome3BackportsApps
+      fi
+      read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+      if [[ $answer = [Yy1] ]]; then
+        gnome3Settings
+      fi
+      ;;
+    kde)
+      read -rp "Do you want to install KDE Backports? (y/n)" answer
+      if [[ $answer = [Yy1] ]]; then
+        kdeBackportsRepo
+        kdeBackportsApps
+      fi
+      ;;
+  esac
+  read -rp "Do you want to install Google Chrome? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    googleChromeInstall
+  fi
+  read -rp "Do you want to install DigiKam? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    kdeBackportsRepo
+    digikamInstall
+  fi
+  read -rp "Do you want to install Docker? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    dockerRepo
+    dockerInstall
+  fi
+  read -rp "Do you want to install Dropbox? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    # dropboxRepo
+    dropboxInstall
+  fi
+  read -rp "Do you want to install Photography Apps? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    photoAppsRepo
+    photoAppsInstall
+  fi
+  read -rp "Do you want to install AsciiDoc? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    asciiDocInstall
+  fi
+  # read -rp "Do you want to install Vagrant? (y/n)" answer
+  # if [[ $answer = [Yy1] ]]; then
+  #   vagrantAns=1
+  # fi
+  read -rp "Do you want to install Development Apps? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    read -rp "Do you want to install Git? (y/n)" answer
+    if [[ $answer = [Yy1] ]]; then
+      gitInstall
+    fi
+    devAppsRepos
+    rubyRepo
+    devAppsInstall
+  fi
+  read -rp "Do you want to install extra Fonts? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    fontsInstall
+  fi
+  read -rp "Do you want to do a Repo Update? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    repoUpdate
+  fi
+  read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    repoUpgrade
+  fi
+}
+
+
 
 # ############################################################################
 # Autorun function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
@@ -2244,7 +2427,7 @@ autoRun () {
     [lwv] )
       ownCloudClientRepo
       dockerRepo
-      dropboxRepo
+      # dropboxRepo
       rubyRepo
       digikamRepo
       photoAppsRepo
@@ -2405,6 +2588,8 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
   7    : Install VirtualBox VM with all packages without asking
   8    : Install VirtualBox VM with all packages asking for groups of packages
 
+  9    : Install going through the list step by step
+
   10   : Install other individual applications
   11   : Install individual repos and items
 
@@ -2462,6 +2647,9 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
     8)
       printf "VirtualBox install asking questions as to which apps to install for the run"
       questionRun vb
+    ;;
+    9)
+      questionRunStep
     ;;
     10)
       installOtherApps
