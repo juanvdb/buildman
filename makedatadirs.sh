@@ -221,7 +221,6 @@ if [ -d "/data" ]; then
 
   for (( i = 0; i <= count; i+=2 )); do
     sourceLinkDirectory=${linkDataDirectories[i]}
-    targetLinkDirectory=${linkDataDirectories[i+1]}
     # remove after testing
     mkdir -p "/data/$sourceLinkDirectory"
     # up to here
@@ -230,14 +229,11 @@ if [ -d "/data" ]; then
 
   # For Firefox only
   if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
+    read -rp "Do you want to create a Firefox dir? (y/n): " qfirefox
+    sourceLinkDirectory=".mozilla"
     if [[ $qfirefox = [Yy1] ]]; then
-      sourceLinkDirectory=~/.mozilla
       mkdir -p "/data/$sourceLinkDirectory"
     fi
-  else
-    sourceLinkDirectory=~/.mozilla
-    mkdir -p "/data/$sourceLinkDirectory"
   fi
 fi
 
