@@ -30,8 +30,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "kbionic"
 
   #config.vm.network "private_network", ip: "172.28.128.202", virtualbox__intnet: true
-  config.vm.network "private_network", ip: "172.28.128.202", auto_config: false
-  # config.vm.network "private_network", type: "dhcp", auto_config: false
+  # config.vm.network "private_network", ip: "172.28.128.202"
+  config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provider :virtualbox do |vb|
     vb.gui = true
 #    vb.customize ["modifyvm", :id, "--groups", "vagrant"]
