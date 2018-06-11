@@ -347,6 +347,48 @@ vmwareGuestSetup () {
 }
 
 # ############################################################################
+# VirtualBox Host Setup
+virtualboxHostSetup () {
+  log_info "VirtualBox Host setup"
+  println_blue "VirtualBox Host setup                                                         "
+
+  wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+  wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+
+  sudo sh -c "echo 'deb https://download.virtualbox.org/virtualbox/debian $distReleaseName contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
+
+
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, downgrade the apt sources."
+    println_red "Beta Code or no new repo, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+
+  repoUpdate
+  # VirtualBox 5.1
+  # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  #VirtualBox 5.2
+  sudo apt install virtualbox-5.2 virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  # case $desktopEnvironment in
+  #   "kde" )
+  #   # sudo apt install -y virtualbox-qt;
+  #   ;;
+  # esac
+
+
+  # LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  # sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
+  # LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  # sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
+  # sudo mount -a
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "VirtualBox Host Applications installed. Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+
+}
+
+# ############################################################################
 # VirtualBox Guest Setup, vmtools, nfs directories to host
 virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
@@ -879,18 +921,14 @@ bracketsInstall() {
 googleChromeInstall () {
   log_info "Google Chrome Install"
   println_blue "Google Chrome Install"
-  	# sudo apt install -y libgconf2-4 libnss3-1d libxss1; # libnss3-1d is no longer in yakkety
-	#wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-	#sudo sh -c 'echo "deb - http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-	#sudo apt install google-chrome-stable
-	wget -P "$HOME/tmp" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-	sudo dpkg -i --force-depends "$HOME/tmp/google-chrome-stable_current_amd64.deb"
-  sudo apt install -yf
+  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
+  repoUpdate
+  sudo apt-get install google-chrome-stable
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Google Chrome installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
   fi
-
 }
 
 # ############################################################################
@@ -922,7 +960,7 @@ dockerRepo () {
       log_warning "Add Docker to repository."
       sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
     else
-      log_warning "Add Docker to repository, Previous Stable Release, no beta release available."
+      log_info "Add Docker to repository"
       sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
     fi
   else
@@ -995,10 +1033,10 @@ dockerInstall () {
 }
 
 # #########################################################################
-# Install Dropbox repository
-dropboxRepo () {
-  log_info "Dropbox Repo setup"
-  println_blue "Dropbox Repo setup"
+# Install Dropbox Application
+dropboxInstall () {
+  log_info "Dropbox Install"
+  println_blue "Dropbox Install"
   # sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
   # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
   # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
@@ -1008,12 +1046,6 @@ dropboxRepo () {
   # log_warning "Change Dropbox to $ltsReleaseName"
   # println_blue "Change Dropbox to $ltsReleaseName"
   # changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
-}
-# #########################################################################
-# Install Dropbox Application
-dropboxInstall () {
-  log_info "Dropbox Install"
-  println_blue "Dropbox Install"
   #sudo apt install -y dropbox
   rm -R "${HOMEDIR/.dropbox-dist/*:?}"
   cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
@@ -1025,11 +1057,10 @@ dropboxInstall () {
 }
 
 # ############################################################################
-# Vagrant Install, vmtools, nfs directories to host
+# Ruby Repository directories to host
 rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
-
   sudo apt-add-repository -y ppa:brightbox/ruby-ng
 }
 
@@ -1038,12 +1069,12 @@ rubyRepo () {
 vagrantInstall () {
   log_info "Vagrant Applications Install"
   println_blue "Vagrant Applications Install                                               "
+  rubyRepo
+  sudo add-apt-repository ppa:tiagohillebrandt/vagrant
 
-  sudo apt install -y libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev;
-  sudo apt install -yf ifupdown numad radvd auditd systemtap zfsutils pm-utils;
+  sudo apt install -yf libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
   vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
   sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
-  vagrant plugin install vagrant-vbguest
   if [[ "$noPrompt" -ne 1 ]]; then
     read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
     printf "%s" "$nullEntry"
@@ -1333,7 +1364,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender google-chrome-stable caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser google-chrome-stable y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget uget-chrome-wrapper flatpak woeusb
 
   # For variety
   sudo apt install python3-pip
@@ -1415,6 +1446,7 @@ installOtherApps () {
     30   : Git
     31   : AsciiDoc
     32   : Vagrant
+
     0|q  : Quit this program
 
     "
@@ -1599,8 +1631,6 @@ installOtherApps () {
       # Dropbox
         read -rp "Do you want to install Dropbox? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          # dropboxRepo
-          # repoUpdate
           dropboxInstall
         fi
       ;;
@@ -1696,8 +1726,6 @@ installOtherApps () {
         # Vagrant
         read -rp "Do you want to install Vagrant? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          rubyRepo
-          repoUpdate
           vagrantInstall
         fi
       ;;
@@ -2116,10 +2144,10 @@ questionRun () {
   if [[ $answer = [Yy1] ]]; then
     asciiDocAns=1
   fi
-  # read -rp "Do you want to install Vagrant? (y/n)" answer
-  # if [[ $answer = [Yy1] ]]; then
-  #   vagrantAns=1
-  # fi
+  read -rp "Do you want to install Vagrant? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    vagrantAns=1
+  fi
   read -rp "Do you want to install Development Apps? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     devAppsAns=1
@@ -2179,10 +2207,6 @@ questionRun () {
     fi
     if [[ $dockerAns = 1 ]]; then
       dockerRepo
-    fi
-    if [[ $dropboxAns = 1 ]]; then
-      log_info "No Dropbox Repo"
-      # dropboxRepo
     fi
     if [[ $devAppsAns = 1 ]]; then
       devAppsRepos
@@ -2275,6 +2299,9 @@ questionRun () {
     fi
     if [[ $fontsAns = 1 ]]; then
       fontsInstall
+    fi
+    if [[ $vagrantAns = 1 ]]; then
+      vagrantInstall
     fi
     installApps
   fi
@@ -2374,7 +2401,6 @@ questionRunStep () {
   fi
   read -rp "Do you want to install Dropbox? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    # dropboxRepo
     dropboxInstall
   fi
   read -rp "Do you want to install Photography Apps? (y/n)" answer
@@ -2386,10 +2412,10 @@ questionRunStep () {
   if [[ $answer = [Yy1] ]]; then
     asciiDocInstall
   fi
-  # read -rp "Do you want to install Vagrant? (y/n)" answer
-  # if [[ $answer = [Yy1] ]]; then
-  #   vagrantAns=1
-  # fi
+  read -rp "Do you want to install Vagrant? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    vagrantInstall
+  fi
   read -rp "Do you want to install Development Apps? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     read -rp "Do you want to install Git? (y/n)" answer
@@ -2427,7 +2453,6 @@ autoRun () {
     [lwv] )
       ownCloudClientRepo
       dockerRepo
-      # dropboxRepo
       rubyRepo
       digikamRepo
       photoAppsRepo
