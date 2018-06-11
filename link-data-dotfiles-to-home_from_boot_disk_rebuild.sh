@@ -40,7 +40,6 @@ dotFilesList=(
 ".netrc"
 ".oc"
 ".pki"
-"Release.key"
 ".remmina"
 "snap"
 ".ssh"
