@@ -57,6 +57,25 @@ function runSelection() {
   esac
 }
 
+function stepRun() {
+  local stepSelection=()
+  read -rp "Do you want to run one? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    stepSelection+=("one")
+  fi
+  read -rp "Do you want to run two? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    stepSelection+=("two")
+  fi
+  read -rp "Do you want to run three? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    stepSelection+=("three")
+  fi
+  for i in "${stepSelection[@]}"; do
+    runSelection "$i"
+  done
+}
+
 function optionInstall() {
   echo "Running from optionInstall functiom"
 }
@@ -90,5 +109,6 @@ for i in "${lastSteps[@]}"; do
   pressEnterToContinue "Finished lastSteps"
 done
 
+stepRun
 
 exit 0
