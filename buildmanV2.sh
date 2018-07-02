@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DateVer 2018/06/12
-# Buildman V1.9
+# Buildman V2.0
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -70,6 +70,7 @@ export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 INTERACTIVE_MODE="on"
 scriptDebugToStdout="off"
 scriptDebugToFile="on"
+switchPrintln="on"
 if [[ $scriptDebugToFile == "on" ]]; then
   if [[ -e $debugLogFile ]]; then
     # >$debugLogFile
@@ -124,6 +125,11 @@ then
     declare -r LOG_SUCCESS_COLOR=""
     declare -r LOG_WARN_COLOR=""
     declare -r LOG_INFO_COLOR=""
+    declare -r BANNER_BLUE=""
+    declare -r BANNER_YELLOW=""
+    declare -r LOG_BANNER_GREY=""
+    declare -r LOG_BANNER_BLUE=""
+    declare -r LOG_BANNER_YELLOW=""
 else
     declare -r LOG_DEFAULT_COLOR="\033[0m"
     declare -r LOG_ERROR_COLOR="\033[1;31m"
@@ -133,6 +139,9 @@ else
     declare -r LOG_DEBUG_COLOR="\033[1;34m"
     declare -r BANNER_BLUE="\e[7;44;39m"
     declare -r BANNER_YELLOW="\e[0;103;30m"
+    declare -r LOG_BANNER_GREY="\e[7;40;97m"
+    declare -r LOG_BANNER_BLUE="\e[7;107;34m"
+    declare -r LOG_BANNER_YELLOW="\e[0;103;30m"
 fi
 
 log() {
@@ -160,6 +169,10 @@ log_success()   { log "$1" "SUCCESS" "${LOG_SUCCESS_COLOR}"; }
 log_error()     { log "$1" "ERROR" "${LOG_ERROR_COLOR}"; }
 log_warning()   { log "$1" "WARNING" "${LOG_WARN_COLOR}"; }
 log_debug()     { log "$1" "DEBUG" "${LOG_DEBUG_COLOR}"; }
+log_info_banner()     { log "$1" "" "$LOG_BANNER_GREY"; }
+log_debug_banner ()   { log "$1" "DEBUG" "${LOG_BANNER_BLUE}"; }
+log_warning_banner () { log "$1" "WARNING" "${LOG_BANNER_YELLOW}"; }
+
 
 println() {
   local println_text="$1"
@@ -167,8 +180,9 @@ println() {
 
   # Default level to "info"
   [[ -z ${println_color} ]] && println_color="${LOG_INFO_COLOR}";
-
-  echo -e "${println_color} ${println_text} ${LOG_DEFAULT_COLOR}";
+  if [[ $switchPrintln == "on" ]]; then
+    echo -e "${println_color} ${println_text} ${LOG_DEFAULT_COLOR}";
+  fi
   return 0;
 }
 
@@ -188,6 +202,13 @@ println_blue()            { println "$1" "${LOG_DEBUG_COLOR}"; }
 # Die process to exit because of a failure
 die() { echo "$*" >&2; exit 1; }
 
+pressEnterToContinue() {
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "$1 Press ENTER to continue." nullEntry
+    printf "%s" "$nullEntry"
+  fi
+}
+
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                   Check system                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -196,7 +217,7 @@ die() { echo "$*" >&2; exit 1; }
 # Desktop environment check and return desktop environment
 desktopEnvironmentCheck () {
   log_info "Desktop environment check"
-  # println_banner_yellow "Desktop environment check                                            "
+  println_banner_yellow "Desktop environment check                                            "
   # another way for ssh terminals
 
   if [[ -z "$XDG_CURRENT_DESKTOP" ]];
@@ -253,10 +274,7 @@ repoUpdate () {
   log_info "Repo Update"
   println_banner_yellow "Repo Update                                                          "
   sudo apt update -y;
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Repo Update Finished."
 }
 
 # ############################################################################
@@ -271,10 +289,7 @@ repoUpgrade () {
   sudo apt dist-upgrade -y;
   sudo apt autoremove -y;
   # sudo apt clean -y
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Repo Upgrade finished."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -293,19 +308,12 @@ kernelUprade () {
   # fi
   read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
   if [[ $answer = [Yy1] ]]; then
-    sudo apt update -y;
-    if [[ "$noPrompt" -ne 1 ]]; then
-      read -rp "Press ENTER to continue." nullEntry
-      printf "%s" "$nullEntry"
-    fi
+    repoUpdate
     sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
     sudo apt upgrade -y;
     sudo apt full-upgrade -y;
     sudo apt dist-upgrade -y;
-    if [[ "$noPrompt" -ne 1 ]]; then
-      read -rp "Kernel Upgrades installed. Press ENTER to continue." nullEntry
-      printf "%s" "$nullEntry"
-    fi
+    pressEnterToContinue "Kernel Upgrades installed."
     # if [[ "$noPrompt" -ne 1 ]]; then
     #   read -rp "Do you want to reboot (y/n)?" answer
     #   if [[ $answer = [Yy1] ]]; then
@@ -341,11 +349,6 @@ vmwareGuestSetup () {
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
   sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "VMware Guest Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
-
 }
 
 # ############################################################################
@@ -383,7 +386,7 @@ virtualboxHostInstall () {
   # LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   # sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
   # sudo mount -a
-
+  pressEnterToContinue "VirtualBox Host installed."
 }
 
 # ############################################################################
@@ -400,11 +403,7 @@ virtualboxGuestSetup () {
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
   sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
-
+  pressEnterToContinue "VirtaulBox Guest Additions installed."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -484,6 +483,7 @@ createTestDataDirs () {
       # up to here
     done
   fi
+  pressEnterToContinue "Test Data Directories created."
 }
 
 # ############################################################################
@@ -624,7 +624,6 @@ dataDirLinksSetup () {
       fi
     done
 
-
     # For Firefox only
     if [[ "$noPrompt" -ne 1 ]]; then
       read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
@@ -643,10 +642,8 @@ dataDirLinksSetup () {
       fi
     fi
   fi
-
-
-
   cd "$currentPath" || exit
+  pressEnterToContinue "Data Directories linked to /data."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -654,24 +651,16 @@ dataDirLinksSetup () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
-# ownCloud Client repository
-ownCloudClientRepo () {
-  log_info "ownCloud Repo" println_blue "ownCloud Repo                                                        "
-  sudo sh -c "echo 'deb http://download.owncloud.org/download/repositories/production/Ubuntu_'$stableReleaseVer'/ /' >> /etc/apt/sources.list.d/owncloud-$stableReleaseName.list"
-  wget -q -O - "https://download.owncloud.org/download/repositories/production/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
-}
-
-# ############################################################################
 # ownCloud Client Application Install
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
   println_blue "ownCloud Install                                                     "
-	sudo apt install -y owncloud-client
-  sudo apt install -yf
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "ownCloud Client installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
+  echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseVer.list"
+  repoUpdate
+  sudo apt install -yf owncloud-client
+  # sudo apt install -yf
+  pressEnterToContinue "ownCloud Client installed."
 }
 
 # ############################################################################
@@ -693,10 +682,7 @@ displayLinkInstallApp () {
   sudo chown -R "$USER":"$USER" "$HOME/tmp/displaylink/"
   cd "$currentPath" || return
   sudo apt install -yf
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Displaylink Application installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "DisplayLink installed."
 }
 
 # ############################################################################
@@ -707,10 +693,7 @@ laptopDisplayDrivers () {
   #get intel key for PPA that gets added during install
   wget --no-check-certificate https://download.01.org/gfx/RPM-GPG-GROUP-KEY-ilg -O - | sudo apt-key add -
   sudo apt install -y nvidia-current intel-graphics-update-tool
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Laptop Display drivers installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "NVidia and Intel Display drivers installed."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -718,33 +701,21 @@ laptopDisplayDrivers () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
-# gnome3BackportsRepo
-gnome3BackportsRepo () {
-  log_info "Add Gnome3 Backports Repo apt sources"
-  println_blue "Add Gnome3 Backports Repo apt sources                                "
-	sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
-	sudo add-apt-repository -y ppa:gnome3-team/gnome3
+# gnome3Backports
+gnome3Backports () {
+  log_info "Install Gnome3 Backports"
+  println_blue "Install Gnome3 Backports                                                      "
+  sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
+  sudo add-apt-repository -y ppa:gnome3-team/gnome3
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the Gnome3 Backport apt sources."
     # changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" xenial
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-
   fi
-
-}
-# ############################################################################
-# gnome3BackportsApps
-gnome3BackportsApps () {
-  log_info "Install Gnome3 Backports Apps"
-  println_blue "Install Gnome3 Backports Apps                                        "
-	repoUpdate
+  repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Gnome Shell installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
-
+  pressEnterToContinue "Gnome3 Backports and Gnome installed."
 }
 # ############################################################################
 # gnome3Settings
@@ -752,14 +723,27 @@ gnome3Settings () {
   log_info "Change Gnome3 settings"
   println_blue "Change Gnome3 settings                                               "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
+  pressEnterToContinue "Gnome Settings changed."
 }
 
 # ############################################################################
-# kdeBackportsRepo
-kdeBackportsRepo () {
-  log_info "Add KDE Backports Repo"
-  println_blue "Add KDE Backports Repo                                               "
-	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
+# kdeBetaBackportsRepo
+kdeBetaBackportsRepo () {
+  log_info "Add KDE Beta Backports Repo"
+  println_blue "Add KDE Beta Backports Repo                                               "
+  sudo add-apt-repository -y ppa:kubuntu-ppa/beta
+  # if [[ $betaAns == 1 ]]; then
+  #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  # fi
+  pressEnterToContinue "KDE BETA Backports enabled."
+}
+# ############################################################################
+# kdeBackportsApps
+kdeBackportsApps () {
+  log_info "Add KDE Backports"
+  println_blue "Add KDE Backports                                                             "
+  sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, downgrade the KDE Backport apt sources."
@@ -771,25 +755,10 @@ kdeBackportsRepo () {
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
   fi
-
-}
-# ############################################################################
-# kdeBetaBackportsRepo
-kdeBetaBackportsRepo () {
-  log_info "Add KDE Beta Backports Repo"
-  println_blue "Add KDE Beta Backports Repo                                               "
-  sudo add-apt-repository -y ppa:kubuntu-ppa/beta
-  # if [[ $betaAns == 1 ]]; then
-  #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
-  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  # fi
-}
-# ############################################################################
-# kdeBackportsApps
-kdeBackportsApps () {
   repoUpdate
   repoUpgrade
   sudo apt full-upgrade -y;
+  pressEnterToContinue "KDE Backports enabled and KDE updated."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -797,22 +766,12 @@ kdeBackportsApps () {
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
-# Development packages repositories
-devAppsRepos () {
-  # Atom
-  log_info "Atom Repo"
-  println_blue "Atom Repo"
-  sudo add-apt-repository -y ppa:webupd8team/atom
-  # LightTable
-}
-# ############################################################################
 # Development packages installation
 devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
-
-  repoUpdate
+  sudo add-apt-repository -y ppa:webupd8team/atom
   sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
   # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
@@ -821,11 +780,8 @@ devAppsInstall() {
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
   # sudo snap install --classic --beta atom
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Development Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
   cd "$currentPath" || return
+  pressEnterToContinue "Development Applications installed."
 }
 
 # ############################################################################
@@ -838,12 +794,8 @@ gitInstall() {
   wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo apt install -yf
-
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
   cd "$currentPath" || return
+  pressEnterToContinue "Git Tooling installed."
 }
 
 # ############################################################################
@@ -851,7 +803,7 @@ gitInstall() {
 bashdbInstall() {
   currentPath=$(pwd)
   log_info "Bash Debugger 4.4-0.94 install"
-  # println_banner_yellow "Bash Debugger 4.4-0.94 install                                       "
+  println_banner_yellow "Bash Debugger 4.4-0.94 install                                       "
   wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
   tar -xvfz bashdb-4.4-0.94.tar.gz
   cd bashdb-4.4-0.94.tar.gz || die "Path bashdb-4.4-0.94.tar.gz does not exist"
@@ -870,12 +822,8 @@ bashdbInstall() {
   # ./configure
   # make
   # sudo make install
-
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
   cd "$currentPath" || return
+  pressEnterToContinue "Bashdb installed."
 }
 
 # ############################################################################
@@ -884,17 +832,14 @@ bashdbInstall() {
 lightTableInstall() {
   currentPath=$(pwd)
   log_info "LightTable"
-  # println_blue "LightTable"
+  println_blue "LightTable"
   sudo add-apt-repository -y ppa:dr-akulavich/lighttable
   log_warning "Change Lighttable to $ltsReleaseName"
-  println_blue "Change Lighttable to $ltsReleaseName"
+  println_yellow "Change Lighttable to $ltsReleaseName"
   changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
   sudo apt install lighttable-installer
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Git Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
   cd "$currentPath" || return
+  pressEnterToContinue "LightTable installed."
 }
 
 # ############################################################################
@@ -908,6 +853,7 @@ bracketsInstall() {
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
   sudo apt install brackets
+  pressEnterToContinue "Brackets installed."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -926,10 +872,7 @@ googleChromeInstall () {
   sudo add-apt-repository -y ppa:slgobinath/uget-chrome-wrapper
   # repoUpdate
   sudo apt-get install google-chrome-stable uget-chrome-wrapper
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Google Chrome installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Google Chrome installed."
 }
 
 # ############################################################################
@@ -939,36 +882,43 @@ fontsInstall () {
   println_blue "Install Fonts"
   sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip fonts-dkg-handwriting ttf-isabella ttf-summersby ttf-sjfonts ttf-mscorefonts-installer ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-aenigma fonts-firacode;
 	# sudo apt install -y  ttf-dejavu-udeb ttf-dejavu-mono-udeb ttf-liberation ttf-freefont;
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Fonts installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
-
+  pressEnterToContinue "Fonts installed."
 }
 
 # ############################################################################
-# Configure DockerRepo
-dockerRepo () {
-  log_info "Configure Docker Repo"
-  println_blue "Configure Docker Repo"
-	# Setup App repository
-  sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-	# sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-	# sudo sh -c "echo 'deb https://apt.dockerproject.org/repo ubuntu-$stableReleaseName main' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
-  if [[ ! "$noCurrentReleaseRepo" = 1  ]]; then
-    if [[ ! "$distReleaseName" =~ ^($betaReleaseName)$ ]]; then
-      log_warning "Add Docker to repository."
-      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
-    else
-      log_info "Add Docker to repository"
-      sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable' >> /etc/apt/sources.list.d/docker-$distReleaseName.list"
-    fi
-  else
-    log_warning "Add Docker to repository, Change Docker to Previous Stable Release, no current release available."
-    sudo sh -c "echo 'deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable' >> /etc/apt/sources.list.d/docker-$stableReleaseName.list"
-  fi
+# Install inSync for GoogleDrive
+insyncInstall () {
+  log_info "Install inSync for GoogleDrive"
+  println_blue "Install inSync for GoogleDrive"
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
+  echo "deb http://apt.insynchq.com/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseVer.list"
+  repoUpdate
+  sudo apt-get install insync
+  pressEnterToContinue "inSync for GoogleDrive installed."
 }
+
+# ############################################################################
+# Install Doublecmd
+doublecmdInstall () {
+  log_info "Install Doublecmd"
+  println_blue "Install Doublecmd"
+  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
+  if [[ $betaAns != 1 ]]; then
+    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
+  else
+    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$stableReleaseVer/Release.key" -O- | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$stableReleaseName.list"
+  fi
+  # sudo apt-add-repository -y ppa:alexx2000/doublecmd
+
+  repoUpdate
+  sudo apt-get install doublecmd-qt5 doublecmd-help-en doublecmd-plugins
+  pressEnterToContinue "Doublecmd installed."
+}
+
+
+
 # ############################################################################
 # Configure DockerInstall
 dockerInstall () {
@@ -977,17 +927,23 @@ dockerInstall () {
   println_blue "Configure Docker Install"
 	# Purge the old repo
 	sudo apt purge -y lxc-docker docker-engine docker.io
+  sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  if [[ $betaAns != 1 ]] || [[ $noCurrentReleaseRepo != 1 ]]; then
+    log_warning "Add Docker to repository."
+    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$distReleaseName.list"
+  else
+    log_info "Add Docker to repository with stable release $stableReleaseName"
+    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$stableReleaseName.list"
+  fi
+  repoUpdate;
 	# Make sure that apt is pulling from the right repository
 	# sudo apt-cache policy docker-engine
 	sudo apt-cache policy docker-ce
 
-	# Add the additional kernel packages
+	# Add the additional kernel packages and install Docker
 	# sudo apt install -y "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
-	sudo apt install -y linux-image-extra-virtual
-
-	# Install Docker
-	# sudo apt install -y docker-engine
-	sudo apt install -y docker-ce
+	sudo apt install -y linux-image-extra-virtual docker-ce
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
@@ -1017,20 +973,14 @@ dockerInstall () {
 	# Create docker group and add juanb
   sudo groupadd docker
 	sudo usermod -aG docker "$USER"
-	printf "Logout and login for the user to be added to the group"
-	printf "Go to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup"
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+	printf "Logout and login for the user to be added to the group\n"
+	printf "\nGo to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n\n"
+  pressEnterToContinue
 
   sudo ufw allow 2375/tcp
   cd "$currentPath" || return
   sudo apt install -yf
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Docker installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Docker installed."
 }
 
 # #########################################################################
@@ -1050,11 +1000,13 @@ dropboxInstall () {
   #sudo apt install -y dropbox
   rm -R "${HOMEDIR/.dropbox-dist/*:?}"
   cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
-  ~/.dropbox-dist/dropboxd
   if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Dropbox installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
+    read -rp "Do you want to start the Dropbox initiation and setup? (Y/N)" answer
+    if [[ $answer = [Yy1] ]]; then
+      ~/.dropbox-dist/dropboxd
+    fi
   fi
+  pressEnterToContinue "Dropbox installed."
 }
 
 # ############################################################################
@@ -1063,6 +1015,7 @@ rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
   sudo apt-add-repository -y ppa:brightbox/ruby-ng
+  pressEnterToContinue "Ruby Repo enabled."
 }
 
 # ############################################################################
@@ -1076,10 +1029,7 @@ vagrantInstall () {
   sudo apt install -yf libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
   vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
   sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Vagrant Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Vagrant installed."
 }
 
 # ############################################################################
@@ -1093,61 +1043,209 @@ asciiDocInstall() {
   repoUpdate
   sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
   sudo gem install bundler guard rake asciidoctor-diagram asciidoctor-plantuml
-
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "AsciiDoc Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
   cd "$currentPath" || return
+  pressEnterToContinue "AsciiDoc Applications installed."
 }
+
+# ############################################################################
+# Syncwall, WoeUSB packages installation
+webupd8AppsInstall() {
+  log_info "WebUpd8: SyncWall, ?WoeUSB? Applictions Install"
+  println_blue "WebUpd8: SyncWall, WoeUSB Applications Install"
+  sudo add-apt-repository -y ppa:nilarimogard/webupd8
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Repos not available as yet, downgrade WebUpd8 apt sources."
+    println_red "Repos not available as yet, downgrade WebUpd8 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
+  if [[ "$noPrompt" -ne 1 ]]; then
+    read -rp "Do you want to install Syncwall? (Y/N)" answer
+    if [[ $answer = [Yy1] ]]; then
+      sudo apt install syncwall
+    fi
+    read -rp "Do you want to install WoeUSB? (Y/N)" answer
+    if [[ $answer = [Yy1] ]]; then
+      sudo apt install woeusb
+    fi
+  else
+    sudo apt install syncwall woeusb
+  fi
+}
+
+# ############################################################################
+# Y-PPA Manager packages installation
+yppaManagerInstall() {
+  log_info "Y-PPA Manager Appliction Install"
+  println_blue "Y-PPA Manager Application Install"
+  sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Distribution, downgrade Y-PPA Manager apt sources."
+    println_red "Beta Distribution, downgrade Y-PPA Manager apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+  sudo apt install y-ppa-manager
+}
+
+# ############################################################################
+# Oracle Java  Installer from WebUpd8 packages installation
+oracleJava8Install() {
+  log_info "Oracle Java8 Installer from WebUpd8"
+  println_blue "Oracle Java8 Installer from WebUpd8"
+  sudo add-apt-repository -y ppa:webupd8team/java
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Repos not available as yet, downgrade Oracle Java8 Installer apt sources."
+    println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
+  sudo apt install oracle-java8-installer
+}
+
+
+oracleJava10Install() {
+  log_info "Oracle Java10 Installer from WebUpd8"
+  println_blue "Oracle Java10 Installer from WebUpd8"
+  sudo add-apt-repository ppa:linuxuprising/java
+  # if [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Repos not available as yet, downgrade Oracle Java10 Installer apt sources."
+  #   # println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/linuxuprising-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  # fi
+  sudo apt install oracle-java10-installer
+  sudo apt install oracle-java10-set-default
+}
+
+# ############################################################################
+# Grub Customizer packages installation
+grubCustomizerInstall() {
+  log_info "Grub Customizer Appliction Install"
+  println_blue "Grub Customizer Application Install"
+  sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Distribution, downgrade Grub Customizer apt sources."
+    println_red "Beta Distribution, downgrade Grub Customizer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+  sudo apt install grub-customizer
+}
+
+# ############################################################################
+# Variety packages installation
+varietyInstall() {
+  log_info "Variety Appliction Install"
+  println_blue "Variety Application Install"
+  sudo add-apt-repository -y ppa:peterlevi/ppa
+  # sudo add-apt-repository -y ppa:variety/daily
+
+  sudo apt install variety variety-slideshow python3-pip
+  sudo pip3 install ndg-httpsclient # For variety
+}
+
+# ############################################################################
+# Boot Repair packages installation
+bootRepairInstall() {
+  log_info "Boot Repair Appliction Install"
+  println_blue "Boot Repair Application Install"
+  sudo add-apt-repository -y ppa:yannubuntu/boot-repair
+
+  sudo apt install boot-repair
+}
+
+# ############################################################################
+# UNetbootin packages installation
+unetbootinInstall() {
+  log_info "UNetbootin Appliction Install"
+  println_blue "UNetbootin Application Install"
+  sudo add-apt-repository ppa:gezakovacs/ppa
+  sudo apt install unetbootin
+}
+
+# ############################################################################
+# getdeb repository installation
+getdebRepository() {
+  log_info "getdeb Repository Install"
+  println_blue "getdeb Repository Install"
+  log_warning "getdeb Repository is set at Zesty"
+  println_yellow "getdeb Repository is set at Zesty"
+  # GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
+  log_info "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+  println_blue "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+  wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+  sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu zesty-getdeb apps" >> /etc/apt/sources.list.d/getdeb-zesty.list'
+  # Downgrade getdeb as there are no current repos
+  # sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
+}
+
+# ############################################################################
+# Latte Dock for KDE packages installation
+latteDockInstall() {
+  log_info "Latte Dock for KDE Install"
+  println_blue "Latte Dock for KDE Install"
+  sudo add-apt-repository -y ppa:rikmills/latte-dock
+  sudo apt install latte-dock
+  kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
+  qdbus org.kde.KWin /KWin reconfigure
+}
+
+# ############################################################################
+# Ambiance and Radiance Theme Color packages installation
+ambianceRadianceThemeInstall() {
+  log_info "Ambiance and Radiance Theme Color Install"
+  println_blue "Ambiance and Radiance Theme Color Install"
+  sudo add-apt-repository -y ppa:ravefinity-project/ppa
+  if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
+      log_warning "Change ravefinity-project to $previousStableReleaseName"
+      println_yellow "Change ravefinity-project to $previousStableReleaseName"
+      changeAptSource "/etc/apt/sources.list.d/ravefinity-project-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
+}
+
+# ############################################################################
+# Inkscape packages installation
+inkscapeInstall() {
+  log_info "Inkscape Install"
+  println_blue "Inkscape Install"
+  sudo add-apt-repository -y ppa:inkscape.dev/stable
+  if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
+      log_warning "Change Inkscape to $previousStableReleaseName"
+      println_yellow "Change Inkscape to $previousStableReleaseName"
+      changeAptSource "/etc/apt/sources.list.d/inkscape_dev-ubuntu-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
+}
+
+
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O               Photography Apps                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # #########################################################################
-# Install digikam repository
-digikamRepo () {
-  log_info "Digikam Repo"
-  println_blue "Digikam Repo"
-	sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-}
-# #########################################################################
 # Install digikam Application
 digikamInstall () {
   log_info "Digikam Install"
   println_blue "Digikam Install"
+  sudo add-apt-repository -y ppa:kubuntu-ppa/backports
+  sudo add-apt-repository ppa:philip5/extra
   # sudo apt install -yf
 	sudo apt install -yf digikam digikam-doc digikam-data
   # sudo apt install -yf
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Digikam installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  pressEnterToContinue "Digikam installed."
+}
 
-}
-# #########################################################################
-# Install photo apps repository
-photoAppsRepo () {
-  log_info "Photo Apps Repositories"
-  println_blue "Photo Apps Repositories                                              "
-  digikamRepo
-  # Darktable
-  log_info "Darktable"
-  println_blue "Darktable"
-  sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, downgrade the apt sources."
-    println_red "Beta Code or no new repo, downgrade the apt sources."
-    changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  fi
-}
 # #########################################################################
 # Install photo applications
 photoAppsInstall () {
   currentPath=$(pwd)
   log_info "Photo Apps install"
   println_blue "Photo Apps install                                                   "
+  # Darktable
+  log_info "Darktable Repo"
+  println_blue "Darktable Repo"
+  sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, downgrade the apt sources."
+    println_red "Beta Code or no new repo, downgrade the apt sources."
+    changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
 
   digikamInstall
   # Rapid Photo downloader
@@ -1158,12 +1256,9 @@ photoAppsInstall () {
   python3 install.py
 
   sudo apt install -y rawtherapee graphicsmagick imagemagick darktable ufraw;
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Photo Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
 
   cd "$currentPath" || return
+  pressEnterToContinue "Photography Applications installed."
 }
 
 
@@ -1202,158 +1297,54 @@ addRepositories () {
   println_banner_yellow "Add Repositories                                                     "
     # general repositories
 	sudo add-apt-repository -y universe
-  # doublecmd
-  log_info "doublecmd"
-  println_blue "doublecmd"
-  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
-  wget -q https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O- | sudo apt-key add -
-  if [[ $betaAns != 1 ]]; then
-    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /' > /etc/apt/sources.list.d/Alexx2000.list"
-  else
-    sudo sh -c "echo 'deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /' > /etc/apt/sources.list.d/Alexx2000.list"
-  fi
-	# sudo apt-add-repository -y ppa:alexx2000/doublecmd
-	# WebUpd8 and SyncWall
-	log_info "WebUpd8: SyncWall, ?WoeUSB?"
-	println_blue "WebUpd8: SyncWall, WoeUSB"
-	sudo add-apt-repository -y ppa:nilarimogard/webupd8
-	# Y PPA Manager
-	log_info "Y PPA Manager"
-	println_blue "Y PPA Manager"
-	sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
-	# WebUpd8 Java
-	log_info "WebUpd8 Java"
-	println_blue "WebUpd8 Java"
-	sudo add-apt-repository -y ppa:webupd8team/java
-	# GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
-	log_info "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
-	println_blue "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
-  wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
-  sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu zesty-getdeb apps" >> /etc/apt/sources.list.d/getdeb-zesty.list'
-  # Downgrade getdeb as there are no current repos
-  # sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
-	# Grub Customizer
-	log_info "Grub Customizer"
-	println_blue "Grub Customizer"
-	sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
-	# Clementine
-  # Commented as it is now a snap install
-	# log_info "Clementine"
-	# println_blue "Clementine"
-	# sudo add-apt-repository -y ppa:me-davidsansome/clementine
-	# Boot-Repair
-	log_info "Boot-Repair"
-	println_blue "Boot-Repair"
-	sudo add-apt-repository -y ppa:yannubuntu/boot-repair
-	# Variety
-	log_info "Variety"
-	println_blue "Variety"
-	sudo add-apt-repository -y ppa:peterlevi/ppa
-  # sudo add-apt-repository -y ppa:variety/daily
-  # Variety
-  log_info "UNetbootin"
-  println_blue "UNetbootin"
-  sudo add-apt-repository ppa:gezakovacs/ppa
 
-	case $desktopEnvironment in
-		"kde" )
-      sudo add-apt-repository -y ppa:rikmills/latte-dock
-			;;
-		"gnome" )
-			# [4] Ambiance and Radiance Theme Color pack
-			log_info "[4] Ambiance and Radiance Theme Color pack"
-			println_blue "[4] Ambiance and Radiance Theme Color pack"
-			sudo add-apt-repository -y ppa:ravefinity-project/ppa
-			;;
-		"ubuntu" )
-			# [4] Ambiance and Radiance Theme Color pack
-      log_info "[4] Ambiance and Radiance Theme Color pack"
-      println_blue "[4] Ambiance and Radiance Theme Color pack"
-			sudo add-apt-repository -y ppa:ravefinity-project/ppa
-			;;
-		"xubuntu" )
-			;;
-		"lubuntu" )
-			;;
-	esac
-
+  pressEnterToContinue "Add Applications Repos enabled."
 }
 
-downgradeAptDistro () {
-  # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
-  if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
-    log_info "Change Repos for which there aren't new repos."
-    println_blue "Change Repos for which there aren't new repos."
-    # Commented as it is now a snap install
-    # changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
-    case $desktopEnvironment in
-      "kde" )
-        ;;
-      "gnome" )
-        ;;
-      "xubuntu" )
-        ;;
-      "lubuntu" )
-        ;;
-    esac
-  fi
-  if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
-    log_warning "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
-    println_blue "Change $stableReleaseName and $betaReleaseName Repos for which there aren't new repos."
-    case $desktopEnvironment in
-      "kde" )
-        ;;
-      "gnome" )
-        log_warning "Change ravefinity-project to $previousStableReleaseName"
-        println_blue "Change ravefinity-project to $previousStableReleaseName"
-        changeAptSource "/etc/apt/sources.list.d/ravefinity-project-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-        # Should not bet here should be in add gnome3 apt repositorites gnome3BackportsRepo
-        # changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-        ;;
-      "xubuntu" )
-        ;;
-      "lubuntu" )
-        ;;
-    esac
-  fi
-
-  # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
-    # Scribes Developer editor
-    # log_warning 'Scribes Developer editor'
-    # sudo add-apt-repository -y ppa:mystilleef/scribes-daily
-    # changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
-    # Canon Printer Drivers
-  	# log_warning "Canon Printer Drivers"
-  	# println_blue "Canon Printer Drivers"
-  	# sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
-  	# sudo add-apt-repository -y ppa:michael-gruz/canon
-  	# sudo add-apt-repository -y ppa:inameiname/stable
-    # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-trunk-$distReleaseName.list" "$distReleaseName" utopic
-    # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
-    # changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
-    # Inkscape
-    log_warning "Inkscape"
-    println_blue "Inkscape"
-    sudo add-apt-repository -y ppa:inkscape.dev/stable
-  fi
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, downgrade the apt sources."
-    println_red "Beta Code, downgrade the apt sources."
-    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Repos not available as yet, downgrade the apt sources."
-    println_red "Repos not available as yet, downgrade the apt sources."
-    # changeAptSource "/etc/apt/sources.list.d/alexx2000-ubuntu-doublecmd-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    #changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
-  fi
-}
+# downgradeAptDistro () {
+#   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
+#   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
+#     log_info "Change Repos for which there aren't new repos."
+#     println_blue "Change Repos for which there aren't new repos."
+#     # Commented as it is now a snap install
+#     # changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+#     case $desktopEnvironment in
+#       "kde" )
+#         ;;
+#       "gnome" )
+#         ;;
+#       "xubuntu" )
+#         ;;
+#       "lubuntu" )
+#         ;;
+#     esac
+#   fi
+#
+#   # older packages that will not install on new releases
+#   if ! [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
+#     # Scribes Developer editor
+#     # log_warning 'Scribes Developer editor'
+#     # sudo add-apt-repository -y ppa:mystilleef/scribes-daily
+#     # changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
+#     # Canon Printer Drivers
+#   	# log_warning "Canon Printer Drivers"
+#   	# println_blue "Canon Printer Drivers"
+#   	# sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
+#   	# sudo add-apt-repository -y ppa:michael-gruz/canon
+#   	# sudo add-apt-repository -y ppa:inameiname/stable
+#     # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-trunk-$distReleaseName.list" "$distReleaseName" utopic
+#     # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
+#     # changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
+#     # Inkscape
+#   fi
+#   if [[ $noCurrentReleaseRepo == 1 ]]; then
+#     log_warning "Repos not available as yet, downgrade the apt sources."
+#     println_red "Repos not available as yet, downgrade the apt sources."
+#     #changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+#     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
+#   fi
+#   pressEnterToContinue "Repos Downgraded."
+# }
 
 # ############################################################################
 # Install applications
@@ -1362,11 +1353,7 @@ installApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat unetbootin nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser y-ppa-manager boot-repair grub-customizer variety variety-slideshow blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak woeusb
-
-  # For variety
-  sudo apt install python3-pip
-  sudo pip3 install ndg-httpsclient # For variety
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat  nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak
 
   # Older packages...
   # Still active, but replaced with other apps
@@ -1380,29 +1367,28 @@ installApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras doublecmd-qt5 doublecmd-help-en doublecmd-plugins digikam amarok kdf k4dirstat filelight kde-config-cron latte-dock kdesdk-dolphin-plugins kcron;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras digikam amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron;
+      latteDockInstall
       # Old packages:
       # ufw-kde
-      kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
-      qdbus org.kde.KWin /KWin reconfigure
 			;;
 		"gnome" )
-			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
+			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
-			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
+			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
 			;;
 		"xubuntu" )
-			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt install -y gmountiso gnome-commander;
 			;;
 		"lubuntu" )
-			sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins gmountiso gnome-commander;
+			sudo apt install -y gmountiso gnome-commander;
 			;;
 	esac
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "General Applications installed. Press ENTER to continue." nullEntry
-    printf "%s" "$nullEntry"
-  fi
+  doublecmdInstall
+  webupd8AppsInstall
+  yppaManagerInstall
+  pressEnterToContinue "General Applications installed."
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1411,7 +1397,7 @@ installApps () {
 
 # ############################################################################
 # Install other applications individually
-installOtherApps () {
+menuOtherApps () {
   ##### Menu section
 
   until [[ "$choiceApps" =~ ^(0|q|Q|quit)$ ]]; do
@@ -1428,7 +1414,7 @@ installOtherApps () {
     4    : Photography Apps
     6    : Image Editing Applications
     7    : Music and Video Applications
-    8    : Oracle Java
+    8    : Oracle Java 9
     10   : Laptop Display Drivers for Intel en Nvidia
     11   : DisplayLink
     12   : ownCloudClient
@@ -1441,9 +1427,14 @@ installOtherApps () {
     21   : LibreCAD
     22   : Calibre
     23   : FreeFileSync
+    24   : inSync for GoogleDrive
+    25   : Doublecmd
     30   : Git
     31   : AsciiDoc
     32   : Vagrant
+    33   : Bashdb
+    34   : Oracle Java 8
+    35   : Oracle Java 10
 
     0|q  : Quit this program
 
@@ -1456,38 +1447,10 @@ installOtherApps () {
     case "$choiceApps" in
       1 )
         # VirtualBox Host
-        if [[ "$noPrompt" -ne 1 ]]; then
-          read -rp "Do you want to install VirtualBox Host? (y/n)" answer
-        else
-          answer="Y"
-        fi
+        read -rp "Do you want to install VirtualBox Host? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          # sudo apt-add-repository "deb http://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" # Place entry in sources.list file
-          sudo sh -c "echo 'deb http://download.virtualbox.org/virtualbox/debian $distReleaseName contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
-          wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-          wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-
-          if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-            log_warning "Beta Code or no new repo, downgrade the apt sources."
-            println_red "Beta Code or no new repo, downgrade the apt sources."
-            changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-          fi
-
-          repoUpdate
-          # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso;
-          # sudo apt install virtualbox-5.2 dkms
-          sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-          # case $desktopEnvironment in
-          #   "kde" )
-          #   # sudo apt install -y virtualbox-qt;
-          #   ;;
-          # esac
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "VirtualBox Host Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          virtualboxHostInstall
         fi
-        answer=0
       ;;
       2 )
         # VirtualBox Guest
@@ -1496,17 +1459,12 @@ installOtherApps () {
           repoUpdate
           # sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
           virtualboxGuestSetup
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "VirtualBox Guest Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
         fi
       ;;
       3 )
         # Development Applications
         read -rp "Do you want to install Development Applications? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          devAppsRepos
           devAppsInstall
         fi
       ;;
@@ -1514,7 +1472,6 @@ installOtherApps () {
         # Photography Applications
         read -rp "Do you want to install Photography Applications? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          photoAppsRepo
           photoAppsInstall
         fi
       ;;
@@ -1527,10 +1484,7 @@ installOtherApps () {
           sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
           repoUpdate
           sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Image Editing Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Image Editing Applications installed."
         fi
       ;;
       7 )
@@ -1542,25 +1496,19 @@ installOtherApps () {
           sudo apt install -y vlc browser-plugin-vlc easytag
           # clementine
           sudo snap install clementine
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Music and Video Applications installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Music and Video Applications installed."
         fi
       ;;
       8)
-        # Oracle Java
-        read -rp "Do you want to install Oracle Java? (y/n)" answer
+        # Oracle Java 9
+        read -rp "Do you want to install Oracle Java9? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          log_info "Install Oracle Java"
-          println_blue "Install Oracle Java"
+          log_info "Install Oracle Java9"
+          println_blue "Install Oracle Java9"
           echo oracle-java9-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
           sudo apt install -y oracle-java9-installer
           sudo apt-get install oracle-java9-set-default
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Oracle Java installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Oracle Java9 installed."
         fi
 
       ;;
@@ -1571,10 +1519,7 @@ installOtherApps () {
           log_info "Freeplane"
           println_blue "Freeplane"
           sudo apt install -y freeplane
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Freeplane installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Freeplane installed."
         fi
       ;;
       10)
@@ -1595,9 +1540,7 @@ installOtherApps () {
         # ownCloudClient
         read -rp "Do you want to install ownCloudClient? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          ownCloudClientRepo
-          repoUpdate
-          ownCloudClientInstallApp
+          ownCloudClientInstall
         fi
       ;;
       13 )
@@ -1611,8 +1554,6 @@ installOtherApps () {
         # DigiKam
         read -rp "Do you want to install DigiKam? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          digikamRepo
-          repoUpdate
           digikamInstall
         fi
       ;;
@@ -1620,8 +1561,6 @@ installOtherApps () {
         # Docker
         read -rp "Do you want to install Docker? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          dockerRepo
-          repoUpdate
           dockerInstall
         fi
       ;;
@@ -1653,10 +1592,7 @@ installOtherApps () {
           repoUpdate
 
           sudo apt install -y sunflower
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Sunflower installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Sunflower installed."
         fi
       ;;
       21 )
@@ -1672,10 +1608,7 @@ installOtherApps () {
           repoUpdate
 
           sudo apt install -y librecad
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Librecad installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "Librecad installed."
         fi
       ;;
       22 )
@@ -1684,12 +1617,13 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           log_info "Calibre"
           println_blue "Calibre"
-          # sudo apt install calibre
-          sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "Calibre installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+          # Use the following f you get certificate issues
+          # sudo -v && wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+          # Github download, above is recommended
+          # sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+          pressEnterToContinue "Calibre installed."
         fi
       ;;
       23)
@@ -1698,12 +1632,22 @@ installOtherApps () {
         if [[ $answer = [Yy1] ]]; then
           log_info "Install FreeFileSync"
           println_blue "Install FreeFileSync"
-
           sudo apt install -y freefilesync
-          if [[ "$noPrompt" -ne 1 ]]; then
-            read -rp "FreeFileSync installed. Press ENTER to continue." nullEntry
-            printf "%s" "$nullEntry"
-          fi
+          pressEnterToContinue "FreeFileSync installed."
+        fi
+      ;;
+      24)
+        # inSync for GoogleDrive
+        read -rp "Do you want to install inSync for GoogleDrive? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          insyncInstall
+        fi
+      ;;
+      25)
+        # Doublecmd
+        read -rp "Do you want to install Doublecmd? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          doublecmdInstall
         fi
       ;;
       30 )
@@ -1727,6 +1671,24 @@ installOtherApps () {
           vagrantInstall
         fi
       ;;
+      33 )
+        read -rp "Do you want to install Bashdb? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          bashdbInstall
+        fi
+      ;;
+      34 )
+        read -rp "Do you want to install Oracle Java 8? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          oracleJava8Install
+        fi
+      ;;
+      35 )
+        read -rp "Do you want to install Oracle Java 10? (y/n)" answer
+        if [[ $answer = [Yy1] ]]; then
+          oracleJava10Install
+        fi
+      ;;
     	0|q);;
     	*)
         # return 1
@@ -1741,7 +1703,7 @@ installOtherApps () {
 
 # ############################################################################
 # Install settings and applications one by one by selecting options
-installOptions () {
+menuInstallOptions () {
   ##### Menu section
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
     clear
@@ -1755,8 +1717,8 @@ installOptions () {
     3    : Repositories upgrade
     4    : Add the additional Repositories for the general applications
     5    : Install the general applications
-    6    : Upgrade Gnome to Gnome on backports
-    7    : Upgrade KDE to KDE on backports
+    6    :
+    7    :
     8    : Upgrae KDE to Beta KDE on backports
     10   : Install Gnome Desktop from backports
     11   : Install KDE Desktop from backports
@@ -1800,10 +1762,10 @@ installOptions () {
         if [[ $answer = [Yy1] ]]; then
           addRepositories
         fi
-        read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          downgradeAptDistro
-        fi
+        # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+        # if [[ $answer = [Yy1] ]]; then
+        #   downgradeAptDistro
+        # fi
         read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           repoUpdate
@@ -1816,32 +1778,18 @@ installOptions () {
         fi
       ;;
       6 )
-        read -rp "Do you want to add the Gnome3 Backports PPA? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          gnome3BackportsRepo
-          # repoUpgrade
-        fi
-        read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          gnome3Settings
-        fi
       ;;
       10 )
         read -rp "Do you want to install Gnome from the Backports? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
-          # gnome3BackportsRepo
-          gnome3BackportsApps
-        fi
-        read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          gnome3Settings
+          gnome3Backports
+          read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+          if [[ $answer = [Yy1] ]]; then
+            gnome3Settings
+          fi
         fi
       ;;
       7 )
-        read -rp "Do you want to add the KDE Backports apt sources? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          kdeBackportsRepo
-        fi
       ;;
       8 )
         read -rp "Do you want to add the KDE Beta Backports apt sources? (y/n)" answer
@@ -1859,13 +1807,13 @@ installOptions () {
         read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           vmwareGuestSetup
-      fi
+        fi
       ;;
       18 )
         read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
         if [[ $answer = [Yy1] ]]; then
           virtualboxGuestSetup
-      fi
+        fi
       ;;
 
       20 )
@@ -1881,8 +1829,6 @@ installOptions () {
         fi
       ;;
       19 )
-        devAppsRepos
-        repoUpdate
         devAppsInstall
       ;;
       30 )
@@ -1900,6 +1846,7 @@ installOptions () {
             There are the following options for changing the distribution app sources to a stable release:
             Key  : Stable Release
             -----: ---------------------------------------
+            c    : 18.10 Cosmic Cuttlefish
             b    : 18.04 Bionic Beaver
             a    : 17.10 Artful Aardvark
             x    : 17.04 Zesty
@@ -1924,6 +1871,14 @@ installOptions () {
 
             read -rp "Enter your choice : " stablechoice
             case $stablechoice in
+              c)
+                stableReleaseName="cosmic"
+                stableReleaseVer="18.10"
+                betaReleaseName="cosmic"
+                betaReleaseVer="18.10"
+                previousStableReleaseName="bionic"
+                validchoice=1
+              ;;
               b)
                 stableReleaseName="bionic"
                 stableReleaseVer="18.04"
@@ -2118,6 +2073,10 @@ questionRun () {
       fi
       ;;
   esac
+  read -rp "Do you want to install Doublecmd? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    doublecmdAns=1
+  fi
   read -rp "Do you want to install Google Chrome? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     chromeAns=1
@@ -2162,10 +2121,10 @@ questionRun () {
   if [[ $answer = [Yy1] ]]; then
     addGenRepoAns=1
   fi
-  read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    downgradeAptDistroAns=1
-  fi
+  # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+  # if [[ $answer = [Yy1] ]]; then
+  #   downgradeAptDistroAns=1
+  # fi
   read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     addRepoAns=1
@@ -2200,41 +2159,25 @@ questionRun () {
   fi
   if [[ $addRepoAns = 1 ]]; then
     #statements
-    if [[ $ownCloudClientAns = 1 ]]; then
-      ownCloudClientRepo
-    fi
-    if [[ $dockerAns = 1 ]]; then
-      dockerRepo
-    fi
     if [[ $devAppsAns = 1 ]]; then
-      devAppsRepos
       rubyRepo
-    fi
-    if [[ $photoAns = 1 ]]; then
-      photoAppsRepo
     fi
     case $desktopEnvironment in
       gnome )
-      if [[ $gnomeBackportsAns = 1 ]]; then
-        gnome3BackportsRepo
-      fi
-      if [[ $digiKamAns = 1 ]]; then
-        kdeBackportsRepo
-      fi
       ;;
       kde )
-      if [[ $kdeBackportsAns = 1 ]]; then
-        kdeBackportsRepo
-      fi
+        if [[ $kdeBackportsAns = 1 ]]; then
+          kdeBackportsApps
+        fi
       ;;
     esac
     if [[ $addGenRepoAns = 1 ]]; then
       addRepositories
     fi
   fi
-  if [[ $downgradeAptDistroAns = 1 ]]; then
-    downgradeAptDistro
-  fi
+  # if [[ $downgradeAptDistroAns = 1 ]]; then
+  #   downgradeAptDistro
+  # fi
 
   # update repositories
   if [[ $repoUpdateAns = 1 ]]; then
@@ -2261,7 +2204,10 @@ questionRun () {
       displayLinkInstallApp
     fi
     if [[ $ownCloudClientAns = 1 ]]; then
-      ownCloudClientInstallApp
+      ownCloudClientInstall
+    fi
+    if [[ $doublecmdAns = 1 ]]; then
+      doublecmdInstall
     fi
     if [[ $chromeAns = 1 ]]; then
       googleChromeInstall
@@ -2277,7 +2223,7 @@ questionRun () {
     fi
     if [[ $desktopEnvironment = "gnome" ]]; then
       if [[ $gnomeBackportsAns = 1 ]]; then
-        gnome3BackportsApps
+        gnome3Backports
       fi
       if [[ $gnomeButtonsAns = 1 ]]; then
         gnome3Settings
@@ -2312,7 +2258,7 @@ questionRun () {
 
 # ############################################################################
 # Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
-questionRunStep () {
+questionStepRun () {
   printf "Question each step before installing\n"
   read -rp "Do you want to do a Kernel update? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
@@ -2326,10 +2272,10 @@ questionRunStep () {
   if [[ $answer = [Yy1] ]]; then
     addRepositories
   fi
-  read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    downgradeAptDistro
-  fi
+  # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+  # if [[ $answer = [Yy1] ]]; then
+  #   downgradeAptDistro
+  # fi
   read -rp "Do you want to do a Repo Update? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     repoUpdate
@@ -2344,8 +2290,7 @@ questionRunStep () {
   fi
   read -rp "Do you want to install ownCloudClient? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    ownCloudClientRepo
-    ownCloudClientInstallApp
+    ownCloudClientInstall
   fi
   read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
@@ -2367,8 +2312,7 @@ questionRunStep () {
     gnome)
       read -rp "Do you want to install Gnome Backports? (y/n)" answer
       if [[ $answer = [Yy1] ]]; then
-        gnome3BackportsRepo
-        gnome3BackportsApps
+        gnome3Backports
       fi
       read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
       if [[ $answer = [Yy1] ]]; then
@@ -2378,23 +2322,24 @@ questionRunStep () {
     kde)
       read -rp "Do you want to install KDE Backports? (y/n)" answer
       if [[ $answer = [Yy1] ]]; then
-        kdeBackportsRepo
         kdeBackportsApps
       fi
       ;;
   esac
+  read -rp "Do you want to install Doublecmd? (y/n)" answer
+  if [[ $answer = [Yy1] ]]; then
+    doublecmdInstall
+  fi
   read -rp "Do you want to install Google Chrome? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
     googleChromeInstall
   fi
   read -rp "Do you want to install DigiKam? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    kdeBackportsRepo
     digikamInstall
   fi
   read -rp "Do you want to install Docker? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    dockerRepo
     dockerInstall
   fi
   read -rp "Do you want to install Dropbox? (y/n)" answer
@@ -2403,7 +2348,6 @@ questionRunStep () {
   fi
   read -rp "Do you want to install Photography Apps? (y/n)" answer
   if [[ $answer = [Yy1] ]]; then
-    photoAppsRepo
     photoAppsInstall
   fi
   read -rp "Do you want to install AsciiDoc? (y/n)" answer
@@ -2424,7 +2368,6 @@ questionRunStep () {
     if [[ $answer = [Yy1] ]]; then
       gitInstall
     fi
-    devAppsRepos
     rubyRepo
     devAppsInstall
   fi
@@ -2453,28 +2396,15 @@ autoRun () {
   kernelUprade
   case $1 in
     [lwv] )
-      ownCloudClientRepo
-      dockerRepo
       rubyRepo
-      digikamRepo
-      photoAppsRepo
-      devAppsRepos
       ;;
   esac
-  case $desktopEnvironment in
-    gnome )
-      gnome3BackportsRepo
-    ;;
-    kde )
-      kdeBackportsRepo
-    ;;
-  esac
   addRepositories
-  downgradeAptDistro
+  # downgradeAptDistro
   repoUpdate
   case $desktopEnvironment in
     gnome )
-      gnome3BackportsApps
+      gnome3Backports
       gnome3Settings
     ;;
     kde )
@@ -2487,6 +2417,7 @@ autoRun () {
 
   repoUpgrade
 
+  doublecmdInstall
   googleChromeInstall
 
   fontsInstall
@@ -2501,9 +2432,9 @@ autoRun () {
     ;;
     l )
       dataDirLinksSetup
-      laptopDisplayDrivers
+      # laptopDisplayDrivers
       # displayLinkInstallApp
-      ownCloudClientInstallApp
+      ownCloudClientInstall
       dockerInstall
       virtualboxHostInstall
       vagrantInstall
@@ -2515,7 +2446,7 @@ autoRun () {
     ;;
     w )
       dataDirLinksSetup
-      ownCloudClientInstallApp
+      ownCloudClientInstall
       dockerInstall
       virtualboxHostInstall
       vagrantInstall
@@ -2525,10 +2456,10 @@ autoRun () {
       gitInstall
       asciiDocInstall
     ;;
-    v)
+    v )
       createTestDataDirs
       dataDirLinksSetup
-      ownCloudClientInstallApp
+      ownCloudClientInstall
       dockerInstall
       dropboxInstall
       devAppsInstall
@@ -2678,14 +2609,14 @@ until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
       questionRun vb
     ;;
     9)
-      questionRunStep
+      questionStepRun
     ;;
     10)
-      installOtherApps
+      menuOtherApps
     ;;
     11 )
       echo "Selecting itemized installations"
-      installOptions
+      menuInstallOptions
     ;;
     99 )
       autoRun v
