@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "kbionic"
+  config.vm.box = "kcosmic"
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
   config.vm.network "private_network", ip: "172.28.128.111", auto_config: false

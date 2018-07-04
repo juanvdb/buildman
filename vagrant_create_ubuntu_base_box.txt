@@ -27,18 +27,20 @@ sudo vi /etc/ssh/sshd_config
     PermitEmptyPasswords no
 sudo service ssh restart
 
-sudo apt update
-sudo apt -y upgrade
-sudo apt clean
-sudo apt autoremove
 
 # if /data exist
 sudo chown -R $USER:$USER /data
 
+# Disable lock screen and power display off
+
+sudo apt update
+sudo apt -y upgrade
+sudo apt -y full-upgrade
+sudo apt -y clean
+sudo apt -y autoremove
+
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 sudo rm -f /EMPTY
-
-# Disable lock screen and power display off
 
 # Shutdown the machine
 sudo shutdown -h now
