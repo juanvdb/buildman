@@ -21,28 +21,6 @@ pressEnterToContinue() {
   fi
 }
 
-function menuRun() {
-  local choiceOpt
-  until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-    clear
-    printf "
-
-    There are the following options for this script
-    TASK : DESCRIPTION
-    -----: ---------------------------------------
-    1    : One
-    2    : Two
-    3    : Three
-
-    0/q  : Quit this program
-
-    "
-
-    read -rp "Enter your choice : " choiceOpt
-    runSelection $choiceOpt
-  done
-}
-
 function mainMenu() {
   local choiceOpt
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
@@ -50,13 +28,15 @@ function mainMenu() {
     printf "
 
     There are the following options for this script
-    TASK : DESCRIPTION
-    -----: ---------------------------------------
-    1    : Select and then auto run
-    2    : Select and run step by step
-    3    : Select from menu and run
-
-    0/q  : Quit this program
+    TASK: DESCRIPTION
+    ----: ---------------------------------------
+    1   : Select and then auto run
+    2   : Select and run step by step
+    3   : Select from menu and run
+    4   : Autorun one and two
+    5   : Select one and three, then autorun
+    6   : Select two and three, then step through
+    0/q : Quit this program
 
     "
 
@@ -72,7 +52,115 @@ function mainMenu() {
         menuRun "SelectItem"
       ;;
       4|four )
-        menuRun "AutoRun"
+        selection=(1 2)
+        menuRun "AutoRun" "${selection[@]}"
+      ;;
+      5|five )
+        selection=(1 3)
+        menuRun "SelectThenAutoRun" "${selection[@]}"
+      ;;
+      6|six )
+        selection=(2 3)
+        menuRun "SelectThenStepRun" "${selection[@]}"
+      ;;
+    esac
+  done
+}
+
+function menuRun() {
+  local choiceOpt
+  local typeOfRun=$1
+  shift
+  local menuSelections=($@)
+
+  function selectionMenu (){
+    local blue=$(tput setaf 4)
+    local normal=$(tput sgr0)
+    local bold=$(tput bold)
+    local white=$(tput setaf 7)
+    local yellow=$(tput setaf 3)
+    local rev=$(tput rev)
+
+
+    clear
+    printf "\n\n"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "${rev}${bold}  Select items and then install the items without prompting.${normal}\n"
+      ;;
+      SelectThenStepRun )
+        printf "${rev}${bold}  Select items and then install the items each with a prompt.${normal}\n"
+      ;;
+      SelectItem )
+        printf "${rev}${bold}  Select items and for individual installation with prompt.${normal}\n"
+      ;;
+    esac
+    printf "
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "1" ]]; then printf "${rev}${bold}1${normal}"; else printf "1"; fi; printf "   : One\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "${rev}${bold}2${normal}"; else printf "2"; fi; printf "   : Two\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "${rev}${bold}3${normal}"; else printf "3"; fi; printf "   : Three\n"
+    printf "\n"
+    printf "     ${bold}9   : RUN${normal}\n"
+    printf "\n"
+    printf "    0/q  : Return to main menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  function howToRun() {
+    if [[ ! $2 = "SelectItem" ]]; then
+      menuSelections+=("$1")
+    else
+      noPrompt=0
+      runSelection "$1"
+    fi
+  }
+
+  case $typeOfRun in
+    AutoRun )
+      noPrompt=1
+      for i in "${menuSelections[@]}"; do
+        runSelection "$i"
+      done
+      noPrompt=0
+      menuSelections=()
+      pressEnterToContinue
+      return 0
+    ;;
+  esac
+
+  until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+    selectionMenu "$typeOfRun"
+    read -rp "Enter your choice : " choiceOpt
+    case $choiceOpt in
+      1|one )
+        howToRun "1" "$typeOfRun"
+      ;;
+      2|two )
+        howToRun "2" "$typeOfRun"
+      ;;
+      3|three )
+        howToRun "3" "$typeOfRun"
+      ;;
+      9|RUN )
+        if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
+          noPrompt=1
+        fi
+        for i in "${menuSelections[@]}"; do
+          runSelection "$i"
+        done
+        noPrompt=0
+        menuSelections=()
+        pressEnterToContinue
       ;;
     esac
   done
