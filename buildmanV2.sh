@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# DateVer 2018/06/12
+# DateVer 2018/07/08
 # Buildman V2.0
 # Author : Juan van der Breggen
 
@@ -1211,6 +1211,13 @@ getdebRepository() {
   # sudo sh -c "echo 'deb http://archive.getdeb.net/ubuntu $distReleaseName-getdeb apps' >> /etc/apt/sources.list.d/getdeb-$distReleaseName.list"
 }
 
+FreeFileSyncInstall() {
+  log_info "FreeFileSync Appliction Install"
+  println_blue "FreeFileSync Application Install"
+  getdebRepository
+  sudo apt install freefilesync
+}
+
 # ############################################################################
 # Latte Dock for KDE packages installation
 latteDockInstall() {
@@ -1220,6 +1227,33 @@ latteDockInstall() {
   sudo apt install latte-dock
   kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
   qdbus org.kde.KWin /KWin reconfigure
+}
+
+# ############################################################################
+# LibreCAD installation
+librecadInstall() {
+  log_info "Install LibreCAD"
+  println_blue "Install LibreCAD"
+
+  sudo add-apt-repository ppa:librecad-dev/librecad-stable
+  changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+
+  repoUpdate
+
+  sudo apt install -y librecad
+}
+
+# ############################################################################
+# Calibre installation
+calibreInstal() {
+  log_info "Calibre"
+  println_blue "Calibre"
+  sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+  # Use the following f you get certificate issues
+  # sudo -v && wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+
+  # Github download, above is recommended
+  # sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
 }
 
 # ############################################################################
@@ -1248,12 +1282,29 @@ inkscapeInstall() {
   fi
 }
 
+# ############################################################################
+# Image Edfiting packages installation
+imageEditingAppsInstall() {
+  log_info "Imaging Editing Applications"
+  println_blue "Imaging Editing Applications"
+  sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+  repoUpdate
+  sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
+}
 
+# ############################################################################
+# Music and Videos packages installation
+musicVideoAppsInstall() {
+  log_info "Music and Video apps"
+  println_blue "Music and Video apps"
+  sudo apt install -y vlc browser-plugin-vlc easytag
+  # clementine
+  sudo snap install clementine
+}
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O               Photography Apps                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-
 # #########################################################################
 # Install digikam Application
 digikamInstall () {
@@ -1267,13 +1318,8 @@ digikamInstall () {
   pressEnterToContinue "Digikam installed."
 }
 
-# #########################################################################
-# Install photo applications
-photoAppsInstall () {
+darktableInstall() {
   currentPath=$(pwd)
-  log_info "Photo Apps install"
-  println_blue "Photo Apps install                                                   "
-  # Darktable
   log_info "Darktable Repo"
   println_blue "Darktable Repo"
   sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
@@ -1282,21 +1328,29 @@ photoAppsInstall () {
     println_red "Beta Code or no new repo, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
+  sudo apt install darktable
+}
 
-  digikamInstall
+rapidPhotoDownloaderInstall() {
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
   wget -P "$HOME/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
   cd "$HOME/tmp" || return
   python3 install.py
-
-  sudo apt install -y rawtherapee graphicsmagick imagemagick darktable ufraw;
-
   cd "$currentPath" || return
-  pressEnterToContinue "Photography Applications installed."
 }
 
+# #########################################################################
+# Install photo applications
+photoAppsInstall () {
+  log_info "Photo Apps install"
+  println_blue "Photo Apps install                                                   "
+  digikamInstall
+  darktableInstall
+  rapidPhotoDownloaderInstall
+  sudo apt install -y rawtherapee graphicsmagick imagemagick darktable ufraw;
+}
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O           General Apps Install                                           O
@@ -1326,16 +1380,16 @@ changeAptSource () {
   sudo sed -i.save -e "s/deb/#deb/" "$infile"
 }
 
-# #########################################################################
-# Add all repositories
-addRepositories () {
-  log_info "Add Repositories"
-  println_banner_yellow "Add Repositories                                                     "
-    # general repositories
-	sudo add-apt-repository -y universe
-
-  pressEnterToContinue "Add Applications Repos enabled."
-}
+# # #########################################################################
+# # Add all repositories
+# addRepositories () {
+#   log_info "Add Repositories"
+#   println_banner_yellow "Add Repositories                                                     "
+#     # general repositories
+# 	sudo add-apt-repository -y universe
+#
+#   pressEnterToContinue "Add Applications Repos enabled."
+# }
 
 # downgradeAptDistro () {
 #   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
@@ -1387,6 +1441,8 @@ addRepositories () {
 installUniverseApps () {
   log_info "Start Applications installation the general apps"
   println_banner_yellow "Start Applications installation the general apps                     "
+  sudo add-apt-repository -y universe
+
 	# general applications
   sudo apt install -yf
 	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat  nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak
@@ -1900,6 +1956,162 @@ autoRun () {
 # O           Menus                                                          O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # ############################################################################
+# Set Ubuntu Version Parameters
+setUbuntuVersionParameters() {
+  println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
+  read -rp "Do you want to setup the build for a beta install? (y/n) " answer
+  if [[ $answer = [Yy1] ]]; then
+    betaAns=1
+    validchoice=0
+    until [[ $validchoice == 1 ]]; do
+      clear
+      printf "
+
+
+
+      There are the following options for changing the distribution app sources to a stable release:
+      Key  : Stable Release
+      -----: ---------------------------------------
+      c    : 18.10 Cosmic Cuttlefish
+      b    : 18.04 Bionic Beaver
+      a    : 17.10 Artful Aardvark
+      x    : 17.04 Zesty
+      y    : 16.10 Yakkety
+      x    : 16.04 Xenial LTS
+      w    : 15.10 Wily
+      v    : 15.04 Vivid
+      u    : 14.10 Utopic
+      t    : 14.04 Trusty LTS
+      s    : 13.10 Saucy
+      r    : 13.04 Raring
+      q    : 12.10 Quantal
+      p    : 12.04 Precise LTS
+      o    : 11.10 Oneiric
+      n    : 11.04 Natty
+      m    : 10.10 Maverick
+      l    : 10.04 Lucid LTS
+
+      quit : Quit this selection
+
+      "
+
+      read -rp "Enter your choice : " stablechoice
+      case $stablechoice in
+        c)
+          stableReleaseName="cosmic"
+          stableReleaseVer="18.10"
+          betaReleaseName="cosmic"
+          betaReleaseVer="18.10"
+          previousStableReleaseName="bionic"
+          validchoice=1
+        ;;
+        b)
+          stableReleaseName="bionic"
+          stableReleaseVer="18.04"
+          betaReleaseName="cosmic"
+          betaReleaseVer="18.10"
+          previousStableReleaseName="artful"
+          validchoice=1
+        ;;
+        a )
+          stableReleaseName="artful"
+          stableReleaseVer="17.10"
+          betaReleaseName="bionic"
+          betaReleaseVer="18.04"
+          previousStableReleaseName="zesty"
+          validchoice=1
+        ;;
+        z )
+          stableReleaseName="zesty"
+          stableReleaseVer="17.04"
+          betaReleaseName="artful"
+          betaReleaseVer="17.10"
+          previousStableReleaseName="yakkety"
+          validchoice=1
+        ;;
+        y )
+          stableReleaseName="yakkety"
+          stableReleaseVer="16.10"
+          validchoice=1
+        ;;
+        x )
+          stableReleaseName="xenial"
+          stableReleaseVer="16.04"
+          validchoice=1
+        ;;
+        w )
+          stableReleaseName="wily"
+          stableReleaseVer="15.10"
+          validchoice=1
+        ;;
+        v )
+          stableReleaseName="vivid"
+          stableReleaseVer="15.04"
+          validchoice=1
+        ;;
+        u )
+          stableReleaseName="utopic"
+          stableReleaseVer="14.10"
+          validchoice=1
+        ;;
+        t )
+          stableReleaseName="trusty"
+          stableReleaseVer="14.04"
+          validchoice=1
+        ;;
+        s )
+          stableReleaseName="saucy"
+          stableReleaseVer="13.10"
+          validchoice=1
+        ;;
+        r )
+          stableReleaseName="raring"
+          stableReleaseVer="13.04"
+          validchoice=1
+        ;;
+        q )
+          stableReleaseName="quantal"
+          stableReleaseVer="12.10"
+          validchoice=1
+        ;;
+        p )
+          stableReleaseName="precise"
+          stableReleaseVer="12.04"
+          validchoice=1
+        ;;
+        o )
+          stableReleaseName="oneiric"
+          stableReleaseVer="11.10"
+          validchoice=1
+        ;;
+        n )
+          stableReleaseName="natty"
+          stableReleaseVer="11.04"
+          validchoice=1
+        ;;
+        m )
+          stableReleaseName="maverick"
+          stableReleaseVer="10.10"
+          validchoice=1
+        ;;
+        l )
+          stableReleaseName="lucid"
+          stableReleaseVer="10.04"
+          validchoice=1
+        ;;
+        quit|q|0)
+          validchoice=1
+        ;;
+        * )
+          printf "Please enter a valid choice, the first letter of the stable release you need."
+          validchoice=0
+        ;;
+      esac
+    done
+  fi
+}
+
+# ############################################################################
 # Install other applications individually
 menuOtherApps () {
   ##### Menu section
@@ -2332,157 +2544,7 @@ menuInstallOptions () {
         devAppsInstall
       ;;
       30 )
-        println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
-        read -rp "Do you want to setup the build for a beta install? (y/n) " answer
-        if [[ $answer = [Yy1] ]]; then
-          betaAns=1
-          validchoice=0
-          until [[ $validchoice == 1 ]]; do
-            clear
-            printf "
-
-
-
-            There are the following options for changing the distribution app sources to a stable release:
-            Key  : Stable Release
-            -----: ---------------------------------------
-            c    : 18.10 Cosmic Cuttlefish
-            b    : 18.04 Bionic Beaver
-            a    : 17.10 Artful Aardvark
-            x    : 17.04 Zesty
-            y    : 16.10 Yakkety
-            x    : 16.04 Xenial LTS
-            w    : 15.10 Wily
-            v    : 15.04 Vivid
-            u    : 14.10 Utopic
-            t    : 14.04 Trusty LTS
-            s    : 13.10 Saucy
-            r    : 13.04 Raring
-            q    : 12.10 Quantal
-            p    : 12.04 Precise LTS
-            o    : 11.10 Oneiric
-            n    : 11.04 Natty
-            m    : 10.10 Maverick
-            l    : 10.04 Lucid LTS
-
-            quit : Quit this selection
-
-            "
-
-            read -rp "Enter your choice : " stablechoice
-            case $stablechoice in
-              c)
-                stableReleaseName="cosmic"
-                stableReleaseVer="18.10"
-                betaReleaseName="cosmic"
-                betaReleaseVer="18.10"
-                previousStableReleaseName="bionic"
-                validchoice=1
-              ;;
-              b)
-                stableReleaseName="bionic"
-                stableReleaseVer="18.04"
-                betaReleaseName="cosmic"
-                betaReleaseVer="18.10"
-                previousStableReleaseName="artful"
-                validchoice=1
-              ;;
-              a )
-                stableReleaseName="artful"
-                stableReleaseVer="17.10"
-                betaReleaseName="bionic"
-                betaReleaseVer="18.04"
-                previousStableReleaseName="zesty"
-                validchoice=1
-              ;;
-              z )
-                stableReleaseName="zesty"
-                stableReleaseVer="17.04"
-                betaReleaseName="artful"
-                betaReleaseVer="17.10"
-                previousStableReleaseName="yakkety"
-                validchoice=1
-              ;;
-              y )
-                stableReleaseName="yakkety"
-                stableReleaseVer="16.10"
-                validchoice=1
-              ;;
-              x )
-                stableReleaseName="xenial"
-                stableReleaseVer="16.04"
-                validchoice=1
-              ;;
-              w )
-                stableReleaseName="wily"
-                stableReleaseVer="15.10"
-                validchoice=1
-              ;;
-              v )
-                stableReleaseName="vivid"
-                stableReleaseVer="15.04"
-                validchoice=1
-              ;;
-              u )
-                stableReleaseName="utopic"
-                stableReleaseVer="14.10"
-                validchoice=1
-              ;;
-              t )
-                stableReleaseName="trusty"
-                stableReleaseVer="14.04"
-                validchoice=1
-              ;;
-              s )
-                stableReleaseName="saucy"
-                stableReleaseVer="13.10"
-                validchoice=1
-              ;;
-              r )
-                stableReleaseName="raring"
-                stableReleaseVer="13.04"
-                validchoice=1
-              ;;
-              q )
-                stableReleaseName="quantal"
-                stableReleaseVer="12.10"
-                validchoice=1
-              ;;
-              p )
-                stableReleaseName="precise"
-                stableReleaseVer="12.04"
-                validchoice=1
-              ;;
-              o )
-                stableReleaseName="oneiric"
-                stableReleaseVer="11.10"
-                validchoice=1
-              ;;
-              n )
-                stableReleaseName="natty"
-                stableReleaseVer="11.04"
-                validchoice=1
-              ;;
-              m )
-                stableReleaseName="maverick"
-                stableReleaseVer="10.10"
-                validchoice=1
-              ;;
-              l )
-                stableReleaseName="lucid"
-                stableReleaseVer="10.04"
-                validchoice=1
-              ;;
-              quit|q|0)
-                validchoice=1
-              ;;
-              * )
-                printf "Please enter a valid choice, the first letter of the stable release you need."
-                validchoice=0
-              ;;
-            esac
-          done
-        fi
+        setUbuntuVersionParameters
       ;;
       50)
         # answer=y
@@ -2504,17 +2566,17 @@ menuInstallOptions () {
   done
 }
 
-function menuRun() {
+menuRun() {
   local choiceOpt
   local typeOfRun=$1
   shift
   local menuSelections=($@)
 
   function selectionMenu (){
-    local blue
-    blue=$(tput setaf 4)
-    local white
-    white=$(tput setaf 7)
+    # local blue
+    # blue=$(tput setaf 4)
+    # local white
+    # white=$(tput setaf 7)
     local yellow
     yellow=$(tput setaf 3)
     local normal
@@ -2524,29 +2586,121 @@ function menuRun() {
     local rev
     rev=$(tput rev)
 
+    menuSelectionsInput=(
+      1    #: Kernel upgrade
+      2    #: Repositories update
+      3    #: Repositories upgrade
+      4    #: Install the Universe applications
+
+      5    #: Setup the home directories to link to the data disk directories
+      7    #: Install KDE Desktop from backports
+      8    #: Upgrae KDE to Beta KDE on backports
+      9    #: Install Gnome Desktop from backports
+
+      10   #: Setup for a VirtualBox guest
+      11   #: VirtualBox Host
+      12   #: Setup for a Vmware guest
+      13   #: Vagrant
+
+      14   #: Laptop Display Drivers for Intel en Nvidia
+      15   #: DisplayLink
+
+      16   #: ownCloudClient
+      17   #: Docker
+      18   #: Dropbox
+      19   #: inSync for GoogleDrive
+
+      20    #: Music and Video Applications
+      21   #: Google Chrome browser
+      22   #: Doublecmd
+      23   #: Sunflower
+      24   #: FreeFileSync
+      25   #: LibreCAD
+      26   #: Calibre
+      27   #: Install extra fonts
+
+      30   #: Install Development Apps and IDEs
+      31   #: Git
+      32   #: AsciiDoc
+      33   #: Bashdb
+      34   #: Oracle Java 8
+      35   #: Oracle Java 9
+      36   #: Oracle Java 10
+
+      40   #: Photography Apps
+      41   #: Digikam
+      42   #: Darktable
+      43   #: RapidPhotoDownloader
+
+      45   #: Image Editing Applications
+
+      90   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
+      91   #: Create test data directories on data drive.
+      97   #: Change that you dont get any questions asked and there is no interpupts.
+      98   #: Change that you are asked if you want to install and it stops after each install function.
+    )
 
     clear
     printf "\n\n"
     case $typeOfRun in
-      SelectThenAutoRun )
-        printf "${rev}${bold}  Select items and then install the items without prompting.${normal}\n"
-      ;;
-      SelectThenStepRun )
-        printf "${rev}${bold}  Select items and then install the items each with a prompt.${normal}\n"
-      ;;
-      SelectItem )
-        printf "${rev}${bold}  Select items and for individual installation with prompt.${normal}\n"
-      ;;
+    SelectThenAutoRun )
+      printf "  %s%s%sSelect items and then install the items without prompting.%s\n" "${rev}" "${bold}" "${yellow}" "${normal}"
+    ;;
+    SelectThenStepRun )
+    printf "  %s%sSelect items and then install the items each with a prompt.%s\n" "${rev}" "${bold}"  "${normal}"
+      printf "  %s%s%sSelect items and then install the items each with a prompt.%s\n" "${rev}" "${bold}"  "${yellow}" "${normal}"
+    ;;
+    SelectItem )
+      printf "  %s%s%sSelect items and for individual installation with prompt.%s\n" "${rev}" "${bold}"  "${yellow}"  "${normal}"
     esac
     printf "
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "1" ]]; then printf "${rev}${bold}1${normal}"; else printf "1"; fi; printf "   : One\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "${rev}${bold}2${normal}"; else printf "2"; fi; printf "   : Two\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "${rev}${bold}3${normal}"; else printf "3"; fi; printf "   : Three\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "1" ]]; then printf "%s%s1%s" "${rev}" "${bold}" "${normal}"; else printf "1"; fi; printf "   : Kernel upgrade.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Repositories update.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Repositories upgrade.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "4" ]]; then printf "%s%s4%s" "${rev}" "${bold}" "${normal}"; else printf "4"; fi; printf "   : Install the Universe application.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "5" ]]; then printf "%s%s5%s" "${rev}" "${bold}" "${normal}"; else printf "5"; fi; printf "   : Setup the home directories to link to the data disk directories.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "7" ]]; then printf "%s%s7%s" "${rev}" "${bold}" "${normal}"; else printf "7"; fi; printf "   : Install KDE Desktop from backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "8" ]]; then printf "%s%s8%s" "${rev}" "${bold}" "${normal}"; else printf "8"; fi; printf "   : Upgrae KDE to Beta KDE on backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "9" ]]; then printf "%s%s9%s" "${rev}" "${bold}" "${normal}"; else printf "9"; fi; printf "   : Install Gnome Desktop from backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "10" ]]; then printf "%s%s10%s" "${rev}" "${bold}" "${normal}"; else printf "10"; fi; printf "  : Setup for a VirtualBox guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "11" ]]; then printf "%s%s11%s" "${rev}" "${bold}" "${normal}"; else printf "11"; fi; printf "  : VirtualBox Host.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "12" ]]; then printf "%s%s12%s" "${rev}" "${bold}" "${normal}"; else printf "12"; fi; printf "  : Setup for a Vmware guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "13" ]]; then printf "%s%s13%s" "${rev}" "${bold}" "${normal}"; else printf "13"; fi; printf "  : Vagrant.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "14" ]]; then printf "%s%s14%s" "${rev}" "${bold}" "${normal}"; else printf "14"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "15" ]]; then printf "%s%s15%s" "${rev}" "${bold}" "${normal}"; else printf "15"; fi; printf "  : DisplayLink.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "16" ]]; then printf "%s%s16%s" "${rev}" "${bold}" "${normal}"; else printf "16"; fi; printf "  : ownCloudClient.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "17" ]]; then printf "%s%s17%s" "${rev}" "${bold}" "${normal}"; else printf "17"; fi; printf "  : Docker.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "18" ]]; then printf "%s%s18%s" "${rev}" "${bold}" "${normal}"; else printf "18"; fi; printf "  : Dropbox.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "19" ]]; then printf "%s%s19%s" "${rev}" "${bold}" "${normal}"; else printf "19"; fi; printf "  : inSync for GoogleDrive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "20" ]]; then printf "%s%s20%s" "${rev}" "${bold}" "${normal}"; else printf "20"; fi; printf "  : Music and Video Applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "21" ]]; then printf "%s%s21%s" "${rev}" "${bold}" "${normal}"; else printf "21"; fi; printf "  : Google Chrome browser.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "22" ]]; then printf "%s%s22%s" "${rev}" "${bold}" "${normal}"; else printf "22"; fi; printf "  : Doublecmd.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "23" ]]; then printf "%s%s23%s" "${rev}" "${bold}" "${normal}"; else printf "23"; fi; printf "  : Sunflower.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "24" ]]; then printf "%s%s24%s" "${rev}" "${bold}" "${normal}"; else printf "24"; fi; printf "  : FreeFileSync.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "25" ]]; then printf "%s%s25%s" "${rev}" "${bold}" "${normal}"; else printf "25"; fi; printf "  : LibreCAD.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "26" ]]; then printf "%s%s26%s" "${rev}" "${bold}" "${normal}"; else printf "26"; fi; printf "  : Calibre.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "27" ]]; then printf "%s%s27%s" "${rev}" "${bold}" "${normal}"; else printf "27"; fi; printf "  : Install extra fonts.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "30" ]]; then printf "%s%s30%s" "${rev}" "${bold}" "${normal}"; else printf "30"; fi; printf "  : Install Development Apps and IDEs.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "31" ]]; then printf "%s%s31%s" "${rev}" "${bold}" "${normal}"; else printf "31"; fi; printf "  : Git.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "32" ]]; then printf "%s%s32%s" "${rev}" "${bold}" "${normal}"; else printf "32"; fi; printf "  : AsciiDoc.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "33" ]]; then printf "%s%s33%s" "${rev}" "${bold}" "${normal}"; else printf "33"; fi; printf "  : Bashdb.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "34" ]]; then printf "%s%s34%s" "${rev}" "${bold}" "${normal}"; else printf "34"; fi; printf "  : Oracle Java 8.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "35" ]]; then printf "%s%s35%s" "${rev}" "${bold}" "${normal}"; else printf "35"; fi; printf "  : Oracle Java 9.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "36" ]]; then printf "%s%s36%s" "${rev}" "${bold}" "${normal}"; else printf "36"; fi; printf "  : Oracle Java 10.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "40" ]]; then printf "%s%s40%s" "${rev}" "${bold}" "${normal}"; else printf "40"; fi; printf "  : Photography Apps.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "41" ]]; then printf "%s%s41%s" "${rev}" "${bold}" "${normal}"; else printf "41"; fi; printf "  : Digikam.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "42" ]]; then printf "%s%s42%s" "${rev}" "${bold}" "${normal}"; else printf "42"; fi; printf "  : Darktable.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "43" ]]; then printf "%s%s43%s" "${rev}" "${bold}" "${normal}"; else printf "43"; fi; printf "  : RapidPhotoDownloader.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Image Editing Applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "90" ]]; then printf "%s%s90%s" "${rev}" "${bold}" "${normal}"; else printf "90"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version./n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "91" ]]; then printf "%s%s91%s" "${rev}" "${bold}" "${normal}"; else printf "91"; fi; printf "  : Create test data directories on data drive./n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "97" ]]; then printf "%s%s97%s" "${rev}" "${bold}" "${normal}"; else printf "97"; fi; printf "  : Change that you dont get any questions asked and there is no interpupts./n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "98" ]]; then printf "%s%s98%s" "${rev}" "${bold}" "${normal}"; else printf "98"; fi; printf "  : Change that you are asked if you want to install and it stops after each install function./n"
     printf "\n"
-    printf "     ${bold}9   : RUN${normal}\n"
+    printf "     %s99  : RUN%s\n" "${bold}" "${normal}"
     printf "\n"
     printf "    0/q  : Return to main menu\n\n"
 
@@ -2584,42 +2738,91 @@ function menuRun() {
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
     selectionMenu "$typeOfRun"
     read -rp "Enter your choice : " choiceOpt
-    case $choiceOpt in
-      1|one )
-        howToRun "1" "$typeOfRun"
-      ;;
-      2|two )
-        howToRun "2" "$typeOfRun"
-      ;;
-      3|three )
-        howToRun "3" "$typeOfRun"
-      ;;
-      9|RUN )
-        if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
-          noPrompt=1
-        fi
-        for i in "${menuSelections[@]}"; do
-          runSelection "$i"
-        done
-        noPrompt=0
-        menuSelections=()
-        pressEnterToContinue
-      ;;
-    esac
-  done
+    if ((1<=choiceOpt && choiceOpt<=27))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((30<=choiceOpt && choiceOpt<=36))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((40<=choiceOpt && choiceOpt<=42))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((90<=choiceOpt && choiceOpt<=91))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((97<=choiceOpt && choiceOpt<=98))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((choiceOpt==99))
+    then
+      if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
+        noPrompt=1
+      fi
+      for i in "${menuSelections[@]}"; do
+        runSelection "$i"
+      done
+      noPrompt=0
+      menuSelections=()
+      pressEnterToContinue
+    # else
+    #     echo "Invalid Input."
+    fi  done
 }
 
-function runSelection() {
+runSelection() {
   # take inputs and perform as necessary
   case $1 in
-    1|one )
-      asking functionOne "run function one" "Function One Complete"
+    1 ) asking kernelUprade "do a Kernel Upgrade" "Kernel Upgrade Complete." ;;
+    2 ) asking repoUpdate "do a Repository Update" "Repository Update Complete." ;;
+    3 ) asking repoUpgrade "do a Repository Upgrade" "Repository Upgrade Complete." ;;
+    4 ) asking installUniverseApps "Install the Universe applications" "Universe applications install complete." ;;
+    5 ) asking dataDirLinksSetup "Setup the home directories to link to the data disk directories" "Setup of the home directories to link to the data disk directories complete." ;;
+    7 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
+    8 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
+    9 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
+    10 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
+    11 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
+    12 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
+    13 ) asking vagrantInstall "install Vagrant" "Vagrant install complete." ;;
+    14 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
+    15 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
+    16 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
+    17 ) asking dockerInstall "install Docker" "Docker install complete." ;;
+    18 ) dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
+    19 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
+    20 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
+    21 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
+    22 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
+    23 ) asking "Install Sunflower" "Sunflower install complete." ;;
+    24 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
+    25 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
+    26 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
+    27 ) asking  fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    30 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
+    31 )  asking gitInstall "install Git" "Git install complete." ;;
+    32 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
+    33 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
+    34 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
+    35 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
+    36 ) asking oracleJava10Install "Install Oracle Java 10" "Oracle Java 10 install complete." ;;
+    40 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
+    41 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
+    42 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
+    43 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
+    45 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
+    90 ) asking  setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
+    91 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
+    97)
+      # answer=y
+      noPrompt=1
+      println_blue "Questions asked OFF\n No questions will be asked"
+      log_debug "Questions asked OFF\n No questions will be asked"
     ;;
-    2|two )
-      asking functionTwo "run Function Two" "Function Two Complete"
-    ;;
-    3|three )
-      asking functionThree "run Function Three" "Function Three Complete"
+    98)
+      # answer=n
+      noPrompt=0
+      println_blue "Questions asked ON\n All questions will be asked"
+      log_debug "Questions asked ON\n All questions will be asked"
     ;;
   esac
 }
@@ -2627,7 +2830,7 @@ function runSelection() {
 
 # ############################################################################
 # Main Menu
-function mainMenu2() {
+mainMenu2() {
   local choiceOpt
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
     clear
