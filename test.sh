@@ -73,20 +73,20 @@ function menuRun() {
   shift
   local menuSelections=($@)
 
-  function selectionMenu (){
-    # local blue
-    # blue=$(tput setaf 4)
-    # local white
-    # white=$(tput setaf 7)
-    # local yellow
-    # yellow=$(tput setaf 3)
-    local normal
-    normal=$(tput sgr0)
-    local bold
-    bold=$(tput bold)
-    local rev
-    rev=$(tput rev)
+  # local blue
+  # blue=$(tput setaf 4)
+  # local white
+  # white=$(tput setaf 7)
+  local yellow
+  yellow=$(tput setaf 3)
+  local normal
+  normal=$(tput sgr0)
+  local bold
+  bold=$(tput bold)
+  local rev
+  rev=$(tput rev)
 
+  function selectionMenu (){
 
     clear
     printf "\n\n"
@@ -107,11 +107,81 @@ function menuRun() {
     -----: ---------------------------------------\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "1" ]]; then printf "%s%s1%s" "${rev}" "${bold}" "${normal}"; else printf "1"; fi; printf "   : One\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Two\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Three\n"
+    printf "\n"
+    printf "     a   : Sub Menu A\n"
+    printf "     b   : Sub Menu B\n"
     printf "\n"
     printf "     %s9   : RUN%s\n" "${bold}" "${normal}"
     printf "\n"
     printf "    0/q  : Return to main menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  function submenuA (){
+    clear
+    printf "\n\n"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  %s%sSelect items and then install the items without prompting.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+      SelectThenStepRun )
+        printf "  %s%sSelect items and then install the items each with a prompt.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+      SelectItem )
+        printf "  %s%sSelect items and for individual installation with prompt.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+    esac
+    printf "
+    %sOptions 3 and 4%s
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n" "${yellow}" "${normal}"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Three\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "4" ]]; then printf "%s%s4%s" "${rev}" "${bold}" "${normal}"; else printf "4"; fi; printf "   : Four\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  function submenuB (){
+    clear
+    printf "\n\n"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  %s%sSelect items and then install the items without prompting.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+      SelectThenStepRun )
+        printf "  %s%sSelect items and then install the items each with a prompt.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+      SelectItem )
+        printf "  %s%sSelect items and for individual installation with prompt.%s\n" "${rev}" "${bold}" "${normal}"
+      ;;
+    esac
+    printf "
+    %sOptions 5 and 6%s
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n" "${yellow}" "${normal}"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "5" ]]; then printf "%s%s5%s" "${rev}" "${bold}" "${normal}"; else printf "5"; fi; printf "   : Five\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "6" ]]; then printf "%s%s6%s" "${rev}" "${bold}" "${normal}"; else printf "6"; fi; printf "   : Six\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
@@ -153,6 +223,9 @@ function menuRun() {
     elif ((3<=choiceOpt && choiceOpt<=4))
     then
       howToRun "$choiceOpt" "$typeOfRun"
+    elif ((5<=choiceOpt && choiceOpt<=6))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
     elif ((choiceOpt==99))
     then
       if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
@@ -164,8 +237,65 @@ function menuRun() {
       noPrompt=0
       menuSelections=()
       pressEnterToContinue
-    # else
-    #     echo "Invalid Input."
+    else
+      case $choiceOpt in
+        a )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuA "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            if ((3<=choiceOpt && choiceOpt<=4))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((3<=choiceOpt && choiceOpt<=4))
+            # then
+            #   howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((5<=choiceOpt && choiceOpt<=6))
+            # then
+            #   howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((choiceOpt==99))
+            # then
+            #   if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
+            #     noPrompt=1
+            #   fi
+            #   for i in "${menuSelections[@]}"; do
+            #     runSelection "$i"
+            #   done
+            #   noPrompt=0
+            #   menuSelections=()
+            #   pressEnterToContinue
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        b )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuB "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            if ((5<=choiceOpt && choiceOpt<=6))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((3<=choiceOpt && choiceOpt<=4))
+            # then
+            #   howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((5<=choiceOpt && choiceOpt<=6))
+            # then
+            #   howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((choiceOpt==99))
+            # then
+            #   if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
+            #     noPrompt=1
+            #   fi
+            #   for i in "${menuSelections[@]}"; do
+            #     runSelection "$i"
+            #   done
+            #   noPrompt=0
+            #   menuSelections=()
+            #   pressEnterToContinue
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+      esac
     fi
     # case $choiceOpt in
     #   [1-8] )
