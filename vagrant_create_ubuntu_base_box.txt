@@ -33,6 +33,10 @@ sudo chown -R $USER:$USER /data
 
 # Disable lock screen and power display off
 
+# Stop auto updates
+sudo software-properties-kde
+sudo software-properties-gtk
+
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y full-upgrade
