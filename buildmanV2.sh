@@ -80,19 +80,19 @@ if [[ $scriptDebugToFile == "on" ]]; then
     \n
     \033[1;31m START OF NEW RUN\n\033[0m
     \n
-    \033[1;31m###############################################################\n\033[0m\n" >>$debugLogFile
+    \033[1;31m###############################################################\n\033[0m\n" >>"$debugLogFile"
   else
-    touch $debugLogFile
+    touch "$debugLogFile"
   fi
   if [[ -e $errorLogFile ]]; then
     echo -en "\n \033[1;31m##############################################################\n\033[0m
     \n
     \033[1;31m START OF NEW RUN\n\033[0m
     \n
-    \033[1;31m###############################################################\n\033[0m\n" >>$errorLogFile
-    echo -en "\n" >>$errorLogFile
+    \033[1;31m###############################################################\n\033[0m\n" >>"$errorLogFile"
+    echo -en "\n" >>"$errorLogFile"
   else
-    touch $errorLogFile
+    touch "$errorLogFile"
   fi
 fi
 
@@ -108,7 +108,7 @@ debug () {
   fi
   if [[ $scriptDebugToFile == "on" ]]
   then
-    printf "DEBUG: %q\n" "$@" >>$debugLogFile 2>>$errorLogFile
+    printf "DEBUG: %q\n" "$@" >>"$debugLogFile" 2>>"$errorLogFile"
   fi
   # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>$debugLogFile 2>>$errorLogFile || :
   #log "$@" >>$debugLogFile 2>>$errorLogFile
@@ -160,7 +160,7 @@ log() {
     fi
     if [[ $scriptDebugToFile == "on" ]]
     then
-      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>$debugLogFile 2>>$errorLogFile
+      echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>"$debugLogFile" 2>>"$errorLogFile"
     fi
     # [[ $script_debug = 1 ]] && echo -e "${log_color}[$(date +"%Y-%m-%d %H:%M:%S %Z")] [${log_level}] ${log_text} ${LOG_DEFAULT_COLOR}" >>$debugLogFile 2>>$errorLogFile || :
     return 0;
@@ -342,7 +342,11 @@ kernelUprade () {
   # else
   #   answer=1
   # fi
-  read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
+  if [[ $noPrompt -eq 1 ]]; then
+    read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
+  else
+    answer=1
+  fi
   if [[ $answer = [Yy1] ]]; then
     repoUpdate
     sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
@@ -355,11 +359,16 @@ kernelUprade () {
     #     sudo reboot
     #   fi
     # fi
-    read -rp "Do you want to reboot (y/n)?" answer
+    if [[ $noPrompt -eq 1 ]]; then
+      read -rp "Do you want to reboot (y/n)?" answer
+    else
+      answer=NULL
+    fi
     if [[ $answer = [Yy1] ]]; then
       sudo reboot
     fi
   fi
+  answer=NULL
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -446,7 +455,7 @@ virtualboxGuestSetup () {
 # ############################################################################
 # Create directories on data disk for testing
 createTestDataDirs () {
-  log_info "XPS Data Dir links"
+  log_info "Create Test Data directories"
   currentPath=$(pwd)
   cd "$HOME" || exit
 
@@ -462,16 +471,18 @@ createTestDataDirs () {
         # ln -s "/data" "$HOME/$sourceDataDirectory"
       else
         # It's a directory!
-        log_debug "Remove directory $HOME/data"
+        # log_debug "Remove directory $HOME/data"
         rm -R "${HOME/$sourceDataDirectory:?}"
         ln -s "/data" "$HOME/$sourceDataDirectory"
       fi
     else
-      log_debug "Link directory $HOME/data"
+      # log_debug "Link directory $HOME/data"
       ln -s "/data" "$HOME/$sourceDataDirectory"
     fi
 
     linkDataDirectories=(
+    "bin"
+    "docker"
     "Documents"
     "Downloads"
     "Music"
@@ -495,7 +506,7 @@ createTestDataDirs () {
     log_info "linkDataDirectories ${linkDataDirectories[*]}"
 
     for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
-      log_debug "Link directory = $sourceLinkDirectory"
+      # log_debug "Link directory = $sourceLinkDirectory"
       mkdir -p "/data/$sourceLinkDirectory"
     done
 
@@ -511,6 +522,7 @@ createTestDataDirs () {
     for (( i = 0; i <= count; i+=2 )); do
       sourceLinkDirectory=${linkDataDirectories[i]}
       targetLinkDirectory=${linkDataDirectories[i+1]}
+      # log_debug "Link directory = $sourceLinkDirectory"
       # remove after testing
       mkdir -p "/data/$sourceLinkDirectory"
       # up to here
@@ -531,7 +543,7 @@ dataDirLinksSetup () {
     if [ -d "$HOME/$sourceDataDirectory" ]; then
       if [ -L "$HOME/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_info "Keep symlink $HOME/data"
+        log_debug "Keep symlink $HOME/data"
         # log_warning "Remove symlink $HOME/data"
         # rm "$HOME/$sourceDataDirectory"
         # ln -s "/data" "$HOME/$sourceDataDirectory"
@@ -568,7 +580,7 @@ dataDirLinksSetup () {
     log_info "linkDataDirectories ${linkDataDirectories[*]}"
 
     for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
-      log_debug "Link directory = $sourceLinkDirectory"
+      # log_debug "Link directory = $sourceLinkDirectory"
       # remove after testing
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
@@ -576,33 +588,33 @@ dataDirLinksSetup () {
         if [ -d "$HOME/$sourceLinkDirectory" ]; then
           if [ -L "$HOME/$sourceLinkDirectory" ]; then
             # It is a symlink!
-            log_debug "Remove symlink $HOME/$sourceLinkDirectory"
+            # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
             rm "$HOME/$sourceLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
           else
             # It's a directory!
-            log_debug "Remove directory $HOME/data"
+            # log_debug "Remove directory $HOME/data"
             rmdir "$HOME/$sourceLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
           fi
         else
           rm "$HOME/$sourceLinkDirectory"
           ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
         fi
       else
-        log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
+        # log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
         if [ -L "$HOME/$sourceLinkDirectory" ];  then
           # It is a symlink!
-          log_debug "Remove symlink $HOME/$sourceLinkDirectory"
+          # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
           rm "$HOME/$sourceLinkDirectory"
           ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
         fi
         ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-        log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
       fi
     done
 
@@ -621,38 +633,38 @@ dataDirLinksSetup () {
       # remove after testing
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
-      log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
+      # log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
       if [ -e "$HOME/$targetLinkDirectory" ]; then
         if [ -d "$HOME/$targetLinkDirectory" ]; then
           if [ -L "$HOME/$targetLinkDirectory" ]; then
             # It is a symlink!
-            log_debug "Remove symlink $HOME/$targetLinkDirectory"
+            # log_debug "Remove symlink $HOME/$targetLinkDirectory"
             rm "$HOME/$targetLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
           else
             # It's a directory!
-            log_debug "Remove directory $HOME/data"
+            # log_debug "Remove directory $HOME/data"
             rmdir "$HOME/$targetLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-            log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
           fi
         else
           rm "$HOME/$targetLinkDirectory"
           ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
         fi
       else
-        log_debug "$HOME/$targetLinkDirectory does not exists and synlink will be made"
+        # log_debug "$HOME/$targetLinkDirectory does not exists and synlink will be made"
         if [ -L "$HOME/$targetLinkDirectory" ];  then
           # It is a symlink!
-          log_debug "Remove symlink $HOME/$targetLinkDirectory"
+          # log_debug "Remove symlink $HOME/$targetLinkDirectory"
           rm "$HOME/$targetLinkDirectory"
           ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
         fi
         ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-        log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
       fi
     done
 
@@ -829,8 +841,8 @@ bashdbInstall() {
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
   curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
-  tar -xzf $HOME/tmp/bashdb.tar.gz
-  cd $HOME/tmp/bashdb-4.4-0.94 || die "Path bashdb-4.4-0.94 does not exist"
+  tar -xzf "$HOME/tmp/bashdb.tar.gz"
+  cd "$HOME/tmp/bashdb-4.4-0.94" || die "Path bashdb-4.4-0.94 does not exist"
   ./configure
   make
   sudo make install
@@ -1038,7 +1050,7 @@ vagrantInstall () {
   log_info "Vagrant Applications Install"
   println_blue "Vagrant Applications Install                                               "
   rubyRepo
-  sudo add-apt-repository ppa:tiagohillebrandt/vagrant
+  sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
 
   sudo apt install -yf libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
   vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
@@ -1211,7 +1223,7 @@ librecadInstall() {
   log_info "Install LibreCAD"
   println_blue "Install LibreCAD"
 
-  sudo add-apt-repository ppa:librecad-dev/librecad-stable
+  sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
   changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 
   repoUpdate
@@ -1224,7 +1236,8 @@ librecadInstall() {
 calibreInstal() {
   log_info "Calibre"
   println_blue "Calibre"
-  sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+  # sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+  sudo && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
   # Use the following f you get certificate issues
   # sudo -v && wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
 
@@ -1287,7 +1300,7 @@ digikamInstall () {
   log_info "Digikam Install"
   println_blue "Digikam Install"
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-  sudo add-apt-repository ppa:philip5/extra
+  sudo add-apt-repository -y ppa:philip5/extra
   # sudo apt install -yf
 	sudo apt install -yf digikam digikam-doc digikam-data
   # sudo apt install -yf
@@ -1303,7 +1316,7 @@ darktableInstall() {
     println_red "Beta Code or no new repo, downgrade the apt sources."
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
-  sudo apt install darktable
+  sudo apt -y install darktable
 }
 
 rapidPhotoDownloaderInstall() {
@@ -1463,470 +1476,470 @@ installUniverseApps () {
 
 # ############################################################################
 # Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
-questionRun () {
-  printf "Question before install asking for each type of install type\n"
-  read -rp "Do you want to do a Kernel update? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    kernelUpradeAns=1
-  else
-    read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
-    if [[ $answer = [Yy1] ]]; then
-      startUpdateAns=1
-    fi
-  fi
-  case $1 in
-    [lw] )
-      read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        homeDataDirAns=1
-      fi
-      read -rp "Do you want to install ownCloudClient? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        ownCloudClientAns=1
-      fi
-      if [[ $1 = l ]]; then
-        read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          displayDriversAns=1
-        fi
-        read -rp "Do you want to install DisplayLink? (y/n)" answer
-        if [[ $answer = [Yy1] ]]; then
-          displayLinkAns=1
-        fi
-      fi
-    ;;
-    vm )
-      read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        vmwareGuestSetupAns=1
-      fi
-    ;;
-    vb )
-      read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        virtualBoxGuestSetupAns=1
-      fi
-    ;;
-  esac
-  case $desktopEnvironment in
-    gnome)
-      read -rp "Do you want to install Gnome Backports? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        gnomeBackportsAns=1
-      fi
-      read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        gnomeButtonsAns=1
-      fi
-      ;;
-    kde)
-      read -rp "Do you want to install KDE Backports? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        kdeBackportsAns=1
-      fi
-      ;;
-  esac
-  read -rp "Do you want to install Doublecmd? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    doublecmdAns=1
-  fi
-  read -rp "Do you want to install Google Chrome? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    chromeAns=1
-  fi
-  read -rp "Do you want to install DigiKam? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    digiKamAns=1
-  fi
-  read -rp "Do you want to install Docker? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    dockerAns=1
-  fi
-  read -rp "Do you want to install Dropbox? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    dropboxAns=1
-  fi
-  read -rp "Do you want to install Photography Apps? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    photoAns=1
-  fi
-  read -rp "Do you want to install AsciiDoc? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    asciiDocAns=1
-  fi
-  read -rp "Do you want to install Vagrant? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    vagrantAns=1
-  fi
-  read -rp "Do you want to install Development Apps? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    devAppsAns=1
-    read -rp "Do you want to install Git? (y/n)" answer
-    if [[ $answer = [Yy1] ]]; then
-      gitAns=1
-    fi
-  fi
-  read -rp "Do you want to install extra Fonts? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    fontsAns=1
-  fi
-  read -rp "Do you want to add the general Repo Keys? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    addGenRepoAns=1
-  fi
-  # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
-  # if [[ $answer = [Yy1] ]]; then
-  #   downgradeAptDistroAns=1
-  # fi
-  read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    addRepoAns=1
-  fi
-  read -rp "Do you want to do a Repo Update? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpdateAns=1
-  fi
-  read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpgradeAns=1
-  fi
-  read -rp "Do you want to do install the applications? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    installAppsAns=1
-  fi
-  # end of questions
-  # debug "You want to stop"
-  # printf "######## STOP ##########"
-  # read -rp "Do you want to stop? (y/n)" answer
-  # if [[ $answer = [Yy1] ]]; then
-  #   exit 0;
-  # fi
-
-  # start of repositories setup
-  if [[ $kernelUpradeAns = 1 ]]; then
-    kernelUprade
-  fi
-  if [[ $startUpdateAns = 1 ]]; then
-    repoUpdate
-    repoUpgrade
-  fi
-  if [[ $addRepoAns = 1 ]]; then
-    #statements
-    if [[ $devAppsAns = 1 ]]; then
-      rubyRepo
-    fi
-    case $desktopEnvironment in
-      gnome )
-      ;;
-      kde )
-        if [[ $kdeBackportsAns = 1 ]]; then
-          kdeBackportsApps
-        fi
-      ;;
-    esac
-    if [[ $addGenRepoAns = 1 ]]; then
-      addRepositories
-    fi
-  fi
-  # if [[ $downgradeAptDistroAns = 1 ]]; then
-  #   downgradeAptDistro
-  # fi
-
-  # update repositories
-  if [[ $repoUpdateAns = 1 ]]; then
-    repoUpdate
-  fi
-
-  #start of application install
-  if [[ $installAppsAns = 1 ]]; then
-    log_info "Start Applications installation"
-    println_banner_yellow "Start Applications installation                                    "
-    if [[ $homeDataDirAns = 1 ]]; then
-      dataDirLinksSetup
-    fi
-    if [[ $vmwareGuestSetupAns = 1 ]]; then
-      vmwareGuestSetup
-    fi
-    if [[ $virtualBoxGuestSetupAns = 1 ]]; then
-      virtualboxGuestSetup
-    fi
-    if [[ $displayDriversAns = 1 ]]; then
-      laptopDisplayDrivers
-    fi
-    if [[ $displayLinkAns = 1 ]]; then
-      displayLinkInstallApp
-    fi
-    if [[ $ownCloudClientAns = 1 ]]; then
-      ownCloudClientInstall
-    fi
-    if [[ $doublecmdAns = 1 ]]; then
-      doublecmdInstall
-    fi
-    if [[ $chromeAns = 1 ]]; then
-      googleChromeInstall
-    fi
-    if [[ $digiKamAns = 1 ]]; then
-      digikamInstall
-    fi
-    if [[ $dockerAns = 1 ]]; then
-      dockerInstall
-    fi
-    if [[ $dropboxAns = 1 ]]; then
-      dropboxInstall
-    fi
-    if [[ $desktopEnvironment = "gnome" ]]; then
-      if [[ $gnomeBackportsAns = 1 ]]; then
-        gnome3Backports
-      fi
-      if [[ $gnomeButtonsAns = 1 ]]; then
-        gnome3Settings
-      fi
-    fi
-    if [[ $photoAns = 1 ]]; then
-      photoAppsInstall
-    fi
-    if [[ $devAppsAns = 1 ]]; then
-      devAppsInstall
-    fi
-    if [[ $gitAns = 1 ]]; then
-      gitInstall
-    fi
-    if [[ $asciiDocAns = 1 ]]; then
-      asciiDocInstall
-    fi
-    if [[ $fontsAns = 1 ]]; then
-      fontsInstall
-    fi
-    if [[ $vagrantAns = 1 ]]; then
-      vagrantInstall
-    fi
-    installUniverseApps
-  fi
-
-  # update distro
-  if [[ $repoUpgradeAns = 1 ]]; then
-    repoUpgrade
-  fi
-}
+# questionRun () {
+#   printf "Question before install asking for each type of install type\n"
+#   read -rp "Do you want to do a Kernel update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     kernelUpradeAns=1
+#   else
+#     read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       startUpdateAns=1
+#     fi
+#   fi
+#   case $1 in
+#     [lw] )
+#       read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         homeDataDirAns=1
+#       fi
+#       read -rp "Do you want to install ownCloudClient? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         ownCloudClientAns=1
+#       fi
+#       if [[ $1 = l ]]; then
+#         read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           displayDriversAns=1
+#         fi
+#         read -rp "Do you want to install DisplayLink? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           displayLinkAns=1
+#         fi
+#       fi
+#     ;;
+#     vm )
+#       read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         vmwareGuestSetupAns=1
+#       fi
+#     ;;
+#     vb )
+#       read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         virtualBoxGuestSetupAns=1
+#       fi
+#     ;;
+#   esac
+#   case $desktopEnvironment in
+#     gnome)
+#       read -rp "Do you want to install Gnome Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnomeBackportsAns=1
+#       fi
+#       read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnomeButtonsAns=1
+#       fi
+#       ;;
+#     kde)
+#       read -rp "Do you want to install KDE Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         kdeBackportsAns=1
+#       fi
+#       ;;
+#   esac
+#   read -rp "Do you want to install Doublecmd? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     doublecmdAns=1
+#   fi
+#   read -rp "Do you want to install Google Chrome? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     chromeAns=1
+#   fi
+#   read -rp "Do you want to install DigiKam? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     digiKamAns=1
+#   fi
+#   read -rp "Do you want to install Docker? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dockerAns=1
+#   fi
+#   read -rp "Do you want to install Dropbox? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dropboxAns=1
+#   fi
+#   read -rp "Do you want to install Photography Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     photoAns=1
+#   fi
+#   read -rp "Do you want to install AsciiDoc? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     asciiDocAns=1
+#   fi
+#   read -rp "Do you want to install Vagrant? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vagrantAns=1
+#   fi
+#   read -rp "Do you want to install Development Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     devAppsAns=1
+#     read -rp "Do you want to install Git? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       gitAns=1
+#     fi
+#   fi
+#   read -rp "Do you want to install extra Fonts? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     fontsAns=1
+#   fi
+#   read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addGenRepoAns=1
+#   fi
+#   # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   downgradeAptDistroAns=1
+#   # fi
+#   read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addRepoAns=1
+#   fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdateAns=1
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgradeAns=1
+#   fi
+#   read -rp "Do you want to do install the applications? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     installAppsAns=1
+#   fi
+#   # end of questions
+#   # debug "You want to stop"
+#   # printf "######## STOP ##########"
+#   # read -rp "Do you want to stop? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   exit 0;
+#   # fi
+#
+#   # start of repositories setup
+#   if [[ $kernelUpradeAns = 1 ]]; then
+#     kernelUprade
+#   fi
+#   if [[ $startUpdateAns = 1 ]]; then
+#     repoUpdate
+#     repoUpgrade
+#   fi
+#   if [[ $addRepoAns = 1 ]]; then
+#     #statements
+#     if [[ $devAppsAns = 1 ]]; then
+#       rubyRepo
+#     fi
+#     case $desktopEnvironment in
+#       gnome )
+#       ;;
+#       kde )
+#         if [[ $kdeBackportsAns = 1 ]]; then
+#           kdeBackportsApps
+#         fi
+#       ;;
+#     esac
+#     if [[ $addGenRepoAns = 1 ]]; then
+#       addRepositories
+#     fi
+#   fi
+#   # if [[ $downgradeAptDistroAns = 1 ]]; then
+#   #   downgradeAptDistro
+#   # fi
+#
+#   # update repositories
+#   if [[ $repoUpdateAns = 1 ]]; then
+#     repoUpdate
+#   fi
+#
+#   #start of application install
+#   if [[ $installAppsAns = 1 ]]; then
+#     log_info "Start Applications installation"
+#     println_banner_yellow "Start Applications installation                                    "
+#     if [[ $homeDataDirAns = 1 ]]; then
+#       dataDirLinksSetup
+#     fi
+#     if [[ $vmwareGuestSetupAns = 1 ]]; then
+#       vmwareGuestSetup
+#     fi
+#     if [[ $virtualBoxGuestSetupAns = 1 ]]; then
+#       virtualboxGuestSetup
+#     fi
+#     if [[ $displayDriversAns = 1 ]]; then
+#       laptopDisplayDrivers
+#     fi
+#     if [[ $displayLinkAns = 1 ]]; then
+#       displayLinkInstallApp
+#     fi
+#     if [[ $ownCloudClientAns = 1 ]]; then
+#       ownCloudClientInstall
+#     fi
+#     if [[ $doublecmdAns = 1 ]]; then
+#       doublecmdInstall
+#     fi
+#     if [[ $chromeAns = 1 ]]; then
+#       googleChromeInstall
+#     fi
+#     if [[ $digiKamAns = 1 ]]; then
+#       digikamInstall
+#     fi
+#     if [[ $dockerAns = 1 ]]; then
+#       dockerInstall
+#     fi
+#     if [[ $dropboxAns = 1 ]]; then
+#       dropboxInstall
+#     fi
+#     if [[ $desktopEnvironment = "gnome" ]]; then
+#       if [[ $gnomeBackportsAns = 1 ]]; then
+#         gnome3Backports
+#       fi
+#       if [[ $gnomeButtonsAns = 1 ]]; then
+#         gnome3Settings
+#       fi
+#     fi
+#     if [[ $photoAns = 1 ]]; then
+#       photoAppsInstall
+#     fi
+#     if [[ $devAppsAns = 1 ]]; then
+#       devAppsInstall
+#     fi
+#     if [[ $gitAns = 1 ]]; then
+#       gitInstall
+#     fi
+#     if [[ $asciiDocAns = 1 ]]; then
+#       asciiDocInstall
+#     fi
+#     if [[ $fontsAns = 1 ]]; then
+#       fontsInstall
+#     fi
+#     if [[ $vagrantAns = 1 ]]; then
+#       vagrantInstall
+#     fi
+#     installUniverseApps
+#   fi
+#
+#   # update distro
+#   if [[ $repoUpgradeAns = 1 ]]; then
+#     repoUpgrade
+#   fi
+# }
 
 # ############################################################################
 # Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
-questionStepRun () {
-  printf "Question each step before installing\n"
-  read -rp "Do you want to do a Kernel update? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    kernelUprade
-  fi
-  read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    dataDirLinksSetup
-  fi
-  read -rp "Do you want to add the general Repo Keys? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    addRepositories
-  fi
-  # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
-  # if [[ $answer = [Yy1] ]]; then
-  #   downgradeAptDistro
-  # fi
-  read -rp "Do you want to do a Repo Update? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpdate
-  fi
-  read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpgrade
-  fi
-  read -rp "Do you want to do install the applications? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    installUniverseApps
-  fi
-  read -rp "Do you want to install ownCloudClient? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    ownCloudClientInstall
-  fi
-  read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    laptopDisplayDrivers
-  fi
-  read -rp "Do you want to install DisplayLink? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    displayLinkInstallApp
-  fi
-  read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    vmwareGuestSetup
-  fi
-  read -rp "Do you want to install and setup for VirtualBox GUEST? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    virtualboxGuestSetup
-  fi
-  case $desktopEnvironment in
-    gnome)
-      read -rp "Do you want to install Gnome Backports? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        gnome3Backports
-      fi
-      read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        gnome3Settings
-      fi
-      ;;
-    kde)
-      read -rp "Do you want to install KDE Backports? (y/n)" answer
-      if [[ $answer = [Yy1] ]]; then
-        kdeBackportsApps
-      fi
-      ;;
-  esac
-  read -rp "Do you want to install Doublecmd? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    doublecmdInstall
-  fi
-  read -rp "Do you want to install Google Chrome? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    googleChromeInstall
-  fi
-  read -rp "Do you want to install DigiKam? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    digikamInstall
-  fi
-  read -rp "Do you want to install Docker? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    dockerInstall
-  fi
-  read -rp "Do you want to install Dropbox? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    dropboxInstall
-  fi
-  read -rp "Do you want to install Photography Apps? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    photoAppsInstall
-  fi
-  read -rp "Do you want to install AsciiDoc? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    asciiDocInstall
-  fi
-  read -rp "Do you want to install and setup for VirtualBox HOST? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    virtualboxHostInstall
-  fi
-  read -rp "Do you want to install Vagrant? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    vagrantInstall
-  fi
-  read -rp "Do you want to install Development Apps? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    read -rp "Do you want to install Git? (y/n)" answer
-    if [[ $answer = [Yy1] ]]; then
-      gitInstall
-    fi
-    rubyRepo
-    devAppsInstall
-  fi
-  read -rp "Do you want to install extra Fonts? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    fontsInstall
-  fi
-  read -rp "Do you want to do a Repo Update? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpdate
-  fi
-  read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
-  if [[ $answer = [Yy1] ]]; then
-    repoUpgrade
-  fi
-}
+# questionStepRun () {
+#   printf "Question each step before installing\n"
+#   read -rp "Do you want to do a Kernel update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     kernelUprade
+#   fi
+#   read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dataDirLinksSetup
+#   fi
+#   read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addRepositories
+#   fi
+#   # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   downgradeAptDistro
+#   # fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdate
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgrade
+#   fi
+#   read -rp "Do you want to do install the applications? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     installUniverseApps
+#   fi
+#   read -rp "Do you want to install ownCloudClient? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     ownCloudClientInstall
+#   fi
+#   read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     laptopDisplayDrivers
+#   fi
+#   read -rp "Do you want to install DisplayLink? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     displayLinkInstallApp
+#   fi
+#   read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vmwareGuestSetup
+#   fi
+#   read -rp "Do you want to install and setup for VirtualBox GUEST? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     virtualboxGuestSetup
+#   fi
+#   case $desktopEnvironment in
+#     gnome)
+#       read -rp "Do you want to install Gnome Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnome3Backports
+#       fi
+#       read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnome3Settings
+#       fi
+#       ;;
+#     kde)
+#       read -rp "Do you want to install KDE Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         kdeBackportsApps
+#       fi
+#       ;;
+#   esac
+#   read -rp "Do you want to install Doublecmd? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     doublecmdInstall
+#   fi
+#   read -rp "Do you want to install Google Chrome? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     googleChromeInstall
+#   fi
+#   read -rp "Do you want to install DigiKam? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     digikamInstall
+#   fi
+#   read -rp "Do you want to install Docker? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dockerInstall
+#   fi
+#   read -rp "Do you want to install Dropbox? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dropboxInstall
+#   fi
+#   read -rp "Do you want to install Photography Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     photoAppsInstall
+#   fi
+#   read -rp "Do you want to install AsciiDoc? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     asciiDocInstall
+#   fi
+#   read -rp "Do you want to install and setup for VirtualBox HOST? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     virtualboxHostInstall
+#   fi
+#   read -rp "Do you want to install Vagrant? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vagrantInstall
+#   fi
+#   read -rp "Do you want to install Development Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     read -rp "Do you want to install Git? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       gitInstall
+#     fi
+#     rubyRepo
+#     devAppsInstall
+#   fi
+#   read -rp "Do you want to install extra Fonts? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     fontsInstall
+#   fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdate
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgrade
+#   fi
+# }
 
 # ############################################################################
 # Autorun function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
-autoRun () {
-  log_info "Start Auto Applications installation"
-  println_banner_yellow "Start Auto Applications installation                                 "
-  noPrompt=1
-  menuSelectionsInput=(1)    #: Kernel upgrade
-  case $1 in
-    [lwv] )
-      menuSelectionsInput+=(59)   #: Add Ruby Repositories
-      ;;
-  esac
-  menuSelectionsInput+=(2)  #: Repositories update
-  case $desktopEnvironment in
-    gnome )
-      menuSelectionsInput+=(15)    #: Install Gnome Desktop from backports
-      menuSelectionsInput+=(16)    #: Install Gnome Desktop from backports
-    ;;
-    kde )
-      menuSelectionsInput+=(11)  #: Install KDE Desktop from backports
-      if [[ $1 = [lwv] ]]; then
-        menuSelectionsInput+=(71)   #: Digikam
-      fi
-    ;;
-  esac
-
-  menuSelectionsInput+=(32)   #: Doublecmd
-  menuSelectionsInput+=(31)   #: Google Chrome browser
-  menuSelectionsInput+=(37)   #: Install extra fonts
-  menuSelectionsInput+=(4)    #: Install the Universe applications
-
-  case $1 in
-    vm )
-      menuSelectionsInput+=(83)   #: Setup for a Vmware guest
-    ;;
-    vb )
-      # menuSelectionsInput+=(81)   #: Setup for a VirtualBox guest
-    ;;
-    l )
-      menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
-      menuSelectionsInput+=(88)   #: Laptop Display Drivers for Intel en Nvidia
-      menuSelectionsInput+=(89)   #: DisplayLink
-      menuSelectionsInput+=(21)   #: ownCloudClient
-      menuSelectionsInput+=(22)   #: Docker
-      menuSelectionsInput+=(23)   #: Dropbox
-      menuSelectionsInput+=(24)   #: inSync for GoogleDrive
-      menuSelectionsInput+=(82)   #: VirtualBox Host
-      menuSelectionsInput+=(84)   #: Vagrant
-      menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
-      menuSelectionsInput+=(51)   #: Git
-      menuSelectionsInput+=(52)   #: AsciiDoc
-      menuSelectionsInput+=(53)   #: Bashdb
-      menuSelectionsInput+=(70)   #: Photography Apps
-    ;;
-    w )
-      menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
-      menuSelectionsInput+=(21)   #: ownCloudClient
-      menuSelectionsInput+=(22)   #: Docker
-      menuSelectionsInput+=(23)   #: Dropbox
-      menuSelectionsInput+=(24)   #: inSync for GoogleDrive
-      menuSelectionsInput+=(82)   #: VirtualBox Host
-      menuSelectionsInput+=(84)   #: Vagrant
-      menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
-      menuSelectionsInput+=(51)   #: Git
-      menuSelectionsInput+=(52)   #: AsciiDoc
-      menuSelectionsInput+=(53)   #: Bashdb
-      menuSelectionsInput+=(70)   #: Photography Apps
-    ;;
-    v )
-      menuSelectionsInput+=(91)   #: Create test data directories on data drive.
-      menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
-      menuSelectionsInput+=(21)   #: ownCloudClient
-      menuSelectionsInput+=(22)   #: Docker
-      menuSelectionsInput+=(23)   #: Dropbox
-      menuSelectionsInput+=(24)   #: inSync for GoogleDrive
-      menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
-      menuSelectionsInput+=(51)   #: Git
-      menuSelectionsInput+=(52)   #: AsciiDoc
-      menuSelectionsInput+=(53)   #: Bashdb
-      menuSelectionsInput+=(70)   #: Photography Apps
-    ;;
-  esac
-
-  menuSelectionsInput+=(2)    #: Repositories update
-  menuSelectionsInput+=(3)    #: Repositories upgrade
-  menuRun "AutoRun" "${menuSelectionsInput[@]}"
-  # end of run
-  noPrompt=0
-}
+# autoRun () {
+#   log_info "Start Auto Applications installation"
+#   println_banner_yellow "Start Auto Applications installation                                 "
+#   noPrompt=1
+#   menuSelectionsInput=(1)    #: Kernel upgrade
+#   case $1 in
+#     [lwv] )
+#       menuSelectionsInput+=(59)   #: Add Ruby Repositories
+#       ;;
+#   esac
+#   menuSelectionsInput+=(2)  #: Repositories update
+#   case $desktopEnvironment in
+#     gnome )
+#       menuSelectionsInput+=(15)    #: Install Gnome Desktop from backports
+#       menuSelectionsInput+=(16)    #: Install Gnome Desktop from backports
+#     ;;
+#     kde )
+#       menuSelectionsInput+=(11)  #: Install KDE Desktop from backports
+#       if [[ $1 = [lwv] ]]; then
+#         menuSelectionsInput+=(71)   #: Digikam
+#       fi
+#     ;;
+#   esac
+#
+#   menuSelectionsInput+=(32)   #: Doublecmd
+#   menuSelectionsInput+=(31)   #: Google Chrome browser
+#   menuSelectionsInput+=(37)   #: Install extra fonts
+#   menuSelectionsInput+=(4)    #: Install the Universe applications
+#
+#   case $1 in
+#     vm )
+#       menuSelectionsInput+=(83)   #: Setup for a Vmware guest
+#     ;;
+#     vb )
+#       # menuSelectionsInput+=(81)   #: Setup for a VirtualBox guest
+#     ;;
+#     l )
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(88)   #: Laptop Display Drivers for Intel en Nvidia
+#       menuSelectionsInput+=(89)   #: DisplayLink
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(82)   #: VirtualBox Host
+#       menuSelectionsInput+=(84)   #: Vagrant
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#     w )
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(82)   #: VirtualBox Host
+#       menuSelectionsInput+=(84)   #: Vagrant
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#     v )
+#       menuSelectionsInput+=(91)   #: Create test data directories on data drive.
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#   esac
+#
+#   menuSelectionsInput+=(2)    #: Repositories update
+#   menuSelectionsInput+=(3)    #: Repositories upgrade
+#   menuRun "AutoRun" "${menuSelectionsInput[@]}"
+#   # end of run
+#   noPrompt=0
+# }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O           Menus                                                          O
@@ -1934,17 +1947,15 @@ autoRun () {
 # ############################################################################
 # Set Ubuntu Version Parameters
 setUbuntuVersionParameters() {
-  println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
-  read -rp "Do you want to setup the build for a beta install? (y/n) " answer
+  # read -rp "Do you want to setup the build for a beta install? (y/n) " answer
   if [[ $answer = [Yy1] ]]; then
     betaAns=1
     validchoice=0
     until [[ $validchoice == 1 ]]; do
       clear
+      printf "\n\n\n"
+      println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
       printf "
-
-
-
       There are the following options for changing the distribution app sources to a stable release:
       Key  : Stable Release
       -----: ---------------------------------------
@@ -2658,8 +2669,9 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "88" ]]; then printf "%s%s88%s" "${rev}" "${bold}" "${normal}"; else printf "88"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "89" ]]; then printf "%s%s89%s" "${rev}" "${bold}" "${normal}"; else printf "89"; fi; printf "  : DisplayLink.\n"
     printf "\n"
-    printf "     a   : Development Apps and IDEs Menu\n"
-    printf "     b   : Photography and Imaging Menu\n"
+    printf "     a   : Development Apps and IDEs Menu.\n"
+    printf "     b   : Photography and Imaging Menu.\n"
+    printf "     x   : Buildman Settings, Utilities and tests.\n"
     printf "\n"
     printf "\n"
     printf "     %s99  : RUN%s\n" "${bold}" "${normal}"
@@ -2922,7 +2934,7 @@ runSelection() {
     36 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
     37 ) asking  fontsInstall "install extra fonts" "Extra fonts install complete." ;;
     50 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
-    51 )  asking gitInstall "install Git" "Git install complete." ;;
+    51 ) asking gitInstall "install Git" "Git install complete." ;;
     52 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
     53 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
     54 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
