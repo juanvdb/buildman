@@ -9,8 +9,8 @@ dotFilesParentDir=/data/dotfiles
 INTERACTIVE_MODE="on"
 scriptDebugToStdout="on"
 scriptDebugToFile="on"
-debugLogFile="linkdotfiles.log"
-errorLogFile="linkdotfileserror.log"
+debugLogFile="$HOME/tmp/linkdotfiles.log"
+errorLogFile="$HOME/tmp/linkdotfileserror.log"
 
 if [[ $scriptDebugToFile == "on" ]]; then
   if [[ -e $debugLogFile ]]; then

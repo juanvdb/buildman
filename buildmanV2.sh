@@ -44,13 +44,11 @@
   distReleaseVer=$(lsb_release -sr)
   distReleaseName=$(lsb_release -sc)
   noPrompt=0
-  debugLogFile="$HOME/.local/share/buildman/buildman.log"
-  errorLogFile="$HOME/.local/share/buildman/buildman_error.log"
+  debugLogFile="$HOME/tmp/buildman.log"
+  errorLogFile="$HOME/tmp/buildman_error.log"
 
   mkdir -p "$HOME/tmp"
   sudo chown "$USER":"$USER" "$HOME/tmp"
-  mkdir -p "$HOME/.local/share/buildman"
-  sudo chown "$USER":"$USER" "$HOME/.local/share/buildman"
 }
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                          Debug                                           O
@@ -337,12 +335,7 @@ repoUpgrade () {
 kernelUprade () {
   log_info "Kernel Upgrade"
   println_banner_yellow "Kernel Upgrade                                                        "
-  # if [[ "$noPrompt" -ne 1 ]]; then
-  #   read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
-  # else
-  #   answer=1
-  # fi
-  if [[ $noPrompt -eq 1 ]]; then
+  if [[ $noPrompt -eq 0 ]]; then
     read -rp "Do you want to go ahead with the kernel and packages Upgrade, and possibly will have to reboot (y/n)?" answer
   else
     answer=1
@@ -353,19 +346,11 @@ kernelUprade () {
     sudo apt upgrade -y;
     sudo apt full-upgrade -y;
     sudo apt dist-upgrade -y;
-    # if [[ "$noPrompt" -ne 1 ]]; then
-    #   read -rp "Do you want to reboot (y/n)?" answer
-    #   if [[ $answer = [Yy1] ]]; then
-    #     sudo reboot
-    #   fi
-    # fi
-    if [[ $noPrompt -eq 1 ]]; then
+    if [[ "$noPrompt" -ne 1 ]]; then
       read -rp "Do you want to reboot (y/n)?" answer
-    else
-      answer=NULL
-    fi
-    if [[ $answer = [Yy1] ]]; then
-      sudo reboot
+      if [[ $answer = [Yy1] ]]; then
+        sudo reboot
+      fi
     fi
   fi
   answer=NULL
@@ -408,8 +393,8 @@ virtualboxHostInstall () {
 
 
   if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, downgrade the apt sources."
-    println_red "Beta Code or no new repo, downgrade the apt sources."
+    log_warning "Beta Code or no new repo, revert the Virtualbox apt sources."
+    println_red "Beta Code or no new repo, revert the Virtaulbox apt sources."
     changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
 
@@ -417,7 +402,7 @@ virtualboxHostInstall () {
   # VirtualBox 5.1
   # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
   #VirtualBox 5.2
-  sudo apt install virtualbox-5.2 virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  sudo apt install -y virtualbox-5.2 virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
   # case $desktopEnvironment in
   #   "kde" )
   #   # sudo apt install -y virtualbox-qt;
@@ -747,11 +732,13 @@ gnome3Backports () {
   println_blue "Install Gnome3 Backports                                                      "
   sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
   sudo add-apt-repository -y ppa:gnome3-team/gnome3
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, downgrade the Gnome3 Backport apt sources."
-    # changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" xenial
-    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Gnome3 apt sources."
+    println_red "Beta Code or no new repo, revert the Gnome3 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
+
   repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
@@ -774,7 +761,13 @@ kdeBetaBackportsRepo () {
   #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
   #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   # fi
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
+    println_red "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
+    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
 }
+
 # ############################################################################
 # kdeBackportsApps
 kdeBackportsApps () {
@@ -782,16 +775,13 @@ kdeBackportsApps () {
   println_blue "Add KDE Backports                                                             "
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, downgrade the KDE Backport apt sources."
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the KDE Backports apt sources."
+    println_red "Beta Code or no new repo, revert the KDE Backports apt sources."
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "KDE Backports Repos not available as yet, downgrade the apt sources."
-    println_red "KDE Backports Repos not available as yet, downgrade the apt sources."
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
-  fi
+
   repoUpdate
   repoUpgrade
   sudo apt full-upgrade -y;
@@ -808,7 +798,13 @@ devAppsInstall() {
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
   sudo add-apt-repository -y ppa:webupd8team/atom
-  sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files gitk git-flow giggle gitk gitg maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Atom apt sources."
+    println_red "Beta Code or no new repo, revert the Atom apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-atom-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+
+  sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files gitk git-flow giggle gitk gitg git-cola maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
   # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   bashdbInstall
@@ -825,7 +821,7 @@ gitInstall() {
   currentPath=$(pwd)
   log_info "Git Apps install"
   println_banner_yellow "Git Apps install                                                     "
-  sudo apt install -y gitk git-flow giggle gitk gitg
+  sudo apt install -y gitk git-flow giggle gitg
   wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo apt install -yf
@@ -862,6 +858,12 @@ bashdbInstall() {
 }
 
 # ############################################################################
+# Visual Studio Code Install
+vscodeInstall() {
+  sudo snap install --classic vscode
+}
+
+# ############################################################################
 # LightTable packages installation
 # Very old, suggest install from lightable.com
 lightTableInstall() {
@@ -872,7 +874,7 @@ lightTableInstall() {
   log_warning "Change Lighttable to $ltsReleaseName"
   println_yellow "Change Lighttable to $ltsReleaseName"
   changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
-  sudo apt install lighttable-installer
+  sudo apt install -y lighttable-installer
   cd "$currentPath" || return
 }
 
@@ -883,10 +885,12 @@ bracketsInstall() {
   println_blue "Brackets"
   log_info "Brackets"
   sudo add-apt-repository -y ppa:webupd8team/brackets
-  if [[ $betaAns == 1 ]]; then
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Brackets apt sources."
+    println_red "Beta Code or no new repo, revert the Brackets apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
-  sudo apt install brackets
+  sudo apt install -y brackets
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -904,7 +908,7 @@ googleChromeInstall () {
   println_blue "UGet Chrome Wrapper"
   sudo add-apt-repository -y ppa:slgobinath/uget-chrome-wrapper
   # repoUpdate
-  sudo apt-get install google-chrome-stable uget-chrome-wrapper
+  sudo apt install -y google-chrome-stable uget-chrome-wrapper
 }
 
 # ############################################################################
@@ -924,7 +928,7 @@ insyncInstall () {
   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
   echo "deb http://apt.insynchq.com/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseVer.list"
   repoUpdate
-  sudo apt-get install insync
+  sudo apt install -y insync
 }
 
 # ############################################################################
@@ -943,7 +947,7 @@ doublecmdInstall () {
   # sudo apt-add-repository -y ppa:alexx2000/doublecmd
 
   repoUpdate
-  sudo apt-get -y install doublecmd-qt5 doublecmd-help-en doublecmd-plugins
+  sudo apt -y install doublecmd-qt5 doublecmd-help-en doublecmd-plugins
 }
 
 
@@ -1077,11 +1081,12 @@ webupd8AppsInstall() {
   log_info "WebUpd8: SyncWall, ?WoeUSB? Applictions Install"
   println_blue "WebUpd8: SyncWall, WoeUSB Applications Install"
   sudo add-apt-repository -y ppa:nilarimogard/webupd8
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Repos not available as yet, downgrade WebUpd8 apt sources."
-    println_red "Repos not available as yet, downgrade WebUpd8 apt sources."
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the WebUpd8 apt sources."
+    println_red "Beta Code or no new repo, revert the WebUpd8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   fi
+
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install Syncwall? (Y/N)" answer
     if [[ $answer = [Yy1] ]]; then
@@ -1102,9 +1107,9 @@ yppaManagerInstall() {
   log_info "Y-PPA Manager Appliction Install"
   println_blue "Y-PPA Manager Application Install"
   sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Distribution, downgrade Y-PPA Manager apt sources."
-    println_red "Beta Distribution, downgrade Y-PPA Manager apt sources."
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
+    println_red "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
   sudo apt -y install y-ppa-manager
@@ -1116,26 +1121,26 @@ oracleJava8Install() {
   log_info "Oracle Java8 Installer from WebUpd8"
   println_blue "Oracle Java8 Installer from WebUpd8"
   sudo add-apt-repository -y ppa:webupd8team/java
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Repos not available as yet, downgrade Oracle Java8 Installer apt sources."
-    println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Oracle Java 8 apt sources."
+    println_red "Beta Code or no new repo, revert the Oracle Java 8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   fi
-  sudo apt install oracle-java8-installer
+  sudo apt install -y oracle-java8-installer
 }
 
 
 oracleJava10Install() {
   log_info "Oracle Java10 Installer from WebUpd8"
   println_blue "Oracle Java10 Installer from WebUpd8"
-  sudo add-apt-repository ppa:linuxuprising/java
+  sudo add-apt-repository -y ppa:linuxuprising/java
   # if [[ $noCurrentReleaseRepo == 1 ]]; then
   #   log_warning "Repos not available as yet, downgrade Oracle Java10 Installer apt sources."
   #   # println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
   #   changeAptSource "/etc/apt/sources.list.d/linuxuprising-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   # fi
-  sudo apt install oracle-java10-installer
-  sudo apt install oracle-java10-set-default
+  sudo apt install -y oracle-java10-installer
+  sudo apt install -y oracle-java10-set-default
 }
 
 # ############################################################################
@@ -1149,7 +1154,7 @@ grubCustomizerInstall() {
     println_red "Beta Distribution, downgrade Grub Customizer apt sources."
     changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
-  sudo apt install grub-customizer
+  sudo apt install -y grub-customizer
 }
 
 # ############################################################################
@@ -1160,7 +1165,7 @@ varietyInstall() {
   sudo add-apt-repository -y ppa:peterlevi/ppa
   # sudo add-apt-repository -y ppa:variety/daily
 
-  sudo apt install variety variety-slideshow python3-pip
+  sudo apt install -y variety variety-slideshow python3-pip
   sudo pip3 install ndg-httpsclient # For variety
 }
 
@@ -1171,7 +1176,7 @@ bootRepairInstall() {
   println_blue "Boot Repair Application Install"
   sudo add-apt-repository -y ppa:yannubuntu/boot-repair
 
-  sudo apt install boot-repair
+  sudo apt install -y boot-repair
 }
 
 # ############################################################################
@@ -1179,8 +1184,50 @@ bootRepairInstall() {
 unetbootinInstall() {
   log_info "UNetbootin Appliction Install"
   println_blue "UNetbootin Application Install"
-  sudo add-apt-repository ppa:gezakovacs/ppa
-  sudo apt install unetbootin
+  sudo add-apt-repository -y ppa:gezakovacs/ppa
+  sudo apt install -y unetbootin
+}
+
+# ############################################################################
+# Etcher USB Creater install
+etcherInstall () {
+  log_info "Install Etcher USB loader"
+  println_blue "Install Etcher USB loader"
+
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the repo(default) or snap? (repo/snap)" answer
+    if [[ $answer = [snap] ]]; then
+      sudo snap install etcher
+    else
+      echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
+      repoUpdate
+      sudo apt install -y etcher-electron
+    fi
+  else
+    echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
+    repoUpdate
+    sudo apt install -y etcher-electron
+  fi
+}
+
+# ############################################################################
+# rEFInd Boot Manager packages installation
+rEFIndInstall() {
+  log_info "rEFInd Boot Manager Appliction Install"
+  println_blue "rEFInd Boot Manager Application Install"
+  sudo apt-add-repository -y ppa:rodsmith/refind
+  sudo apt install -y refind
+}
+
+# ############################################################################
+# Stacer Linux system info and cleaner packages installation
+stacerInstall() {
+  log_info "Stacer Linux system info and cleaner Appliction Install"
+  println_blue "Stacer Linux system info and cleaner Application Install"
+  sudo add-apt-repository -y ppa:oguzhaninan/stacer
+  sudo apt install -y stacer
 }
 
 # ############################################################################
@@ -1203,7 +1250,7 @@ FreeFileSyncInstall() {
   log_info "FreeFileSync Appliction Install"
   println_blue "FreeFileSync Application Install"
   getdebRepository
-  sudo apt install freefilesync
+  sudo apt install -y freefilesync
 }
 
 # ############################################################################
@@ -1212,7 +1259,7 @@ latteDockInstall() {
   log_info "Latte Dock for KDE Install"
   println_blue "Latte Dock for KDE Install"
   sudo add-apt-repository -y ppa:rikmills/latte-dock
-  sudo apt install latte-dock
+  sudo apt install -y latte-dock
   kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
   qdbus org.kde.KWin /KWin reconfigure
 }
@@ -1289,6 +1336,7 @@ musicVideoAppsInstall() {
   sudo apt install -y vlc browser-plugin-vlc easytag
   # clementine
   sudo snap install clementine
+  # sudo snap install vlc
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1312,8 +1360,8 @@ darktableInstall() {
   println_blue "Darktable Repo"
   sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
   if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, downgrade the apt sources."
-    println_red "Beta Code or no new repo, downgrade the apt sources."
+    log_warning "Beta Code or no new repo, revert the Darktable apt sources."
+    println_red "Beta Code or no new repo, revert the Darktable apt sources."
     changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
   sudo apt -y install darktable
@@ -1433,7 +1481,7 @@ installUniverseApps () {
 
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat  nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak
+	sudo apt install -yf synaptic gparted aptitude mc filezilla remmina nfs-kernel-server nfs-common samba ssh sshfs rar gawk rdiff-backup luckybackup vim vim-gnome vim-doc tree meld printer-driver-cups-pdf keepassx flashplugin-installer bzr ffmpeg htop iptstate kerneltop vnstat  nmon qpdfview keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter terminator chromium-browser blender caffeine vlc browser-plugin-vlc gufw cockpit autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils thunderbird network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak traceroute
 
   # Older packages...
   # Still active, but replaced with other apps
@@ -2209,7 +2257,7 @@ setUbuntuVersionParameters() {
 #           println_blue "Install Oracle Java9"
 #           echo oracle-java9-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
 #           sudo apt install -y oracle-java9-installer
-#           sudo apt-get install oracle-java9-set-default
+#           sudo apt install oracle-java9-set-default
 #         fi
 #
 #       ;;
@@ -2301,7 +2349,7 @@ setUbuntuVersionParameters() {
 #           log_info "Install LibreCAD"
 #           println_blue "Install LibreCAD"
 #
-#           sudo add-apt-repository ppa:librecad-dev/librecad-stable
+#           sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
 #           changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 #
 #           repoUpdate
@@ -2595,6 +2643,13 @@ menuRun() {
       35   #: LibreCAD
       36   #: Calibre
       37   #: Install extra fonts
+      38   #: Y-PPA Manager
+
+      41   #: bootRepair
+      42   #: rEFInd Boot Manager
+      43   #: UNetbootin
+      44   #: Etcher USB Loader
+      45   #: Stacer Linux system info and cleaner
 
       50   #: Install Development Apps and IDEs
       51   #: Git
@@ -2603,6 +2658,8 @@ menuRun() {
       54   #: Oracle Java 8
       55   #: Oracle Java 9
       56   #: Oracle Java 10
+      57   #: Visual Studio Code
+      58   #: Brackets IDE
       59   #: Add Ruby Repositories
 
       70   #: Photography Apps
@@ -2624,6 +2681,8 @@ menuRun() {
       91   #: Create test data directories on data drive.
       95   #: Change that you dont get any questions asked and there is no interpupts.
       96   #: Change that you are asked if you want to install and it stops after each install function.
+
+      99   #: Run Selection
     )
 
     clear
@@ -2662,6 +2721,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "35" ]]; then printf "%s%s35%s" "${rev}" "${bold}" "${normal}"; else printf "35"; fi; printf "  : LibreCAD.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "36" ]]; then printf "%s%s36%s" "${rev}" "${bold}" "${normal}"; else printf "36"; fi; printf "  : Calibre.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "37" ]]; then printf "%s%s37%s" "${rev}" "${bold}" "${normal}"; else printf "37"; fi; printf "  : Install extra fonts.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "38" ]]; then printf "%s%s38%s" "${rev}" "${bold}" "${normal}"; else printf "38"; fi; printf "  : Y-PPA Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "81" ]]; then printf "%s%s81%s" "${rev}" "${bold}" "${normal}"; else printf "81"; fi; printf "  : Setup for a VirtualBox guest.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "82" ]]; then printf "%s%s82%s" "${rev}" "${bold}" "${normal}"; else printf "82"; fi; printf "  : VirtualBox Host.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "83" ]]; then printf "%s%s83%s" "${rev}" "${bold}" "${normal}"; else printf "83"; fi; printf "  : Setup for a Vmware guest.\n"
@@ -2671,6 +2731,7 @@ menuRun() {
     printf "\n"
     printf "     a   : Development Apps and IDEs Menu.\n"
     printf "     b   : Photography and Imaging Menu.\n"
+    printf "     c   : More Utilities Menu.\n"
     printf "     x   : Buildman Settings, Utilities and tests.\n"
     printf "\n"
     printf "\n"
@@ -2714,6 +2775,9 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "54" ]]; then printf "%s%s54%s" "${rev}" "${bold}" "${normal}"; else printf "54"; fi; printf "  : Oracle Java 8.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "55" ]]; then printf "%s%s55%s" "${rev}" "${bold}" "${normal}"; else printf "55"; fi; printf "  : Oracle Java 9.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "56" ]]; then printf "%s%s56%s" "${rev}" "${bold}" "${normal}"; else printf "56"; fi; printf "  : Oracle Java 10.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "57" ]]; then printf "%s%s57%s" "${rev}" "${bold}" "${normal}"; else printf "57"; fi; printf "  : Visual Studio Code.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "58" ]]; then printf "%s%s58%s" "${rev}" "${bold}" "${normal}"; else printf "58"; fi; printf "  : Brackets IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "59" ]]; then printf "%s%s59%s" "${rev}" "${bold}" "${normal}"; else printf "59"; fi; printf "  : Ruby Repo.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2752,6 +2816,43 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "73" ]]; then printf "%s%s73%s" "${rev}" "${bold}" "${normal}"; else printf "73"; fi; printf "  : RapidPhotoDownloader.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "74" ]]; then printf "%s%s74%s" "${rev}" "${bold}" "${normal}"; else printf "74"; fi; printf "  : Image Editing Applications.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "75" ]]; then printf "%s%s75%s" "${rev}" "${bold}" "${normal}"; else printf "75"; fi; printf "  : Music and Video Applications.\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuUtils(){
+    clear
+    printf "\n\n"
+    printf "  %s%sUtilities%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "41" ]]; then printf "%s%s41%s" "${rev}" "${bold}" "${normal}"; else printf "41"; fi; printf "  : Boot Repair Appliction.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "42" ]]; then printf "%s%s42%s" "${rev}" "${bold}" "${normal}"; else printf "42"; fi; printf "  : rEFInd Boot Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "43" ]]; then printf "%s%s43%s" "${rev}" "${bold}" "${normal}"; else printf "43"; fi; printf "  : UNetbootin ISO to USB Application.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "44" ]]; then printf "%s%s44%s" "${rev}" "${bold}" "${normal}"; else printf "44"; fi; printf "  : Etcher USB loader.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Stacer Linux system info and cleaner.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2832,7 +2933,10 @@ menuRun() {
     elif ((11<=choiceOpt && choiceOpt<=16))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((21<=choiceOpt && choiceOpt<=37))
+    elif ((21<=choiceOpt && choiceOpt<=38))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
+    elif ((41<=choiceOpt && choiceOpt<=45))
     then
       howToRun "$choiceOpt" "$typeOfRun"
     elif ((50<=choiceOpt && choiceOpt<=59))
@@ -2867,7 +2971,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuDev "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            if ((50<=choiceOpt && choiceOpt<=56))
+            if ((50<=choiceOpt && choiceOpt<=59))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             # elif ((3<=choiceOpt && choiceOpt<=4))
@@ -2882,6 +2986,20 @@ menuRun() {
             submenuPhoto "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             if ((70<=choiceOpt && choiceOpt<=75))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            # elif ((3<=choiceOpt && choiceOpt<=4))
+            # then
+            #   howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        c )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuUtils "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            if ((41<=choiceOpt && choiceOpt<=45))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             # elif ((3<=choiceOpt && choiceOpt<=4))
@@ -2932,7 +3050,13 @@ runSelection() {
     34 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
     35 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
     36 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
-    37 ) asking  fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    37 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    38 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
+    41 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
+    42 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
+    43 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
+    44 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
+    45 ) asking stacerInstall "install Stacer Linux system info and cleaner" "Stacer Linux system info and cleaner install complete." ;;
     50 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
     51 ) asking gitInstall "install Git" "Git install complete." ;;
     52 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
@@ -2940,6 +3064,8 @@ runSelection() {
     54 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
     55 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
     56 ) asking oracleJava10Install "Install Oracle Java 10" "Oracle Java 10 install complete." ;;
+    57 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
+    58 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
     59 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
     70 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
     71 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
