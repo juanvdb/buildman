@@ -40,7 +40,7 @@ sudo software-properties-gtk
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y full-upgrade
-sudo apt -y clean
+# sudo apt -y clean
 sudo apt -y autoremove
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
@@ -69,3 +69,26 @@ vagrant up
 sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
 sudo flatpak update
 sudo snap refresh
+
+vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove"
+vagrant ssh -c "/srv/share/build/buildmanV2.sh"
+vagrant ssh -c "tail -f .local/share/buildman/buildman.log"
+
+currentpath=$(pwd)
+cd /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/
+vagrant package --base <VitualBox VM Name> --output /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+cd ${currentpath}
+vagrant destroy -f
+vagrant box remove kcosmic
+vagrant box add kcosmic /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
+
+cd /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/
+vagrant package --base <VitualBox VM Name>
+cd ${currentpath}
+vagrant destroy -y
+vagrant box remove kbionic
+vagrant box add kbionic /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+rm -r $HOME/.vagrant.d/tmp/vagrant-package-*

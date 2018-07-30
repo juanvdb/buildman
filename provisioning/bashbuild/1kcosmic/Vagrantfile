@@ -3,6 +3,7 @@
 
 system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kbionic')
 
+
 # Load our custom configuration and prepare some global variables
 # require 'yaml'
 # cwd       = File.dirname(File.expand_path(__FILE__))
