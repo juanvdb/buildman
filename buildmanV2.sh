@@ -804,7 +804,7 @@ devAppsInstall() {
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-atom-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
   fi
 
-  sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files gitk git-flow giggle gitk gitg git-cola maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb;
+  sudo apt install -y abs-guide atom eclipse idle3 idle3-tools shellcheck eric eric-api-files maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
   # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   bashdbInstall
@@ -821,7 +821,7 @@ gitInstall() {
   currentPath=$(pwd)
   log_info "Git Apps install"
   println_banner_yellow "Git Apps install                                                     "
-  sudo apt install -y gitk git-flow giggle gitg
+  sudo apt install -y gitk git-flow giggle gitg git-cola
   wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo apt install -yf
@@ -921,6 +921,22 @@ fontsInstall () {
 }
 
 # ############################################################################
+# Install Fonts
+thunderbirdInstall () {
+  log_info "Install Thunderbird email client"
+  println_blue "Install Thunderbird email client"
+  sudo apt install -y thunderbird;
+}
+
+# ############################################################################
+# Install Fonts
+evolutionInstall () {
+  log_info "Install Evolution email client"
+  println_blue "Install Evolution email client"
+  sudo apt install -y  evolution evolution-ews gnome-online-accounts gnome-control-center;
+}
+
+# ############################################################################
 # Install inSync for GoogleDrive
 insyncInstall () {
   log_info "Install inSync for GoogleDrive"
@@ -948,6 +964,15 @@ doublecmdInstall () {
 
   repoUpdate
   sudo apt -y install doublecmd-qt5 doublecmd-help-en doublecmd-plugins
+}
+
+# ############################################################################
+# KVM Install
+kvmInstall () {
+  log_info "KVM Applications Install"
+  println_blue "KVM Applications Install                                               "
+
+  sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
 }
 
 
@@ -1224,8 +1249,8 @@ rEFIndInstall() {
 # ############################################################################
 # Stacer Linux system info and cleaner packages installation
 stacerInstall() {
-  log_info "Stacer Linux system info and cleaner Appliction Install"
-  println_blue "Stacer Linux system info and cleaner Application Install"
+  log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
+  println_blue "Stacer Linux System Optimizer and Monitoring Application Install"
   sudo add-apt-repository -y ppa:oguzhaninan/stacer
   sudo apt install -y stacer
 }
@@ -2635,6 +2660,8 @@ menuRun() {
       22   #: Docker
       23   #: Dropbox
       24   #: inSync for GoogleDrive
+      25   #: Thunderbird email
+      26   #: Evolution email
 
       31   #: Google Chrome browser
       32   #: Doublecmd
@@ -2673,6 +2700,7 @@ menuRun() {
       82   #: VirtualBox Host
       83   #: Setup for a Vmware guest
       84   #: Vagrant
+      85   #: KVM
 
       88   #: Laptop Display Drivers for Intel en Nvidia
       89   #: DisplayLink
@@ -2714,6 +2742,8 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "22" ]]; then printf "%s%s22%s" "${rev}" "${bold}" "${normal}"; else printf "22"; fi; printf "  : Docker.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "23" ]]; then printf "%s%s23%s" "${rev}" "${bold}" "${normal}"; else printf "23"; fi; printf "  : Dropbox.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "24" ]]; then printf "%s%s24%s" "${rev}" "${bold}" "${normal}"; else printf "24"; fi; printf "  : inSync for GoogleDrive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "25" ]]; then printf "%s%s25%s" "${rev}" "${bold}" "${normal}"; else printf "25"; fi; printf "  : Thunderbird email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "26" ]]; then printf "%s%s26%s" "${rev}" "${bold}" "${normal}"; else printf "26"; fi; printf "  : Evolution email client.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "31" ]]; then printf "%s%s31%s" "${rev}" "${bold}" "${normal}"; else printf "31"; fi; printf "  : Google Chrome browser.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "32" ]]; then printf "%s%s32%s" "${rev}" "${bold}" "${normal}"; else printf "32"; fi; printf "  : Doublecmd.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "33" ]]; then printf "%s%s33%s" "${rev}" "${bold}" "${normal}"; else printf "33"; fi; printf "  : Sunflower.\n"
@@ -2726,6 +2756,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "82" ]]; then printf "%s%s82%s" "${rev}" "${bold}" "${normal}"; else printf "82"; fi; printf "  : VirtualBox Host.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "83" ]]; then printf "%s%s83%s" "${rev}" "${bold}" "${normal}"; else printf "83"; fi; printf "  : Setup for a Vmware guest.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "84" ]]; then printf "%s%s84%s" "${rev}" "${bold}" "${normal}"; else printf "84"; fi; printf "  : Vagrant.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "85" ]]; then printf "%s%s85%s" "${rev}" "${bold}" "${normal}"; else printf "85"; fi; printf "  : KVM.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "88" ]]; then printf "%s%s88%s" "${rev}" "${bold}" "${normal}"; else printf "88"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "89" ]]; then printf "%s%s89%s" "${rev}" "${bold}" "${normal}"; else printf "89"; fi; printf "  : DisplayLink.\n"
     printf "\n"
@@ -2852,7 +2883,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "42" ]]; then printf "%s%s42%s" "${rev}" "${bold}" "${normal}"; else printf "42"; fi; printf "  : rEFInd Boot Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "43" ]]; then printf "%s%s43%s" "${rev}" "${bold}" "${normal}"; else printf "43"; fi; printf "  : UNetbootin ISO to USB Application.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "44" ]]; then printf "%s%s44%s" "${rev}" "${bold}" "${normal}"; else printf "44"; fi; printf "  : Etcher USB loader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Stacer Linux system info and cleaner.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -3044,6 +3075,8 @@ runSelection() {
     22 ) asking dockerInstall "install Docker" "Docker install complete." ;;
     23 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
     24 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
+    25 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
+    26 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
     31 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
     32 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     33 ) asking "Install Sunflower" "Sunflower install complete." ;;
@@ -3056,7 +3089,7 @@ runSelection() {
     42 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
     43 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
     44 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
-    45 ) asking stacerInstall "install Stacer Linux system info and cleaner" "Stacer Linux system info and cleaner install complete." ;;
+    45 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
     50 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
     51 ) asking gitInstall "install Git" "Git install complete." ;;
     52 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
@@ -3077,6 +3110,7 @@ runSelection() {
     82 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
     83 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
     84 ) asking vagrantInstall "install Vagrant" "Vagrant install complete." ;;
+    85 ) asking kvmInstall "install KVM" "KVM install complete." ;;
     88 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
     89 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
     90 ) asking  setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
@@ -3156,7 +3190,7 @@ mainMenu() {
     case "$choiceMain" in
       1)
         println_info "Automated installation for a Laptop\n"
-        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3165,13 +3199,13 @@ mainMenu() {
             menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
-        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
         pressEnterToContinue "Automated installation for a Laptop completed successfully."
       ;;
       2)
         println_info "Step install for a Laptop\n"
-        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3180,13 +3214,13 @@ mainMenu() {
             menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
-        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
         pressEnterToContinue "Automated installation for a Laptop completed successfully."
       ;;
       3)
         println_info "Automated installation for a Workstation\n"
-        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3195,13 +3229,13 @@ mainMenu() {
             menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
-        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 75 25 31 32 37 50 70 74)
         menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
         pressEnterToContinue "Automated installation for a Workstation completed successfully."
       ;;
       4)
         println_info "Step select installation for a Laptop\n"
-        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3210,13 +3244,13 @@ mainMenu() {
             menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
-        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 75 31 32 37 50 70 74)
+        menuSelectionsInput+=(1 2 3 4 80 12 84 21 22 23 24 25 75 31 32 37 50 70 74)
         menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
         pressEnterToContinue "Automated installation for a Workstation completed successfully."
       ;;
       5)
         println_info "Automated install for a VMware virtual machine\n"
-        menuSelectionsInput=(1 2 3 4 83 21 22 23 24 75 31 32 37 50 51 52 53 70 74)
+        menuSelectionsInput=(1 2 3 4 83 21 22 23 24 25 75 31 32 37 50 51 52 53 70 74)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
