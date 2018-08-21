@@ -774,13 +774,13 @@ kdeBackportsApps () {
   log_info "Add KDE Backports"
   println_blue "Add KDE Backports                                                             "
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports
-  sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the KDE Backports apt sources."
-    println_red "Beta Code or no new repo, revert the KDE Backports apt sources."
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  fi
+  # sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
+  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Beta Code or no new repo, revert the KDE Backports apt sources."
+  #   println_red "Beta Code or no new repo, revert the KDE Backports apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  # fi
 
   repoUpdate
   repoUpgrade
@@ -921,7 +921,7 @@ fontsInstall () {
 }
 
 # ############################################################################
-# Install Fonts
+# Install Thunderbird
 thunderbirdInstall () {
   log_info "Install Thunderbird email client"
   println_blue "Install Thunderbird email client"
@@ -929,11 +929,35 @@ thunderbirdInstall () {
 }
 
 # ############################################################################
-# Install Fonts
+# Install Evolution
 evolutionInstall () {
   log_info "Install Evolution email client"
   println_blue "Install Evolution email client"
   sudo apt install -y  evolution evolution-ews gnome-online-accounts gnome-control-center;
+}
+
+# ############################################################################
+# Install Mailspring
+mailspringInstall () {
+  log_info "Install Mailspring desktop email client"
+  println_blue "Install Mailspring desktop email client"
+  sudo snap install mailspring
+}
+
+# ############################################################################
+# Install Winds
+windsInstall () {
+  log_info "Install Winds RSS Reader and Podcast application"
+  println_blue "Install Winds RSS Reader and Podcast application"
+  sudo snap install winds
+}
+
+# ############################################################################
+# Install Skype
+skypeInstall () {
+  log_info "Install Skype"
+  println_blue "Install Skype"
+  sudo snap install skype --classic
 }
 
 # ############################################################################
@@ -972,7 +996,7 @@ kvmInstall () {
   log_info "KVM Applications Install"
   println_blue "KVM Applications Install                                               "
 
-  sudo apt-get install qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
+  sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
 }
 
 
@@ -1094,7 +1118,7 @@ asciiDocInstall() {
   println_banner_yellow "AsciiDoc Apps install                                                     "
 
   rubyRepo
-  repoUpdate
+  # repoUpdate
   sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
   sudo gem install bundler guard rake asciidoctor-diagram asciidoctor-plantuml
   cd "$currentPath" || return
@@ -1349,7 +1373,6 @@ imageEditingAppsInstall() {
   log_info "Imaging Editing Applications"
   println_blue "Imaging Editing Applications"
   sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
-  repoUpdate
   sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
 }
 
@@ -1362,6 +1385,22 @@ musicVideoAppsInstall() {
   # clementine
   sudo snap install clementine
   # sudo snap install vlc
+}
+
+# ############################################################################
+# Install Spotify
+mailspringInstall () {
+  log_info "Install Spotify"
+  println_blue "Install Spotify"
+  sudo snap install spotify
+}
+
+# ############################################################################
+# Install Google Play Music Desktop Player
+google-play-music-desktop-playerInstall () {
+  log_info "Install Google Play Music Desktop Player"
+  println_blue "Install Google Play Music Desktop Player"
+  sudo snap install google-play-music-desktop-player
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -2662,6 +2701,9 @@ menuRun() {
       24   #: inSync for GoogleDrive
       25   #: Thunderbird email
       26   #: Evolution email
+      27   #: Mailspring desktop email client
+      28   #: Winds RSS Reader and Podcast application
+      29   #: Skype
 
       31   #: Google Chrome browser
       32   #: Doublecmd
@@ -2695,6 +2737,8 @@ menuRun() {
       73   #: RapidPhotoDownloader
       74   #: Image Editing Applications
       75   #: Music and Video Applications
+      76   #: Spotify
+      77   #: Google Play Music Desktop Player
 
       81   #: Setup for a VirtualBox guest
       82   #: VirtualBox Host
@@ -2744,6 +2788,9 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "24" ]]; then printf "%s%s24%s" "${rev}" "${bold}" "${normal}"; else printf "24"; fi; printf "  : inSync for GoogleDrive.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "25" ]]; then printf "%s%s25%s" "${rev}" "${bold}" "${normal}"; else printf "25"; fi; printf "  : Thunderbird email client.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "26" ]]; then printf "%s%s26%s" "${rev}" "${bold}" "${normal}"; else printf "26"; fi; printf "  : Evolution email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "27" ]]; then printf "%s%s27%s" "${rev}" "${bold}" "${normal}"; else printf "27"; fi; printf "  : Mailspring desktop email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "28" ]]; then printf "%s%s28%s" "${rev}" "${bold}" "${normal}"; else printf "28"; fi; printf "  : Winds RSS Reader and Podcast application.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "29" ]]; then printf "%s%s29%s" "${rev}" "${bold}" "${normal}"; else printf "29"; fi; printf "  : Skype.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "31" ]]; then printf "%s%s31%s" "${rev}" "${bold}" "${normal}"; else printf "31"; fi; printf "  : Google Chrome browser.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "32" ]]; then printf "%s%s32%s" "${rev}" "${bold}" "${normal}"; else printf "32"; fi; printf "  : Doublecmd.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "33" ]]; then printf "%s%s33%s" "${rev}" "${bold}" "${normal}"; else printf "33"; fi; printf "  : Sunflower.\n"
@@ -2847,6 +2894,8 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "73" ]]; then printf "%s%s73%s" "${rev}" "${bold}" "${normal}"; else printf "73"; fi; printf "  : RapidPhotoDownloader.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "74" ]]; then printf "%s%s74%s" "${rev}" "${bold}" "${normal}"; else printf "74"; fi; printf "  : Image Editing Applications.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "75" ]]; then printf "%s%s75%s" "${rev}" "${bold}" "${normal}"; else printf "75"; fi; printf "  : Music and Video Applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "76" ]]; then printf "%s%s76%s" "${rev}" "${bold}" "${normal}"; else printf "76"; fi; printf "  : Spotify.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "77" ]]; then printf "%s%s77%s" "${rev}" "${bold}" "${normal}"; else printf "77"; fi; printf "  : Google Play Music Desktop Player.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2973,7 +3022,7 @@ menuRun() {
     elif ((50<=choiceOpt && choiceOpt<=59))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((70<=choiceOpt && choiceOpt<=75))
+    elif ((70<=choiceOpt && choiceOpt<=77))
     then
       howToRun "$choiceOpt" "$typeOfRun"
     elif ((81<=choiceOpt && choiceOpt<=89))
@@ -3016,7 +3065,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuPhoto "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            if ((70<=choiceOpt && choiceOpt<=75))
+            if ((70<=choiceOpt && choiceOpt<=77))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             # elif ((3<=choiceOpt && choiceOpt<=4))
@@ -3077,6 +3126,9 @@ runSelection() {
     24 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
     25 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
     26 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
+    27 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
+    28 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
+    29 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
     31 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
     32 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     33 ) asking "Install Sunflower" "Sunflower install complete." ;;
@@ -3106,6 +3158,8 @@ runSelection() {
     73 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
     74 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
     75 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
+    76 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
+    77 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
     81 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
     82 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
     83 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;

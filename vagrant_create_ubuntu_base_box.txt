@@ -39,6 +39,7 @@ sudo software-properties-gtk
 
 sudo apt update
 sudo apt -y upgrade
+sudo apt -y dist-upgrade
 sudo apt -y full-upgrade
 # sudo apt -y clean
 sudo apt -y autoremove
@@ -48,6 +49,10 @@ sudo rm -f /EMPTY
 
 # Shutdown the machine
 sudo shutdown -h now
+
+vboxmanage list runningvms
+
+../../reBuildVagrantImage.sh <Vagrant Box name> <Virtual Box VM name>
 
 ssh juan@vbhost
 

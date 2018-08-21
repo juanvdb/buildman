@@ -11,8 +11,8 @@ ETCDIR="$MOUNTDIR/etc"
 INTERACTIVE_MODE="on"
 scriptDebugToStdout="on"
 scriptDebugToFile="on"
-debugLogFile="$HOME/tmp/linkdotfiles.log"
-errorLogFile="$HOME/tmp/linkdotfileserror.log"
+debugLogFile="$MOUNTDIR/tmp/linkdotfiles.log"
+errorLogFile="$MOUNTDIR/tmp/linkdotfileserror.log"
 
 dotFilesList=(
 ".bash_aliases"
