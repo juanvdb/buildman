@@ -4,6 +4,7 @@ sudo apt -y install linux-headers-$(uname -r) build-essential dkms vim openssh-s
 
 cd /media/vagrant/vboxcd
 sudo ./VBoxLinuxAdditions.run
+sudo /media/vagrant/VBOXADDITIONS_5.1.34_121010/VBoxLinuxAdditions.run 
 
 sudo vim /etc/hosts
   172.28.128.1 vbhost
@@ -37,6 +38,7 @@ sudo chown -R $USER:$USER /data
 sudo software-properties-kde
 sudo software-properties-gtk
 
+sudo dpkg --configure -a
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y dist-upgrade
@@ -75,9 +77,12 @@ sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -
 sudo flatpak update
 sudo snap refresh
 
+vagrant ssh -c "sudo /media/vagrant/VBOXADDITIONS_5.1.34_121010/VBoxLinuxAdditions.run"
+vagrant ssh -c "sudo dpkg --configure -a"
 vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove"
 vagrant ssh -c "/srv/share/build/buildmanV2.sh"
-vagrant ssh -c "tail -f .local/share/buildman/buildman.log"
+vagrant ssh -c "tail -f /tmp/buildman.log"
+vagrant ssh -c "sudo mount 172.28.128.1:/data/vagrant/.vagrant.d/cache/kcosmic /tmp/vagrant-cache && sudo ln -s /tmp/vagrant-cache/apt /var/cache/apt/archives"
 
 currentpath=$(pwd)
 cd /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/
@@ -97,3 +102,5 @@ vagrant box remove kbionic
 vagrant box add kbionic /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
 rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
 rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
+
+vagrant ssh -c "sudo apt remove cryptsetup-initramfs"

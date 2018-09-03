@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DateVer 2018/07/10
-# Buildman V2.0
+# Buildman V3.1
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -37,6 +37,7 @@
   stableReleaseVer="18.04"
   previousStableReleaseName="artful"
   noCurrentReleaseRepo=0
+  betaAns=0
 
   ltsReleaseName="bionic"
   desktopEnvironment=""
@@ -49,6 +50,15 @@
 
   mkdir -p "$HOME/tmp"
   sudo chown "$USER":"$USER" "$HOME/tmp"
+
+  # blue=$(tput setaf 4)
+  # white=$(tput setaf 7)
+  # yellow=$(tput setaf 3)
+  red=$(tput setaf 1)
+  green=$(tput setaf 2)
+  normal=$(tput sgr0)
+  bold=$(tput bold)
+  rev=$(tput rev)
 }
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                          Debug                                           O
@@ -2751,18 +2761,6 @@ menuRun() {
   local typeOfRun=$1
   shift
   local menuSelections=($@)
-  # local blue
-  # blue=$(tput setaf 4)
-  # local white
-  # white=$(tput setaf 7)
-  # local yellow
-  # yellow=$(tput setaf 3)
-  local normal
-  normal=$(tput sgr0)
-  local bold
-  bold=$(tput bold)
-  local rev
-  rev=$(tput rev)
 
   selectionMenu(){
 
@@ -2837,8 +2835,6 @@ menuRun() {
 
       90   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
       91   #: Create test data directories on data drive.
-      95   #: Change that you dont get any questions asked and there is no interpupts.
-      96   #: Change that you are asked if you want to install and it stops after each install function.
       97   #: Toggle No Questions asked
       98   #: Toggle noCurrentReleaseRepo
 
@@ -3058,8 +3054,6 @@ menuRun() {
     -----: ---------------------------------------\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "90" ]]; then printf "%s%s90%s" "${rev}" "${bold}" "${normal}"; else printf "90"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "91" ]]; then printf "%s%s91%s" "${rev}" "${bold}" "${normal}"; else printf "91"; fi; printf "  : Create test data directories on data drive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "95" ]]; then printf "%s%s95%s" "${rev}" "${bold}" "${normal}"; else printf "95"; fi; printf "  : Change that you dont get any questions asked and there is no interpupts.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "96" ]]; then printf "%s%s96%s" "${rev}" "${bold}" "${normal}"; else printf "96"; fi; printf "  : Change that you are asked if you want to install and it stops after each install function.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "97" ]]; then printf "%s%s97%s" "${rev}" "${bold}" "${normal}"; else printf "97"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 97 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "     ";if [[ "${menuSelections[*]}" =~ "98" ]]; then printf "%s%s98%s" "${rev}" "${bold}" "${normal}"; else printf "98"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 98 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "\n"
@@ -3119,10 +3113,7 @@ menuRun() {
     elif ((81<=choiceOpt && choiceOpt<=89))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((90<=choiceOpt && choiceOpt<=91))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((95<=choiceOpt && choiceOpt<=96))
+    elif ((90<=choiceOpt && choiceOpt<=98))
     then
       howToRun "$choiceOpt" "$typeOfRun"
     elif ((choiceOpt==99))
@@ -3188,38 +3179,12 @@ menuRun() {
             submenuSettings "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((90<=choiceOpt && choiceOpt<=96))
-            then
+            if ((90<=choiceOpt && choiceOpt<=96)); then
               howToRun "$choiceOpt" "$typeOfRun"
-            # elif ((3<=choiceOpt && choiceOpt<=4))
-            # then
-            #   howToRun "$choiceOpt" "$typeOfRun"
-          elif ((97<=choiceOpt && choiceOpt<=98)); then
-              case $choiceOpt in
-                97)
-                  if [[ $noPrompt = 0 ]]; then
-                    noPrompt=1
-                    println_blue "Questions asked is OFF.\n No questions will be asked."
-                    log_debug "Questions asked is OFF.\n No questions will be asked."
-                  else
-                    noPrompt=0
-                    println_blue "Questions asked is ON.\n All questions will be asked."
-                    log_debug "Questions asked is ON.\n All questions will be asked."
-                  fi
-                ;;
-                98)
-                  if [[ $noCurrentReleaseRepo = 0 ]]; then
-                    noCurrentReleaseRepo=1
-                    println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
-                    log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
-                  else
-                    noCurrentReleaseRepo=0
-                    println_blue "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
-                    log_debug "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
-                  fi
-                ;;
-              esac
-          fi
+              # elif ((3<=choiceOpt && choiceOpt<=4))
+              # then
+              #   howToRun "$choiceOpt" "$typeOfRun"
+            fi
           done
           choiceOpt=NULL
         ;;
@@ -3294,41 +3259,28 @@ runSelection() {
     89 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
     90 ) asking  setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     91 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
-    95)
-      # answer=y
-      noPrompt=1
-      println_blue "Questions asked OFF\n No questions will be asked"
-      log_debug "Questions asked OFF\n No questions will be asked"
+    97)
+      if [[ $noPrompt = 0 ]]; then
+        noPrompt=1
+        println_blue "Questions asked is OFF.\n No questions will be asked."
+        log_debug "Questions asked is OFF.\n No questions will be asked."
+      else
+        noPrompt=0
+        println_blue "Questions asked is ON.\n All questions will be asked."
+        log_debug "Questions asked is ON.\n All questions will be asked."
+      fi
     ;;
-    96)
-      # answer=n
-      noPrompt=0
-      println_blue "Questions asked ON\n All questions will be asked"
-      log_debug "Questions asked ON\n All questions will be asked"
+    98)
+      if [[ $noCurrentReleaseRepo = 0 ]]; then
+        noCurrentReleaseRepo=1
+        println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
+        log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
+      else
+        noCurrentReleaseRepo=0
+        println_blue "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
+        log_debug "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
+      fi
     ;;
-    # Replaced with direct change in submenuSettings
-    # 97)
-    #   if [[ $noPrompt = 0 ]]; then
-    #     noPrompt=1
-    #     println_blue "Questions asked is OFF.\n No questions will be asked."
-    #     log_debug "Questions asked is OFF.\n No questions will be asked."
-    #   else
-    #     noPrompt=0
-    #     println_blue "Questions asked is ON.\n All questions will be asked."
-    #     log_debug "Questions asked is ON.\n All questions will be asked."
-    #   fi
-    # ;;
-    # 98)
-    #   if [[ $noCurrentReleaseRepo = 0 ]]; then
-    #     noCurrentReleaseRepo=1
-    #     println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
-    #     log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
-    #   else
-    #     noCurrentReleaseRepo=0
-    #     println_blue "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
-    #     log_debug "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
-    #   fi
-    # ;;
   esac
 }
 
@@ -3343,38 +3295,34 @@ mainMenu() {
     println_info "BuildMan                                                    "
     println_info "====================================================================="
 
-    echo -e "
-    MESSAGE : In case of options, one value is displayed as the default value.
-    Do erase it to use other value.
+    # printf \n    MESSAGE : In case of options, one value is displayed as the default value.\n"
+    # printf "    Do erase it to use other value.\n"
 
-    BuildMan v0.1
+    printf "\n    BuildMan v3.0\n"
+    printf "\n    This script is documented in README.md file.\n"
+    printf "\n    Running: "
+    println_yellow "${distReleaseName} ${distReleaseVer} ${desktopEnvironment}\n"
+    printf "\n    There are the following options for this script\n"
+    printf "\n    TASK :     DESCRIPTION\n\n"
+    printf "    1    : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "$bold" "$green" "$normal"; else printf "%s%s%sON%s" "$rev" "$bold" "$red" "$normal"; fi; printf ".\n"
+    printf "            Select 1 to toggle so that questions are "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "    2    : Change to older Release Repositories is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\n"
+    printf "            Select 2 to toggle older Release Repositories to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\n"
+    printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n\n";
+    printf "    4    : Select the applications and then run uninterupted.
+    5    : Select the applications and then run each item individually
+    6    : Install applications from the menu one by one.
 
-    This script is documented in README.md file.
+    7    : Install Laptop with pre-selected applications
+    8    : Install Workstation with pre-selected applications
 
-    Running $LOG_ERROR_COLOR $distReleaseName $distReleaseVer $desktopEnvironment $LOG_DEFAULT_COLOR
+    9    : Install VirtualBox VM with pre-selected applications
+    10   : Install KVM VM with pre-selected applications
+    11   : Install VMware VM with pre-selected applications
 
-    There are the following options for this script
-    TASK :     DESCRIPTION
-
-    1    : Install Laptop with all packages without asking
-    2    : Install Laptop with all packages step at each application
-
-    3    : Install Workstation with all packages without asking
-    4    : Install Workstation with all packages step at each application
-
-    5    : Install VMware VM with all packages without asking
-    6    : Install VMware VM with all packages asking for groups of packages
-
-    7    : Auto install VirtualBox VM with all preselected packages
-    8    : Select applications for VirtualBox VM auto install
-    9    : Select applications for VirtualBox VM step install
-
-    10   : Select the applications and then run uninterupted.
-    11   : Select the applications and then run each item individually
-    12   : Install applications from the menu one by one.
-
-    15   : Autorun a VirtualBox full test run, all apps.
-    16   : Step run a VirtualBox full test run, all apps.
+    12   : Autorun a VirtualBox full test run, all apps.
+    13   : Step run a VirtualBox full test run, all apps.
 
     0/q  : Quit this program
 
@@ -3392,166 +3340,153 @@ mainMenu() {
     # take inputs and perform as necessary
     case "$choiceMain" in
       1)
-        println_info "Automated installation for a Laptop\n"
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
-        pressEnterToContinue "Automated installation for a Laptop completed successfully."
+        if [[ $noPrompt = 0 ]]; then
+          noPrompt=1
+          println_blue "Questions asked is OFF.\n No questions will be asked."
+          log_debug "Questions asked is OFF.\n No questions will be asked."
+        else
+          noPrompt=0
+          println_blue "Questions asked is ON.\n All questions will be asked."
+          log_debug "Questions asked is ON.\n All questions will be asked."
+        fi
       ;;
       2)
-        println_info "Step install for a Laptop\n"
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
-        pressEnterToContinue "Automated installation for a Laptop completed successfully."
+        if [[ $noCurrentReleaseRepo = 0 ]]; then
+          noCurrentReleaseRepo=1
+          println_blue "Using older repositories ON.\n The repos will be installed against ${stableReleaseName}."
+          log_debug "Using older repositories ON.\n The repos will be installed against ${stableReleaseName}."
+        else
+          noCurrentReleaseRepo=0
+          println_blue "Using older repositories OFF.\n The repos will be installed against ${distReleaseName}."
+          log_debug "Using older repositories OFF.\n The repos will be installed against ${distReleaseName}."
+        fi
       ;;
       3)
-        println_info "Automated installation for a Workstation\n"
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
-        pressEnterToContinue "Automated installation for a Workstation completed successfully."
+        if [[ $betaAns = 0 ]]; then
+          betaAns=1
+          println_blue "Beta release is ON.\n The repos will be installed against ${stableReleaseName}."
+          log_debug "Beta release is ON.\n The repos will be installed against ${stableReleaseName}."
+        else
+          betaAns=0
+          println_blue "Beta release is OFF.\n The repos will be installed against ${distReleaseName}."
+          log_debug "Beta release is OFF.\n The repos will be installed against ${distReleaseName}."
+        fi
       ;;
-      4)
-        println_info "Step select installation for a Workstation.\n"
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
-        pressEnterToContinue "Step select installation for a Workstation completed successfully."
-      ;;
-      5)
-        println_info "Automated install for a VMware virtual machine\n"
-        menuSelectionsInput=(1 2 3 4 32 38 45)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "AutoRun" "${menuSelectionsInput[@]}"
-        println_info "VMware VM automated install completed."
-      ;;
-      6 )
-        println_info "Select step install for a VMware VM\n"
-        menuSelectionsInput=(1 2 3 4 32 38 45)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
-        println_info "VMware VM install completed."
-      ;;
-      7)
-        println_info "Automated install for a VirtualBox virtual machine\n"
-        menuSelectionsInput=(1 2 3 4 32 38 45)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "AutoRun" "${menuSelectionsInput[@]}"
-        println_info "VirtualBox automated install completed."
-      ;;
-      8)
-        println_info "Automated install for a VirtualBox virtual machine\n"
-        menuSelectionsInput=(1 2 3 4 32 38 45)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
-        println_info "VirtualBox automated install completed."
-      ;;
-      9)
-        println_info "Step install for a VirtualBox virtual machine\n"
-        menuSelectionsInput=(1 2 3 4 32 38 45)
-        case $desktopEnvironment in
-          gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
-          ;;
-          kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
-          ;;
-        esac
-        menuSelectionsInput+=(2 3)
-        menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
-        println_info "VirtualBox automated install completed."
-      ;;
-      10 )
+      4 )
         menuRun "SelectThenAutoRun"
       ;;
-      11 )
+      5 )
         menuRun "SelectThenStepRun"
       ;;
-      12 )
+      6 )
         menuRun "SelectItem"
       ;;
-      15 )
-        println_info "Automated Test install all apps on a VirtualBox VM\n"
-        menuSelectionsInput=(5 1 2 3 4 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 34 35 36 37 38 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 85 84)
+      7)
+        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 12 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
         menuSelectionsInput+=(2 3)
-        menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
-        println_info "All apps on VirtualBox automated install completed."
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated installation for a Laptop\n"
+          menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
+          pressEnterToContinue "Automated installation for a Laptop completed successfully."
+        else
+          println_info "Step install for a Laptop\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          pressEnterToContinue "Automated installation for a Laptop completed successfully."
+        fi
       ;;
-      16 )
-        println_info "Step Test install all apps on a VirtualBox VM\n"
+      8)
+        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
+        case $desktopEnvironment in
+          gnome )
+            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
+          kde )
+            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+        esac
+        menuSelectionsInput+=(2 3)
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated installation for a Workstation\n"
+          menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
+          pressEnterToContinue "Automated installation for a Workstation completed successfully."
+        else
+          println_info "Step select installation for a Workstation.\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          pressEnterToContinue "Step select installation for a Workstation completed successfully."
+        fi
+      ;;
+      9)
+        menuSelectionsInput=(1 2 3 4 32 38 45)
+        case $desktopEnvironment in
+          gnome )
+            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
+          kde )
+            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+        esac
+        menuSelectionsInput+=(2 3)
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated install for a VirtualBox virtual machine\n"
+          menuRun "AutoRun" "${menuSelectionsInput[@]}"
+          println_info "VirtualBox automated install completed."
+        else
+          println_info "Step install for a VirtualBox virtual machine\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          println_info "VirtualBox step install completed."
+        fi
+      ;;
+      10)
+        menuSelectionsInput=(1 2 3 4 32 38 45)
+        case $desktopEnvironment in
+          gnome )
+            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
+          kde )
+            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+        esac
+        menuSelectionsInput+=(2 3)
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated install for a KVM virtual machine\n"
+          menuRun "AutoRun" "${menuSelectionsInput[@]}"
+          println_info "KVM VM automated install completed."
+        else
+          println_info "Select step install for a KVM VM\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          println_info "KVM VM step install completed."
+        fi
+      ;;
+      11)
+        menuSelectionsInput=(1 2 3 4 32 38 45)
+        case $desktopEnvironment in
+          gnome )
+            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
+          kde )
+            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+        esac
+        menuSelectionsInput+=(2 3)
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated install for a VMware virtual machine\n"
+          menuRun "AutoRun" "${menuSelectionsInput[@]}"
+          println_info "VMware VM automated install completed."
+        else
+          println_info "Select step install for a VMware VM\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          println_info "VMware VM step install completed."
+        fi
+      ;;
+      15 )
         menuSelectionsInput=(5 1 2 3 4 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 34 35 36 37 38 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 85 84)
         case $desktopEnvironment in
           gnome )
@@ -3562,8 +3497,15 @@ mainMenu() {
           ;;
         esac
         menuSelectionsInput+=(2 3)
-        menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
-        println_info "All apps on VirtualBox stepped install completed."
+        if [[ $noPrompt = 1 ]]; then
+          println_info "Automated Test install all apps on a VirtualBox VM\n"
+          menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
+          println_info "All apps on VirtualBox automated install completed."
+        else
+          println_info "Step Test install all apps on a VirtualBox VM\n"
+          menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
+          println_info "All apps on VirtualBox stepped install completed."
+        fi
       ;;
       0|q)
         return 0
@@ -3584,7 +3526,7 @@ mainMenu() {
 # Set global variables
 desktopEnvironmentCheck
 
-if [[ ("$betaReleaseName" == "$distReleaseName") || ("$betaReleaseVer" == "$distReleaseVer") ]]; then
+if [[ "$betaReleaseName" == "$distReleaseName" ]] || [[ "$betaReleaseVer" == "$distReleaseVer" ]]; then
   betaAns=1
 else
   stableReleaseVer=$distReleaseVer
