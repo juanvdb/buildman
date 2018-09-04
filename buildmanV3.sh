@@ -2790,19 +2790,21 @@ menuRun() {
       31   #: Google Chrome browser
       32   #: Doublecmd
       33   #: Latte Dock
-      34   #: FreeFileSync
-      35   #: LibreCAD
-      36   #: Calibre
-      37   #: Install extra fonts
-      38   #: Y-PPA Manager
+      34   #: Y-PPA Manager
+      35   #: Install extra fonts
 
+           #: submenuUtils
       41   #: bootRepair
       42   #: rEFInd Boot Manager
       43   #: UNetbootin
       44   #: Etcher USB Loader
       45   #: Stacer Linux system info and cleaner
       46   #: Bitwarden Password Manager
+      47   #: FreeFileSync
+      48   #: LibreCAD
+      49   #: Calibre
 
+           #: submenuDev
       50   #: Install Development Apps and IDEs
       51   #: Git
       52   #: AsciiDoc
@@ -2815,6 +2817,7 @@ menuRun() {
       68   #: Oracle Java 9
       69   #: Oracle Java 10
 
+           #: submenuPhoto
       70   #: Photography Apps
       71   #: Digikam
       72   #: Darktable
@@ -2824,15 +2827,18 @@ menuRun() {
       76   #: Spotify
       77   #: Google Play Music Desktop Player
 
+           #: submenuVirtualization
       81   #: Setup for a VirtualBox guest
       82   #: VirtualBox Host
       83   #: Setup for a Vmware guest
       84   #: Vagrant
       85   #: KVM
 
+           #: submenuHardwareDrivers
       88   #: Laptop Display Drivers for Intel en Nvidia
       89   #: DisplayLink
 
+           #: submenuSettings
       90   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
       91   #: Create test data directories on data drive.
       97   #: Toggle No Questions asked
@@ -2878,22 +2884,14 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "31" ]]; then printf "%s%s31%s" "${rev}" "${bold}" "${normal}"; else printf "31"; fi; printf "  : Google Chrome browser.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "32" ]]; then printf "%s%s32%s" "${rev}" "${bold}" "${normal}"; else printf "32"; fi; printf "  : Doublecmd.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "33" ]]; then printf "%s%s33%s" "${rev}" "${bold}" "${normal}"; else printf "33"; fi; printf "  : Latte Dock.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "34" ]]; then printf "%s%s34%s" "${rev}" "${bold}" "${normal}"; else printf "34"; fi; printf "  : FreeFileSync.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "35" ]]; then printf "%s%s35%s" "${rev}" "${bold}" "${normal}"; else printf "35"; fi; printf "  : LibreCAD.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "36" ]]; then printf "%s%s36%s" "${rev}" "${bold}" "${normal}"; else printf "36"; fi; printf "  : Calibre.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "37" ]]; then printf "%s%s37%s" "${rev}" "${bold}" "${normal}"; else printf "37"; fi; printf "  : Install extra fonts.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "38" ]]; then printf "%s%s38%s" "${rev}" "${bold}" "${normal}"; else printf "38"; fi; printf "  : Y-PPA Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "81" ]]; then printf "%s%s81%s" "${rev}" "${bold}" "${normal}"; else printf "81"; fi; printf "  : Setup for a VirtualBox guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "82" ]]; then printf "%s%s82%s" "${rev}" "${bold}" "${normal}"; else printf "82"; fi; printf "  : VirtualBox Host.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "83" ]]; then printf "%s%s83%s" "${rev}" "${bold}" "${normal}"; else printf "83"; fi; printf "  : Setup for a Vmware guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "84" ]]; then printf "%s%s84%s" "${rev}" "${bold}" "${normal}"; else printf "84"; fi; printf "  : Vagrant.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "85" ]]; then printf "%s%s85%s" "${rev}" "${bold}" "${normal}"; else printf "85"; fi; printf "  : KVM.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "88" ]]; then printf "%s%s88%s" "${rev}" "${bold}" "${normal}"; else printf "88"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "89" ]]; then printf "%s%s89%s" "${rev}" "${bold}" "${normal}"; else printf "89"; fi; printf "  : DisplayLink.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "34" ]]; then printf "%s%s34%s" "${rev}" "${bold}" "${normal}"; else printf "34"; fi; printf "  : Y-PPA Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "35" ]]; then printf "%s%s35%s" "${rev}" "${bold}" "${normal}"; else printf "35"; fi; printf "  : Install extra fonts.\n"
     printf "\n"
     printf "     a   : Development Apps and IDEs Menu.\n"
     printf "     b   : Photography and Imaging Menu.\n"
     printf "     c   : More Utilities Menu.\n"
+    printf "     d   : Virtualization Applictions Menu.\n"
+    printf "     h   : Hardware Drivers.\n"
     printf "     s   : Buildman Settings, Utilities and tests.\n"
     printf "     x   : Clear selections.\n"
     printf "\n"
@@ -3020,6 +3018,80 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "44" ]]; then printf "%s%s44%s" "${rev}" "${bold}" "${normal}"; else printf "44"; fi; printf "  : Etcher USB loader.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "46" ]]; then printf "%s%s46%s" "${rev}" "${bold}" "${normal}"; else printf "46"; fi; printf "  : Bitwarden Password Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "47" ]]; then printf "%s%s47%s" "${rev}" "${bold}" "${normal}"; else printf "47"; fi; printf "  : FreeFileSync.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "48" ]]; then printf "%s%s48%s" "${rev}" "${bold}" "${normal}"; else printf "48"; fi; printf "  : LibreCAD.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "49" ]]; then printf "%s%s49%s" "${rev}" "${bold}" "${normal}"; else printf "49"; fi; printf "  : Calibre.\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuVirtualization(){
+    clear
+    printf "\n\n"
+    printf "  %s%Virtualization%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "81" ]]; then printf "%s%s81%s" "${rev}" "${bold}" "${normal}"; else printf "81"; fi; printf "  : Setup for a VirtualBox guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "82" ]]; then printf "%s%s82%s" "${rev}" "${bold}" "${normal}"; else printf "82"; fi; printf "  : VirtualBox Host.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "83" ]]; then printf "%s%s83%s" "${rev}" "${bold}" "${normal}"; else printf "83"; fi; printf "  : Setup for a Vmware guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "84" ]]; then printf "%s%s84%s" "${rev}" "${bold}" "${normal}"; else printf "84"; fi; printf "  : Vagrant.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "85" ]]; then printf "%s%s85%s" "${rev}" "${bold}" "${normal}"; else printf "85"; fi; printf "  : KVM.\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuHardwareDrivers(){
+    clear
+    printf "\n\n"
+    printf "  %s%Hardware Drivers%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "88" ]]; then printf "%s%s88%s" "${rev}" "${bold}" "${normal}"; else printf "88"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "89" ]]; then printf "%s%s89%s" "${rev}" "${bold}" "${normal}"; else printf "89"; fi; printf "  : DisplayLink.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -3104,7 +3176,7 @@ menuRun() {
     elif ((21<=choiceOpt && choiceOpt<=38))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((41<=choiceOpt && choiceOpt<=46))
+    elif ((41<=choiceOpt && choiceOpt<=49))
     then
       howToRun "$choiceOpt" "$typeOfRun"
     elif ((50<=choiceOpt && choiceOpt<=77))
@@ -3137,9 +3209,6 @@ menuRun() {
             if ((50<=choiceOpt && choiceOpt<=69))
             then
               howToRun "$choiceOpt" "$typeOfRun"
-            # elif ((3<=choiceOpt && choiceOpt<=4))
-            # then
-            #   howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
           choiceOpt=NULL
@@ -3152,9 +3221,6 @@ menuRun() {
             if ((70<=choiceOpt && choiceOpt<=77))
             then
               howToRun "$choiceOpt" "$typeOfRun"
-            # elif ((3<=choiceOpt && choiceOpt<=4))
-            # then
-            #   howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
           choiceOpt=NULL
@@ -3164,12 +3230,33 @@ menuRun() {
             submenuUtils "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((41<=choiceOpt && choiceOpt<=46))
+            if ((41<=choiceOpt && choiceOpt<=49))
             then
               howToRun "$choiceOpt" "$typeOfRun"
-            # elif ((3<=choiceOpt && choiceOpt<=4))
-            # then
-            #   howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        d )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuVirtualization "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            printf "\n"
+            if ((81<=choiceOpt && choiceOpt<=85))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        h )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuHardwareDrivers "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            printf "\n"
+            if ((88<=choiceOpt && choiceOpt<=89))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
           choiceOpt=NULL
@@ -3181,9 +3268,6 @@ menuRun() {
             printf "\n"
             if ((90<=choiceOpt && choiceOpt<=96)); then
               howToRun "$choiceOpt" "$typeOfRun"
-              # elif ((3<=choiceOpt && choiceOpt<=4))
-              # then
-              #   howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
           choiceOpt=NULL
@@ -3220,11 +3304,11 @@ runSelection() {
     31 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
     32 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     33 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
-    34 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
-    35 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
-    36 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
-    37 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
-    38 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
+    47 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
+    48 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
+    49 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
+    35 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    34 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
     41 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
     42 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
     43 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
@@ -3382,7 +3466,7 @@ mainMenu() {
         menuRun "SelectItem"
       ;;
       7)
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
+        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3403,7 +3487,7 @@ mainMenu() {
         fi
       ;;
       8)
-        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 36 37 38 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
+        menuSelectionsInput=(5 1 2 3 4 21 22 23 24 25 27  28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3424,7 +3508,7 @@ mainMenu() {
         fi
       ;;
       9)
-        menuSelectionsInput=(1 2 3 4 32 38 45)
+        menuSelectionsInput=(1 2 3 4 32 34 45)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3445,7 +3529,7 @@ mainMenu() {
         fi
       ;;
       10)
-        menuSelectionsInput=(1 2 3 4 32 38 45)
+        menuSelectionsInput=(1 2 3 4 32 34 45)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3466,7 +3550,7 @@ mainMenu() {
         fi
       ;;
       11)
-        menuSelectionsInput=(1 2 3 4 32 38 45)
+        menuSelectionsInput=(1 2 3 4 32 34 45)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3487,7 +3571,7 @@ mainMenu() {
         fi
       ;;
       15 )
-        menuSelectionsInput=(5 1 2 3 4 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 34 35 36 37 38 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 85 84)
+        menuSelectionsInput=(5 1 2 3 4 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
