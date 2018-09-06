@@ -80,8 +80,11 @@ sudo snap refresh
 vagrant ssh -c "sudo /media/vagrant/VBOXADDITIONS_5.1.34_121010/VBoxLinuxAdditions.run"
 vagrant ssh -c "sudo dpkg --configure -a"
 vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove"
+vagrant ssh -c "sudo dd if=/dev/zero of=/EMPTY bs=1M && sudo rm -f /EMPTY"
+
 vagrant ssh -c "/srv/share/build/buildmanV2.sh"
 vagrant ssh -c "tail -f /tmp/buildman.log"
+
 vagrant ssh -c "sudo mount 172.28.128.1:/data/vagrant/.vagrant.d/cache/kcosmic /tmp/vagrant-cache && sudo ln -s /tmp/vagrant-cache/apt /var/cache/apt/archives"
 
 currentpath=$(pwd)
