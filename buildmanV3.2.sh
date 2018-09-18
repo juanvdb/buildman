@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # DateVer 2018/07/10
-# Buildman V3.3
+# Buildman V3.2
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -776,6 +776,10 @@ kdeBetaBackportsRepo () {
   log_info "Add KDE Beta Backports Repo"
   println_blue "Add KDE Beta Backports Repo                                               "
   sudo add-apt-repository -y ppa:kubuntu-ppa/beta
+  # if [[ $betaAns == 1 ]]; then
+  #   log_warning "Beta Code, downgrade the KDE Backport apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  # fi
   if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
     println_red "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
@@ -814,6 +818,13 @@ devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
+  # sudo add-apt-repository -y ppa:webupd8team/atom
+  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Beta Code or no new repo, revert the Atom apt sources."
+  #   println_red "Beta Code or no new repo, revert the Atom apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-atom-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   repoUpdate
+  # fi
   sudo snap install atom --classic
   sudo snap install eclipse --classic
   sudo snap install shellcheck
@@ -834,6 +845,8 @@ gitInstall() {
   log_info "Git Apps install"
   println_banner_yellow "Git Apps install                                                     "
   sudo apt install -y gitk git-flow giggle gitg git-cola
+  # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
   sudo snap install gitkraken
   sudo apt install -yf
   cd "$currentPath" || return
@@ -854,6 +867,17 @@ bashdbInstall() {
   make
   sudo make install
 
+  # install bashdb and ddd
+  # printf "Please check ddd-3 version"
+  # sudo apt build-dep ddd
+  # sudo apt install -y libmotif-dev
+  # wget -P "$HOME/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz"
+  # wget -P "$HOME/tmp http://ftp.gnu.org/gnu/ddd/ddd-3.3.12.tar.gz.sig"
+  # tar xvf "$HOME/tmp/ddd-3.3.9.tar.gz"
+  # cd "$HOME/tmp/ddd-3.3.12" || return
+  # ./configure
+  # make
+  # sudo make install
   cd "$currentPath" || die "Could not cd $currentPath."
 }
 
@@ -890,6 +914,14 @@ bracketsInstall() {
   # Brackets
   println_blue "Brackets"
   log_info "Brackets"
+  # sudo add-apt-repository -y ppa:webupd8team/brackets
+  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Beta Code or no new repo, revert the Brackets apt sources."
+  #   println_red "Beta Code or no new repo, revert the Brackets apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-brackets-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   repoUpdate
+  # fi
+  # sudo apt install -y brackets
   sudo snap install brackets --classic
 }
 
@@ -1017,6 +1049,23 @@ kvmInstall () {
   sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
 }
 
+# # ############################################################################
+# # Sunflower Install
+# sunflowerInstall () {
+#   log_info "Sunflower"
+#   println_blue "Sunflower"
+#   sudo add-apt-repository -y ppa:atareao/sunflower
+#   if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+#     # local deprecatedReleaseName=$ltsReleaseName
+#     local deprecatedReleaseName="xenial"
+#     log_warning "Change Sunflower to $deprecatedReleaseName"
+#     println_red "Change Sunflower to $deprecatedReleaseName"
+#     changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$deprecatedReleaseName.list" "$deprecatedReleaseName" "$deprecatedReleaseName"
+#     repoUpdate
+#   fi
+#   sudo apt install -y sunflower
+# }
+
 # ############################################################################
 # Configure DockerInstall
 dockerInstall () {
@@ -1085,6 +1134,16 @@ dockerInstall () {
 dropboxInstall () {
   log_info "Dropbox Install"
   println_blue "Dropbox Install"
+  # sudo apt-key adv --keyserver pgp.mit.edu --recv-keys 5044912E
+  # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ oneiric main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ precise main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "#deb http://linux.dropbox.com/ubuntu/ quantal main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c 'echo "deb http://linux.dropbox.com/ubuntu/ trusty main" >> /etc/apt/sources.list.d/dropbox.list'
+  # sudo sh -c "echo deb http://linux.dropbox.com/ubuntu/ $stableReleaseName main >> /etc/apt/sources.list.d/dropbox-$stableReleaseName.list"
+  # log_warning "Change Dropbox to $ltsReleaseName"
+  # println_blue "Change Dropbox to $ltsReleaseName"
+  # changeAptSource "/etc/apt/sources.list.d/dropbox-$stableReleaseName.list" "$stableReleaseName" "$ltsReleaseName"
+  #sudo apt install -y dropbox
   rm -R "${HOMEDIR/.dropbox-dist/*:?}"
   cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
   if [[ "$noPrompt" -eq 0 ]]; then
@@ -1410,6 +1469,12 @@ ambianceRadianceThemeInstall() {
 inkscapeInstall() {
   log_info "Inkscape Install"
   println_blue "Inkscape Install"
+  # sudo add-apt-repository -y ppa:inkscape.dev/stable
+  # if [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
+  #     log_warning "Change Inkscape to $previousStableReleaseName"
+  #     println_yellow "Change Inkscape to $previousStableReleaseName"
+  #     changeAptSource "/etc/apt/sources.list.d/inkscape_dev-ubuntu-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  # fi
   sudo snap install inkscape
 }
 
@@ -1471,6 +1536,14 @@ darktableInstall() {
   currentPath=$(pwd)
   log_info "Darktable Repo"
   println_blue "Darktable Repo"
+  # sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release;
+  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Beta Code or no new repo, revert the Darktable apt sources."
+  #   println_red "Beta Code or no new repo, revert the Darktable apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   repoUpdate
+  # fi
+  # sudo apt install -y darktable
   sudo snap install darktable
 }
 
@@ -1546,6 +1619,62 @@ flatpakInstall() {
   sudo flatpak install -y kdeapps org.kde.KStyle.Adwaita
   sudo flatpak install -y kdeapps org.kde.PlatformTheme.QGnomePlatform
 }
+
+# # #########################################################################
+# # Add all repositories
+# addRepositories () {
+#   log_info "Add Repositories"
+#   println_banner_yellow "Add Repositories                                                     "
+#     # general repositories
+# 	sudo add-apt-repository -y universe
+#
+#   pressEnterToContinue "Add Applications Repos enabled."
+# }
+
+# downgradeAptDistro () {
+#   # if [[ $distReleaseName = "xenial" || "yakkety" || "zesty" ]]; then
+#   if [[ "$distReleaseName" =~ ^($previousStableReleaseName|$stableReleaseName|$betaReleaseName)$ ]]; then
+#     log_info "Change Repos for which there aren't new repos."
+#     println_blue "Change Repos for which there aren't new repos."
+#     # Commented as it is now a snap install
+#     # changeAptSource "/etc/apt/sources.list.d/me-davidsansome-ubuntu-clementine-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+#     case $desktopEnvironment in
+#       "kde" )
+#         ;;
+#       "gnome" )
+#         ;;
+#       "xubuntu" )
+#         ;;
+#       "lubuntu" )
+#         ;;
+#     esac
+#   fi
+#
+#   # older packages that will not install on new releases
+#   if ! [[ "$distReleaseName" =~ ^($stableReleaseName|$betaReleaseName)$ ]]; then
+#     # Scribes Developer editor
+#     # log_warning 'Scribes Developer editor'
+#     # sudo add-apt-repository -y ppa:mystilleef/scribes-daily
+#     # changeAptSource "/etc/apt/sources.list.d/mystilleef-ubuntu-scribes-daily-$distReleaseName.list" "$distReleaseName" quantal
+#     # Canon Printer Drivers
+#   	# log_warning "Canon Printer Drivers"
+#   	# println_blue "Canon Printer Drivers"
+#   	# sudo add-apt-repository -y ppa:michael-gruz/canon-trunk
+#   	# sudo add-apt-repository -y ppa:michael-gruz/canon
+#   	# sudo add-apt-repository -y ppa:inameiname/stable
+#     # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-trunk-$distReleaseName.list" "$distReleaseName" utopic
+#     # changeAptSource "/etc/apt/sources.list.d/michael-gruz-ubuntu-canon-$distReleaseName.list" "$distReleaseName" quantal
+#     # changeAptSource "/etc/apt/sources.list.d/inameiname-ubuntu-stable-$distReleaseName.list" "$distReleaseName" trusty
+#     # Inkscape
+#   fi
+#   if [[ $noCurrentReleaseRepo == 1 ]]; then
+#     log_warning "Repos not available as yet, downgrade the apt sources."
+#     println_red "Repos not available as yet, downgrade the apt sources."
+#     #changeAptSource "/etc/apt/sources.list.d/getdeb-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+#     # changeAptSource "/etc/apt/sources.list.d/.list" "$distReleaseName" "$stableReleaseName"
+#   fi
+#   pressEnterToContinue "Repos Downgraded."
+# }
 
 # ############################################################################
 # Install Base applications
@@ -1623,6 +1752,477 @@ installUniverseApps () {
   # webupd8AppsInstall
   # yppaManagerInstall
 }
+
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+# O           Install group apps and Automated Apps Install                  O
+# OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+
+# ############################################################################
+# Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
+# questionRun () {
+#   printf "Question before install asking for each type of install type\n"
+#   read -rp "Do you want to do a Kernel update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     kernelUpradeAns=1
+#   else
+#     read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       startUpdateAns=1
+#     fi
+#   fi
+#   case $1 in
+#     [lw] )
+#       read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         homeDataDirAns=1
+#       fi
+#       read -rp "Do you want to install ownCloudClient? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         ownCloudClientAns=1
+#       fi
+#       if [[ $1 = l ]]; then
+#         read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           displayDriversAns=1
+#         fi
+#         read -rp "Do you want to install DisplayLink? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           displayLinkAns=1
+#         fi
+#       fi
+#     ;;
+#     vm )
+#       read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         vmwareGuestSetupAns=1
+#       fi
+#     ;;
+#     vb )
+#       read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         virtualBoxGuestSetupAns=1
+#       fi
+#     ;;
+#   esac
+#   case $desktopEnvironment in
+#     gnome)
+#       read -rp "Do you want to install Gnome Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnomeBackportsAns=1
+#       fi
+#       read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnomeButtonsAns=1
+#       fi
+#       ;;
+#     kde)
+#       read -rp "Do you want to install KDE Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         kdeBackportsAns=1
+#       fi
+#       ;;
+#   esac
+#   read -rp "Do you want to install Doublecmd? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     doublecmdAns=1
+#   fi
+#   read -rp "Do you want to install Google Chrome? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     chromeAns=1
+#   fi
+#   read -rp "Do you want to install DigiKam? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     digiKamAns=1
+#   fi
+#   read -rp "Do you want to install Docker? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dockerAns=1
+#   fi
+#   read -rp "Do you want to install Dropbox? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dropboxAns=1
+#   fi
+#   read -rp "Do you want to install Photography Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     photoAns=1
+#   fi
+#   read -rp "Do you want to install AsciiDoc? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     asciiDocAns=1
+#   fi
+#   read -rp "Do you want to install Vagrant? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vagrantAns=1
+#   fi
+#   read -rp "Do you want to install Development Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     devAppsAns=1
+#     read -rp "Do you want to install Git? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       gitAns=1
+#     fi
+#   fi
+#   read -rp "Do you want to install extra Fonts? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     fontsAns=1
+#   fi
+#   read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addGenRepoAns=1
+#   fi
+#   # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   downgradeAptDistroAns=1
+#   # fi
+#   read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addRepoAns=1
+#   fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdateAns=1
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgradeAns=1
+#   fi
+#   read -rp "Do you want to do install the applications? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     installAppsAns=1
+#   fi
+#   # end of questions
+#   # debug "You want to stop"
+#   # printf "######## STOP ##########"
+#   # read -rp "Do you want to stop? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   exit 0;
+#   # fi
+#
+#   # start of repositories setup
+#   if [[ $kernelUpradeAns = 1 ]]; then
+#     kernelUprade
+#   fi
+#   if [[ $startUpdateAns = 1 ]]; then
+#     repoUpdate
+#     repoUpgrade
+#   fi
+#   if [[ $addRepoAns = 1 ]]; then
+#     #statements
+#     if [[ $devAppsAns = 1 ]]; then
+#       rubyRepo
+#     fi
+#     case $desktopEnvironment in
+#       gnome )
+#       ;;
+#       kde )
+#         if [[ $kdeBackportsAns = 1 ]]; then
+#           kdeBackportsApps
+#         fi
+#       ;;
+#     esac
+#     if [[ $addGenRepoAns = 1 ]]; then
+#       addRepositories
+#     fi
+#   fi
+#   # if [[ $downgradeAptDistroAns = 1 ]]; then
+#   #   downgradeAptDistro
+#   # fi
+#
+#   # update repositories
+#   if [[ $repoUpdateAns = 1 ]]; then
+#     repoUpdate
+#   fi
+#
+#   #start of application install
+#   if [[ $installAppsAns = 1 ]]; then
+#     log_info "Start Applications installation"
+#     println_banner_yellow "Start Applications installation                                    "
+#     if [[ $homeDataDirAns = 1 ]]; then
+#       dataDirLinksSetup
+#     fi
+#     if [[ $vmwareGuestSetupAns = 1 ]]; then
+#       vmwareGuestSetup
+#     fi
+#     if [[ $virtualBoxGuestSetupAns = 1 ]]; then
+#       virtualboxGuestSetup
+#     fi
+#     if [[ $displayDriversAns = 1 ]]; then
+#       laptopDisplayDrivers
+#     fi
+#     if [[ $displayLinkAns = 1 ]]; then
+#       displayLinkInstallApp
+#     fi
+#     if [[ $ownCloudClientAns = 1 ]]; then
+#       ownCloudClientInstall
+#     fi
+#     if [[ $doublecmdAns = 1 ]]; then
+#       doublecmdInstall
+#     fi
+#     if [[ $chromeAns = 1 ]]; then
+#       googleChromeInstall
+#     fi
+#     if [[ $digiKamAns = 1 ]]; then
+#       digikamInstall
+#     fi
+#     if [[ $dockerAns = 1 ]]; then
+#       dockerInstall
+#     fi
+#     if [[ $dropboxAns = 1 ]]; then
+#       dropboxInstall
+#     fi
+#     if [[ $desktopEnvironment = "gnome" ]]; then
+#       if [[ $gnomeBackportsAns = 1 ]]; then
+#         gnome3Backports
+#       fi
+#       if [[ $gnomeButtonsAns = 1 ]]; then
+#         gnome3Settings
+#       fi
+#     fi
+#     if [[ $photoAns = 1 ]]; then
+#       photoAppsInstall
+#     fi
+#     if [[ $devAppsAns = 1 ]]; then
+#       devAppsInstall
+#     fi
+#     if [[ $gitAns = 1 ]]; then
+#       gitInstall
+#     fi
+#     if [[ $asciiDocAns = 1 ]]; then
+#       asciiDocInstall
+#     fi
+#     if [[ $fontsAns = 1 ]]; then
+#       fontsInstall
+#     fi
+#     if [[ $vagrantAns = 1 ]]; then
+#       vagrantInstall
+#     fi
+#     installUniverseApps
+#   fi
+#
+#   # update distro
+#   if [[ $repoUpgradeAns = 1 ]]; then
+#     repoUpgrade
+#   fi
+# }
+
+# ############################################################################
+# Question run ask questions before run function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
+# questionStepRun () {
+#   printf "Question each step before installing\n"
+#   read -rp "Do you want to do a Kernel update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     kernelUprade
+#   fi
+#   read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dataDirLinksSetup
+#   fi
+#   read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     addRepositories
+#   fi
+#   # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+#   # if [[ $answer = [Yy1] ]]; then
+#   #   downgradeAptDistro
+#   # fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdate
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgrade
+#   fi
+#   read -rp "Do you want to do install the applications? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     installUniverseApps
+#   fi
+#   read -rp "Do you want to install ownCloudClient? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     ownCloudClientInstall
+#   fi
+#   read -rp "Do you want to install Intel and Nvidia Display drivers? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     laptopDisplayDrivers
+#   fi
+#   read -rp "Do you want to install DisplayLink? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     displayLinkInstallApp
+#   fi
+#   read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vmwareGuestSetup
+#   fi
+#   read -rp "Do you want to install and setup for VirtualBox GUEST? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     virtualboxGuestSetup
+#   fi
+#   case $desktopEnvironment in
+#     gnome)
+#       read -rp "Do you want to install Gnome Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnome3Backports
+#       fi
+#       read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         gnome3Settings
+#       fi
+#       ;;
+#     kde)
+#       read -rp "Do you want to install KDE Backports? (y/n)" answer
+#       if [[ $answer = [Yy1] ]]; then
+#         kdeBackportsApps
+#       fi
+#       ;;
+#   esac
+#   read -rp "Do you want to install Doublecmd? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     doublecmdInstall
+#   fi
+#   read -rp "Do you want to install Google Chrome? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     googleChromeInstall
+#   fi
+#   read -rp "Do you want to install DigiKam? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     digikamInstall
+#   fi
+#   read -rp "Do you want to install Docker? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dockerInstall
+#   fi
+#   read -rp "Do you want to install Dropbox? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     dropboxInstall
+#   fi
+#   read -rp "Do you want to install Photography Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     photoAppsInstall
+#   fi
+#   read -rp "Do you want to install AsciiDoc? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     asciiDocInstall
+#   fi
+#   read -rp "Do you want to install and setup for VirtualBox HOST? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     virtualboxHostInstall
+#   fi
+#   read -rp "Do you want to install Vagrant? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     vagrantInstall
+#   fi
+#   read -rp "Do you want to install Development Apps? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     read -rp "Do you want to install Git? (y/n)" answer
+#     if [[ $answer = [Yy1] ]]; then
+#       gitInstall
+#     fi
+#     rubyRepo
+#     devAppsInstall
+#   fi
+#   read -rp "Do you want to install extra Fonts? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     fontsInstall
+#   fi
+#   read -rp "Do you want to do a Repo Update? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpdate
+#   fi
+#   read -rp "Do you want to do a Repo Upgrade? (y/n)" answer
+#   if [[ $answer = [Yy1] ]]; then
+#     repoUpgrade
+#   fi
+# }
+
+# ############################################################################
+# Autorun function $1 = l (laptop), w (workstation), vm (vmware virtual machine), vb (virtualbox virtual machine)
+# autoRun () {
+#   log_info "Start Auto Applications installation"
+#   println_banner_yellow "Start Auto Applications installation                                 "
+#   noPrompt=1
+#   menuSelectionsInput=(1)    #: Kernel upgrade
+#   case $1 in
+#     [lwv] )
+#       menuSelectionsInput+=(59)   #: Add Ruby Repositories
+#       ;;
+#   esac
+#   menuSelectionsInput+=(2)  #: Repositories update
+#   case $desktopEnvironment in
+#     gnome )
+#       menuSelectionsInput+=(15)    #: Install Gnome Desktop from backports
+#       menuSelectionsInput+=(16)    #: Install Gnome Desktop from backports
+#     ;;
+#     kde )
+#       menuSelectionsInput+=(11)  #: Install KDE Desktop from backports
+#       if [[ $1 = [lwv] ]]; then
+#         menuSelectionsInput+=(71)   #: Digikam
+#       fi
+#     ;;
+#   esac
+#
+#   menuSelectionsInput+=(32)   #: Doublecmd
+#   menuSelectionsInput+=(31)   #: Google Chrome browser
+#   menuSelectionsInput+=(37)   #: Install extra fonts
+#   menuSelectionsInput+=(4)    #: Install the Universe applications
+#
+#   case $1 in
+#     vm )
+#       menuSelectionsInput+=(83)   #: Setup for a Vmware guest
+#     ;;
+#     vb )
+#       # menuSelectionsInput+=(81)   #: Setup for a VirtualBox guest
+#     ;;
+#     l )
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(88)   #: Laptop Display Drivers for Intel en Nvidia
+#       menuSelectionsInput+=(89)   #: DisplayLink
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(82)   #: VirtualBox Host
+#       menuSelectionsInput+=(84)   #: Vagrant
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#     w )
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(82)   #: VirtualBox Host
+#       menuSelectionsInput+=(84)   #: Vagrant
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#     v )
+#       menuSelectionsInput+=(91)   #: Create test data directories on data drive.
+#       menuSelectionsInput+=(80)    #: Setup the home directories to link to the data disk directories
+#       menuSelectionsInput+=(21)   #: ownCloudClient
+#       menuSelectionsInput+=(22)   #: Docker
+#       menuSelectionsInput+=(23)   #: Dropbox
+#       menuSelectionsInput+=(24)   #: inSync for GoogleDrive
+#       menuSelectionsInput+=(50)   #: Install Development Apps and IDEs
+#       menuSelectionsInput+=(51)   #: Git
+#       menuSelectionsInput+=(52)   #: AsciiDoc
+#       menuSelectionsInput+=(53)   #: Bashdb
+#       menuSelectionsInput+=(70)   #: Photography Apps
+#     ;;
+#   esac
+#
+#   menuSelectionsInput+=(2)    #: Repositories update
+#   menuSelectionsInput+=(3)    #: Repositories upgrade
+#   menuRun "AutoRun" "${menuSelectionsInput[@]}"
+#   # end of run
+#   noPrompt=0
+# }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O           Menus                                                          O
@@ -1782,6 +2382,456 @@ setUbuntuVersionParameters() {
     done
   fi
 }
+
+# ############################################################################
+# Install other applications individually
+# menuOtherApps () {
+#   ##### Menu section
+#
+#   until [[ "$choiceApps" =~ ^(0|q|Q|quit)$ ]]; do
+#     clear
+#     printf "
+#
+#     There are the following options for installing individual apps.
+#     NOTE: The apps will only be installed when you quit this menu so that only one repo update is done.
+#     TASK : DESCRIPTION
+#     -----: ---------------------------------------
+#     1    : VirtualBox Host
+#     2    : VirtualBox Guest
+#     3    : Development Apps
+#     4    : Photography Apps
+#     6    : Image Editing Applications
+#     7    : Music and Video Applications
+#     8    : Oracle Java 9
+#     10   : Laptop Display Drivers for Intel en Nvidia
+#     11   : DisplayLink
+#     12   : ownCloudClient
+#     13   : Google Chrome browser
+#     14   : Digikam
+#     15   : Docker
+#     16   : Dropbox
+#     19   : Install extra fonts
+#     20   : Sunflower
+#     21   : LibreCAD
+#     22   : Calibre
+#     23   : FreeFileSync
+#     24   : inSync for GoogleDrive
+#     25   : Doublecmd
+#     50   : Git
+#     51   : AsciiDoc
+#     52   : Vagrant
+#     53   : Bashdb
+#     67   : Oracle Java 8
+#     68   : Oracle Java 10
+#
+#     0|q  : Quit this program
+#
+#     "
+#
+#     read -rp "Enter your choice : " choiceApps
+#     # printf "%s" "$choiceApps"
+#
+#     # take inputs and perform as necessary
+#     case "$choiceApps" in
+#       1 )
+#         # VirtualBox Host
+#         read -rp "Do you want to install VirtualBox Host? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           virtualboxHostInstall
+#         fi
+#       ;;
+#       2 )
+#         # VirtualBox Guest
+#         read -rp "Do you want to install VirtualBox Guest? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           repoUpdate
+#           # sudo apt install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+#           virtualboxGuestSetup
+#         fi
+#       ;;
+#       3 )
+#         # Development Applications
+#         read -rp "Do you want to install Development Applications? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           devAppsInstall
+#         fi
+#       ;;
+#       4 )
+#         # Photography Applications
+#         read -rp "Do you want to install Photography Applications? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           photoAppsInstall
+#         fi
+#       ;;
+#       6 )
+#         # Imaging Editing Applications
+#         read -rp "Do you want to install Imaging Editing Applications? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Imaging Editing Applications"
+#           println_blue "Imaging Editing Applications"
+#           sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+#           repoUpdate
+#           sudo apt install -y dia-gnome gimp gimp-plugin-registry gimp-ufraw;
+#           pressEnterToContinue "Image Editing Applications installed."
+#         fi
+#       ;;
+#       7 )
+#         # Music and Video apps
+#         read -rp "Do you want to install Music and Video Apps? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Music and Video apps"
+#           println_blue "Music and Video apps"
+#           sudo apt install -y vlc browser-plugin-vlc easytag
+#           # clementine
+#           sudo snap install clementine
+#         fi
+#       ;;
+#       8)
+#         # Oracle Java 9
+#         read -rp "Do you want to install Oracle Java9? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Install Oracle Java9"
+#           println_blue "Install Oracle Java9"
+#           echo oracle-java9-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+#           sudo apt install -y oracle-java9-installer
+#           sudo apt install oracle-java9-set-default
+#         fi
+#
+#       ;;
+#       10 )
+#         # Freeplane
+#         read -rp "Do you want to install Freeplane? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Freeplane"
+#           println_blue "Freeplane"
+#           sudo apt install -y freeplane
+#         fi
+#       ;;
+#       10)
+#         # Laptop Drivers
+#         read -rp "Do you want to install Nvidia and Intel Drivers? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           laptopDisplayDrivers
+#         fi
+#       ;;
+#       11)
+#         # DisplayLink
+#         read -rp "Do you want to install DisplayLink Drivers? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           displayLinkInstallApp
+#         fi
+#       ;;
+#       12 )
+#         # ownCloudClient
+#         read -rp "Do you want to install ownCloudClient? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           ownCloudClientInstall
+#         fi
+#       ;;
+#       13 )
+#         # Google Chrome
+#         read -rp "Do you want to install Google Chrome? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           googleChromeInstall
+#         fi
+#       ;;
+#       14 )
+#         # DigiKam
+#         read -rp "Do you want to install DigiKam? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           digikamInstall
+#         fi
+#       ;;
+#       15 )
+#         # Docker
+#         read -rp "Do you want to install Docker? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           dockerInstall
+#         fi
+#       ;;
+#       16 )
+#       # Dropbox
+#         read -rp "Do you want to install Dropbox? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           dropboxInstall
+#         fi
+#       ;;
+#       19 )
+#         # ExtraFonts
+#         read -rp "Do you want to install extra Fonts? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           fontsInstall
+#         fi
+#       ;;
+#       20 )
+#         # Sunflower
+#         read -rp "Do you want to install Sunflower? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Sunflower"
+#           println_blue "Sunflower"
+#           sudo add-apt-repository -y ppa:atareao/sunflower
+#           log_warning "Change Sunflower to $ltsReleaseName"
+#           println_blue "Change Sunflower to $ltsReleaseName"
+#           changeAptSource "/etc/apt/sources.list.d/atareao-ubuntu-sunflower-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+#
+#           repoUpdate
+#
+#           sudo apt install -y sunflower
+#         fi
+#       ;;
+#       21 )
+#         # [?] LibreCAD
+#         read -rp "Do you want to install LibreCAD? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Install LibreCAD"
+#           println_blue "Install LibreCAD"
+#
+#           sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
+#           changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
+#
+#           repoUpdate
+#
+#           sudo apt install -y librecad
+#         fi
+#       ;;
+#       22 )
+#         # Calibre
+#         read -rp "Do you want to install Calibre? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Calibre"
+#           println_blue "Calibre"
+#           sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+#           # Use the following f you get certificate issues
+#           # sudo -v && wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+#
+#           # Github download, above is recommended
+#           # sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+#           pressEnterToContinue "Calibre installed."
+#         fi
+#       ;;
+#       23)
+#         # FreeFileSync
+#         read -rp "Do you want to install FreeFileSync? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           log_info "Install FreeFileSync"
+#           println_blue "Install FreeFileSync"
+#           sudo apt install -y freefilesync
+#           pressEnterToContinue "FreeFileSync installed."
+#         fi
+#       ;;
+#       24)
+#         # inSync for GoogleDrive
+#         read -rp "Do you want to install inSync for GoogleDrive? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           insyncInstall
+#         fi
+#       ;;
+#       25)
+#         # Doublecmd
+#         read -rp "Do you want to install Doublecmd? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           doublecmdInstall
+#         fi
+#       ;;
+#       50 )
+#         # Git
+#         read -rp "Do you want to install Git? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           gitInstall
+#         fi
+#       ;;
+#       51 )
+#         # AsciiDoc
+#         read -rp "Do you want to install AsciiDoc? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           asciiDocInstall
+#         fi
+#       ;;
+#       52 )
+#         # Vagrant
+#         read -rp "Do you want to install Vagrant? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           vagrantInstall
+#         fi
+#       ;;
+#       53 )
+#         read -rp "Do you want to install Bashdb? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           bashdbInstall
+#         fi
+#       ;;
+#       67 )
+#         read -rp "Do you want to install Oracle Java 8? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           oracleJava8Install
+#         fi
+#       ;;
+#       68 )
+#         read -rp "Do you want to install Oracle Java 10? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           oracleJava10Install
+#         fi
+#       ;;
+#     	0|q);;
+#     	*)
+#         # return 1
+#     		;;
+#     esac
+#   done
+# }
+
+# ############################################################################
+# Install settings and applications one by one by selecting options
+# menuInstallOptions () {
+#   ##### Menu section
+#   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+#     clear
+#     printf "
+#
+#     There are the following options for this script
+#     TASK : DESCRIPTION
+#     -----: ---------------------------------------
+#     1    : Kernel upgrade
+#     2    : Repositories update
+#     3    : Repositories upgrade
+#     4    : Add the additional Repositories for the general applications
+#     5    : Install the general applications
+#     6    :
+#     7    :
+#     8    : Upgrae KDE to Beta KDE on backports
+#     10   : Install Gnome Desktop from backports
+#     11   : Install KDE Desktop from backports
+#     17   : Setup for a Vmware guest
+#     18   : Setup for a VirtualBox guest
+#     19   : Install Development Apps and IDEs
+#     20   : Setup the home directories to link to the data disk directories
+#     21   : Create test data directories on data drive
+#
+#     30   : Set options for an Ubuntu Beta install with PPA references to a previous version
+#
+#     50   : Change that you don't get any questions
+#     51   : Change that you get questioned
+#
+#     0/q  : Quit this program
+#
+#     "
+#
+#     read -rp "Enter your choice : " choiceOpt
+#     # printf "%s" "$choiceOpt"
+#
+#     # take inputs and perform as necessary
+#     case "$choiceOpt" in
+#       1|krnl )
+#         read -rp "Do you want to do a Kernel update that includes a reboot? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           kernelUprade
+#         fi
+#       ;;
+#       2|updt )
+#         repoUpdate
+#       ;;
+#       3|upgr )
+#         read -rp "Do you want to do a start with an update and upgrade, with a possible reboot? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           kernelUprade
+#         fi
+#       ;;
+#       4|addrepos)
+#         read -rp "Do you want to add the general Repo Keys? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           addRepositories
+#         fi
+#         # read -rp "Do you want to downgrade some of the repos that do not have updates for the latest repos? (y/n)" answer
+#         # if [[ $answer = [Yy1] ]]; then
+#         #   downgradeAptDistro
+#         # fi
+#         read -rp "Do you want to go through adding Repo Keys of the selection above? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           repoUpdate
+#         fi
+#       ;;
+#       5|instapps)
+#         read -rp "Do you want to do install the applications? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           installUniverseApps
+#         fi
+#       ;;
+#       6 )
+#       ;;
+#       10 )
+#         read -rp "Do you want to install Gnome from the Backports? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           gnome3Backports
+#           read -rp "Do you want to set the Gnome Window buttons to the left? (y/n)" answer
+#           if [[ $answer = [Yy1] ]]; then
+#             gnome3Settings
+#           fi
+#         fi
+#       ;;
+#       7 )
+#       ;;
+#       8 )
+#         read -rp "Do you want to add the KDE Beta Backports apt sources? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           kdeBetaBackportsRepo
+#         fi
+#       ;;
+#       11 )
+#         read -rp "Do you want to install KDE from the Backports? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           kdeBackportsApps
+#         fi
+#       ;;
+#       17 )
+#         read -rp "Do you want to install and setup for VMware guest? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           vmwareGuestSetup
+#         fi
+#       ;;
+#       18 )
+#         read -rp "Do you want to install and setup for VirtualBox guest? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           virtualboxGuestSetup
+#         fi
+#       ;;
+#
+#       20 )
+#         read -rp "Do you want to update the home directory links for the data drive? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           dataDirLinksSetup
+#         fi
+#       ;;
+#       21 )
+#         read -rp "Do you want to create the test home directories on the data drive? (y/n)" answer
+#         if [[ $answer = [Yy1] ]]; then
+#           createTestDataDirs
+#         fi
+#       ;;
+#       19 )
+#         devAppsInstall
+#       ;;
+#       30 )
+#         setUbuntuVersionParameters
+#       ;;
+#       50)
+#         # answer=y
+#         noPrompt=1
+#         println_blue "Questions asked OFF\n No questions will be asked"
+#         log_debug "Questions asked OFF\n No questions will be asked"
+#       ;;
+#       51)
+#         # answer=n
+#         noPrompt=0
+#         println_blue "Questions asked ON\n All questions will be asked"
+#         log_debug "Questions asked ON\n All questions will be asked"
+#       ;;
+#     	0|q);;
+#     	*)
+#         return 1
+#     		;;
+#     esac
+#   done
+# }
 
 # ############################################################################
 # Preselect menu options, display menu and then install as per the main menu option
@@ -2470,7 +3520,7 @@ mainMenu() {
     # printf \n    MESSAGE : In case of options, one value is displayed as the default value.\n"
     # printf "    Do erase it to use other value.\n"
 
-    printf "\n    BuildMan v3.3\n"
+    printf "\n    BuildMan v3.2\n"
     printf "\n    This script is documented in README.md file.\n"
     printf "\n    Running: "
     println_yellow "${distReleaseName} ${distReleaseVer} ${desktopEnvironment}\n"

@@ -3,7 +3,7 @@
 # Remove existing files.
 
 MOUNTDIR=$1
-HOMEDIR="$MOUNTDIR/home/juan"
+HOMEDIR="$MOUNTDIR/home/vagrant"
 dotFilesParentDir="/data/dotfiles/home"
 etcFilesParentDir="/data/dotfiles/etc"
 ETCDIR="$MOUNTDIR/etc"
@@ -202,10 +202,32 @@ die() { echo "$*" >&2; exit 1; }
 
 checkParameters() {
   if [[ -z "${1// }" ]]; then
-    die "Please enter the mounted directory of the new OS, for example /media/yourname/newos"
-  fi
-  if [[ -z "${MOUNTDIR// }" ]]; then
-    die "Please enter the mounted directory of the new OS, for example /media/yourname/newos"
+    printf "You did not specify a mounted target directory. You can enter it as a parameter next time or enter one now.\n"
+    printf "link-data-dotfiles-to-home_from_boot_diskV3.sh /media/%s/newubuntu\n" "${USER}"
+    read -rp "Please enter the mounted directory of the new OS, for example /media/${USER}/newos:" answer
+    MOUNTDIR=$answer
+    HOMEDIR="$MOUNTDIR/home/vagrant"
+    ETCDIR="$MOUNTDIR/etc"
+    printf "\nThe target home directory is: %s\n" "$HOMEDIR"
+    printf "The target etc directory is: %s\n" "$ETCDIR"
+    printf "\nThe source dotfiles directory for HOME is: %s" "${dotFilesParentDir}"
+    read -rp "Please press enter to keep ${dotFilesParentDir} or enter a new directory: " answer
+    if [[ ! -z "${answer// }" ]]; then
+      if [[ -d ${answer} ]]; then
+        dotFilesParentDir=${answer}
+      else
+        die "Please enter a valid directory."
+      fi
+    fi
+    printf "\nThe source dotfiles directory for etc is: %s" "${etcFilesParentDir}"
+    read -rp "Please press enter to keep ${etcFilesParentDir} or enter a new directory: " answer
+    if [[ ! -z "${answer// }" ]]; then
+      if [[ -d ${answer} ]]; then
+        etcFilesParentDir=${answer}
+      else
+        die "Please enter a valid directory."
+      fi
+    fi
   fi
 }
 
