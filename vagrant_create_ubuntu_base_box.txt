@@ -6,9 +6,13 @@ cd /media/vagrant/vboxcd
 sudo ./VBoxLinuxAdditions.run
 sudo /media/vagrant/VBOXADDITIONS_5.1.34_121010/VBoxLinuxAdditions.run
 
+Start/restart the service:
+manually: sudo /opt/VBoxGuestAdditions*/init/vboxadd setup (add sudo sh -x to debug)
+Debian: sudo /etc/init.d/vboxadd-service start
+
 sudo vim /etc/hosts
-  172.28.128.1 vbhost
-  192.168.56.1 vbhost56
+172.28.128.1 vbhost
+192.168.56.1 vbhost56
 
 mkdir -p /home/vagrant/.ssh
 wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
@@ -18,9 +22,6 @@ chmod 0600 /home/vagrant/.ssh/authorized_keys
 chown -R vagrant /home/vagrant/.ssh
 
 env EDITOR=vim
-sudo visudo
-  vagrant ALL=(ALL) NOPASSWD:ALL
-  echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 sudo update-alternatives --config editor
 export EDITOR=vim;
 env | grep EDITOR
@@ -30,6 +31,11 @@ Defaults editor=/usr/bin/vim
 echo "Defaults editor=/usr/bin/vim" | sudo tee -a /etc/sudoers
 )
 
+sudo visudo
+  vagrant ALL=(ALL) NOPASSWD:ALL
+
+echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+
 sudo vi /etc/ssh/sshd_config
   Ensure the following is set:
     Port 22
@@ -37,7 +43,6 @@ sudo vi /etc/ssh/sshd_config
     AuthorizedKeysFile %h/.ssh/authorized_keys
     PermitEmptyPasswords no
 sudo service ssh restart
-
 
 # if /data exist
 sudo chown -R $USER:$USER /data
@@ -55,6 +60,7 @@ sudo apt -y dist-upgrade
 sudo apt -y full-upgrade
 # sudo apt -y clean
 sudo apt -y autoremove
+sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
 
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 sudo rm -f /EMPTY
@@ -68,12 +74,12 @@ vboxmanage list runningvms
 
 ssh juan@vbhost
 
+# Manual build
 vagrant package --base <VitualBox VM Name>
-
 vagrant box remove {boxname}
-
 vagrant box add {boxname} package.box
 
+# Vagrant setup and start
 vagrant init {boxname}
 
 Edit Vagrant file and add
@@ -83,21 +89,26 @@ Edit Vagrant file and add
 
 vagrant up
 
+# Commands to upgrade inside the vagrant box
 sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
 sudo flatpak update
 sudo snap refresh
 
+#Commands to upgrade through ssh
 vagrant ssh -c "sudo dpkg --configure -a"
 vagrant ssh -c "sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove"
 vagrant ssh -c "sudo /media/vagrant/VBOXADDITIONS_5.1.34_121010/VBoxLinuxAdditions.run"
 vagrant ssh -c "sudo dd if=/dev/zero of=/EMPTY bs=1M"
 vagrant ssh -c "sudo rm -f /EMPTY"
 
+# Using Buildman
 vagrant ssh -c "/srv/share/build/buildmanV2.sh"
 vagrant ssh -c "tail -f /tmp/buildman.log"
 
+# Vagrant mount
 vagrant ssh -c "sudo mount 172.28.128.1:/data/vagrant/.vagrant.d/cache/kcosmic /tmp/vagrant-cache && sudo ln -s /tmp/vagrant-cache/apt /var/cache/apt/archives"
 
+# Build a new vagrant box from an existing Vagrant guest
 currentpath=$(pwd)
 cd /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/
 vagrant package --base <VitualBox VM Name> --output /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
@@ -108,13 +119,5 @@ vagrant box add kcosmic /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/v
 rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
 rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
 
-cd /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/
-vagrant package --base <VitualBox VM Name>
-cd ${currentpath}
-vagrant destroy -y
-vagrant box remove kbionic
-vagrant box add kbionic /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
-rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
-rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
-
+# Cosmic issues with crypto
 vagrant ssh -c "sudo apt remove cryptsetup-initramfs"

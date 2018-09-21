@@ -195,7 +195,8 @@ if [ -d "/data" ]; then
   ".cxoffice"
   ".atom"
   ".nylas"
-  "scripts"
+  ".mozilla"
+  "bin"
   )
 
   # DATAHOMEDIRECTORIES=(".local"
@@ -295,24 +296,24 @@ if [ -d "/data" ]; then
   done
 
 
-  # For Firefox only
-  if [[ "$noPrompt" -ne 1 ]]; then
-    read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
-    if [[ $qfirefox = [Yy1] ]]; then
-      sourceLinkDirectory=~/.mozilla
-      if [ -d "$sourceLinkDirectory" ]; then
-        rm -R "$sourceLinkDirectory"
-        ln -s /data/.mozilla "$sourceLinkDirectory"
-      fi
-    fi
-  else
-    sourceLinkDirectory=~/.mozilla
-    if [ -d "$sourceLinkDirectory" ]; then
-      rm -R "$sourceLinkDirectory"
-      ln -s /data/.mozilla "$sourceLinkDirectory"
-    fi
-  fi
-fi
+#   # For Firefox only
+#   if [[ "$noPrompt" -ne 1 ]]; then
+#     read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
+#     if [[ $qfirefox = [Yy1] ]]; then
+#       sourceLinkDirectory=~/.mozilla
+#       if [ -d "$sourceLinkDirectory" ]; then
+#         rm -R "$sourceLinkDirectory"
+#         ln -s /data/.mozilla "$sourceLinkDirectory"
+#       fi
+#     fi
+#   else
+#     sourceLinkDirectory=~/.mozilla
+#     if [ -d "$sourceLinkDirectory" ]; then
+#       rm -R "$sourceLinkDirectory"
+#       ln -s /data/.mozilla "$sourceLinkDirectory"
+#     fi
+#   fi
+# fi
 
 
 ###############################################################################################################
