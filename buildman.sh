@@ -572,6 +572,7 @@ dataDirLinksSetup () {
     ".cxoffice"
     ".atom"
     ".nylas"
+    '.mozilla'
     "bin"
     )
 
@@ -666,23 +667,23 @@ dataDirLinksSetup () {
       fi
     done
 
-    # For Firefox only
-    if [[ "$noPrompt" -eq 0 ]]; then
-      read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
-      if [[ $qfirefox = [Yy1] ]]; then
-        sourceLinkDirectory="$HOME/.mozilla"
-        if [ -d "$sourceLinkDirectory" ]; then
-          rm -R "$sourceLinkDirectory"
-          ln -s /data/.mozilla "$sourceLinkDirectory"
-        fi
-      fi
-    else
-      sourceLinkDirectory"$HOME/.mozilla"
-      if [ -d "$sourceLinkDirectory" ]; then
-        rm -R "$sourceLinkDirectory"
-        ln -s /data/.mozilla "$sourceLinkDirectory"
-      fi
-    fi
+  #   # For Firefox only
+  #   if [[ "$noPrompt" -eq 0 ]]; then
+  #     read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
+  #     if [[ $qfirefox = [Yy1] ]]; then
+  #       sourceLinkDirectory="$HOME/.mozilla"
+  #       if [ -d "$sourceLinkDirectory" ]; then
+  #         rm -R "$sourceLinkDirectory"
+  #         ln -s /data/.mozilla "$sourceLinkDirectory"
+  #       fi
+  #     fi
+  #   else
+  #     sourceLinkDirectory"$HOME/.mozilla"
+  #     if [ -d "$sourceLinkDirectory" ]; then
+  #       rm -R "$sourceLinkDirectory"
+  #       ln -s /data/.mozilla "$sourceLinkDirectory"
+  #     fi
+  #   fi
   fi
   cd "$currentPath" || exit
 }
@@ -1601,7 +1602,7 @@ installUniverseApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras digikam amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron;
       latteDockInstall
       # Old packages:
       # ufw-kde
@@ -2565,7 +2566,7 @@ mainMenu() {
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
         menuSelectionsInput+=(2 3)
@@ -2587,7 +2588,7 @@ mainMenu() {
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
         menuSelectionsInput+=(2 3)
@@ -2609,7 +2610,7 @@ mainMenu() {
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
         menuSelectionsInput+=(2 3)
@@ -2631,7 +2632,7 @@ mainMenu() {
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 12 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(11 12 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
         esac
         menuSelectionsInput+=(2 3)
