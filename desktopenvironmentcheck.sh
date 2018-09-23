@@ -207,7 +207,7 @@ desktopEnvironmentCheck () {
 	 	"xfce" )
 	   	desktopEnvironment="xubuntu"
 	 		;;
-    "ubuntu:GNOME" )
+    "ubuntu:GNOME" | "ubuntu:gnome")
       desktopEnvironment="ubuntu"
     ;;
     * )
