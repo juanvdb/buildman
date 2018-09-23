@@ -48,8 +48,9 @@
   debugLogFile="/tmp/buildman.log"
   errorLogFile="/tmp/buildman_error.log"
 
-  mkdir -p "$HOME/tmp"
-  sudo chown "$USER":"$USER" "$HOME/tmp"
+  HOMEDIR=$HOME
+  mkdir -p "$HOMEDIR/tmp"
+  sudo chown "$USER":"$USER" "$HOMEDIR/tmp"
 
   # black=$(tput setaf 0)
   red=$(tput setaf 1)
@@ -303,7 +304,7 @@ desktopEnvironmentCheck () {
     "xfce" )
     desktopEnvironment="xubuntu"
     ;;
-    "ubuntu:GNOME" )
+    "ubuntu:GNOME" | "ubuntu:gnome")
     desktopEnvironment="ubuntu"
     ;;
     * )
@@ -379,17 +380,17 @@ vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
   println_blue "VMware setup with Open VM Tools and NFS file share to host           "
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
-  mkdir -p "$HOME/hostfiles/home"
-  mkdir -p "$HOME/hostfiles/data"
-  LINE1="172.22.8.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  mkdir -p "$HOMEDIR/hostfiles/home"
+  mkdir -p "$HOMEDIR/hostfiles/data"
+  LINE1="172.22.8.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  LINE2="172.22.8.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  LINE2="172.22.8.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  LINE3="172.22.1.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  LINE3="172.22.1.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE3|h; \${x;s|$LINE3||;{g;t};a\\" -e "$LINE3" -e "}" /etc/fstab
-  LINE4="172.22.1.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  LINE4="172.22.1.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
+  sudo chown -R "$USER":"$USER" "$HOMEDIR/hostfiles"
   # sudo mount -a
 }
 
@@ -423,9 +424,9 @@ virtualboxHostInstall () {
   # esac
 
 
-  # LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  # LINE1="192.168.56.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
   # sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  # LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  # LINE2="192.168.56.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
   # sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
   # sudo mount -a
 }
@@ -436,13 +437,13 @@ virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
-  mkdir -p "$HOME/hostfiles/home"
-  mkdir -p "$HOME/hostfiles/data"
-  LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
+  mkdir -p "$HOMEDIR/hostfiles/home"
+  mkdir -p "$HOMEDIR/hostfiles/data"
+  LINE1="192.168.56.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
+  LINE2="192.168.56.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
+  sudo chown -R "$USER":"$USER" "$HOMEDIR/hostfiles"
   # sudo mount -a
 }
 
@@ -455,27 +456,27 @@ virtualboxGuestSetup () {
 createTestDataDirs () {
   log_info "Create Test Data directories"
   currentPath=$(pwd)
-  cd "$HOME" || exit
+  cd "$HOMEDIR" || exit
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
     sudo chown -R "$USER:$USER" /data
-    if [ -d "$HOME/$sourceDataDirectory" ]; then
-      if [ -L "$HOME/$sourceDataDirectory" ]; then
+    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
+      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_info "Keep symlink $HOME/data"
-        # log_debug "Remove symlink $HOME/data"
-        # rm "$HOME/$sourceDataDirectory"
-        # ln -s "/data" "$HOME/$sourceDataDirectory"
+        log_info "Keep symlink $HOMEDIR/data"
+        # log_debug "Remove symlink $HOMEDIR/data"
+        # rm "$HOMEDIR/$sourceDataDirectory"
+        # ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
       else
         # It's a directory!
-        # log_debug "Remove directory $HOME/data"
-        rm -R "${HOME/$sourceDataDirectory:?}"
-        ln -s "/data" "$HOME/$sourceDataDirectory"
+        # log_debug "Remove directory $HOMEDIR/data"
+        rm -R "${HOME}/${sourceDataDirectory}:?"
+        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
       fi
     else
-      # log_debug "Link directory $HOME/data"
-      ln -s "/data" "$HOME/$sourceDataDirectory"
+      # log_debug "Link directory $HOMEDIR/data"
+      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
     fi
 
     linkDataDirectories=(
@@ -531,32 +532,34 @@ createTestDataDirs () {
 # ############################################################################
 # Links directories to data disk if exists
 dataDirLinksSetup () {
-  log_info "XPS Data Dir links"
+  log_info "Data Dir links"
 	currentPath=$(pwd)
-  cd "$HOME" || exit
+  cd "$HOMEDIR" || exit
 
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
-    if [ -d "$HOME/$sourceDataDirectory" ]; then
-      if [ -L "$HOME/$sourceDataDirectory" ]; then
+    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
+      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_debug "Keep symlink $HOME/data"
-        # log_warning "Remove symlink $HOME/data"
-        # rm "$HOME/$sourceDataDirectory"
-        # ln -s "/data" "$HOME/$sourceDataDirectory"
+        log_debug "Keep symlink $HOMEDIR/data"
+        # log_warning "Remove symlink $HOMEDIR/data"
+        # rm "$HOMEDIR/$sourceDataDirectory"
+        # ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
       else
         # It's a directory!
-        log_debug "Remove directory $HOME/data"
-        rm -R "${HOME/$sourceDataDirectory:?}"
-        ln -s "/data" "$HOME/$sourceDataDirectory"
+        log_debug "Remove directory $HOMEDIR/data"
+        rm -R "${DATADIR}/${sourceDataDirectory}:?"
+        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
       fi
     else
-      log_debug "Link directory $HOME/data"
-      ln -s "/data" "$HOME/$sourceDataDirectory"
+      log_debug "Link directory $HOMEDIR/data"
+      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
     fi
 
     linkDataDirectories=(
+    "bin"
+    "Development"
     "Documents"
     "Downloads"
     "Music"
@@ -573,7 +576,6 @@ dataDirLinksSetup () {
     ".atom"
     ".nylas"
     '.mozilla'
-    "bin"
     )
 
     log_info "linkDataDirectories ${linkDataDirectories[*]}"
@@ -583,37 +585,37 @@ dataDirLinksSetup () {
       # remove after testing
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
-      if [ -e "$HOME/$sourceLinkDirectory" ]; then
-        if [ -d "$HOME/$sourceLinkDirectory" ]; then
-          if [ -L "$HOME/$sourceLinkDirectory" ]; then
+      if [ -e "$HOMEDIR/$sourceLinkDirectory" ]; then
+        if [ -d "$HOMEDIR/$sourceLinkDirectory" ]; then
+          if [ -L "$HOMEDIR/$sourceLinkDirectory" ]; then
             # It is a symlink!
-            # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
-            rm "$HOME/$sourceLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
+            rm "$HOMEDIR/$sourceLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           else
             # It's a directory!
-            # log_debug "Remove directory $HOME/data"
-            rmdir "$HOME/$sourceLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Remove directory $HOMEDIR/data"
+            rmdir "$HOMEDIR/$sourceLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           fi
         else
-          rm "$HOME/$sourceLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          rm "$HOMEDIR/$sourceLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
         fi
       else
-        # log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
-        if [ -L "$HOME/$sourceLinkDirectory" ];  then
+        # log_debug "$HOMEDIR/$sourceLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOMEDIR/$sourceLinkDirectory" ];  then
           # It is a symlink!
-          # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
-          rm "$HOME/$sourceLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+          # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
+          rm "$HOMEDIR/$sourceLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
         fi
-        ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
-        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
+        ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
       fi
     done
 
@@ -633,37 +635,37 @@ dataDirLinksSetup () {
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       # log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
-      if [ -e "$HOME/$targetLinkDirectory" ]; then
-        if [ -d "$HOME/$targetLinkDirectory" ]; then
-          if [ -L "$HOME/$targetLinkDirectory" ]; then
+      if [ -e "$HOMEDIR/$targetLinkDirectory" ]; then
+        if [ -d "$HOMEDIR/$targetLinkDirectory" ]; then
+          if [ -L "$HOMEDIR/$targetLinkDirectory" ]; then
             # It is a symlink!
-            # log_debug "Remove symlink $HOME/$targetLinkDirectory"
-            rm "$HOME/$targetLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
+            rm "$HOMEDIR/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
           else
             # It's a directory!
-            # log_debug "Remove directory $HOME/data"
-            rmdir "$HOME/$targetLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Remove directory $HOMEDIR/data"
+            rmdir "$HOMEDIR/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
           fi
         else
-          rm "$HOME/$targetLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          rm "$HOMEDIR/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
         fi
       else
-        # log_debug "$HOME/$targetLinkDirectory does not exists and synlink will be made"
-        if [ -L "$HOME/$targetLinkDirectory" ];  then
+        # log_debug "$HOMEDIR/$targetLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOMEDIR/$targetLinkDirectory" ];  then
           # It is a symlink!
-          # log_debug "Remove symlink $HOME/$targetLinkDirectory"
-          rm "$HOME/$targetLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+          # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
+          rm "$HOMEDIR/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
         fi
-        ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
-        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
+        ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
       fi
     done
 
@@ -671,14 +673,14 @@ dataDirLinksSetup () {
   #   if [[ "$noPrompt" -eq 0 ]]; then
   #     read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
   #     if [[ $qfirefox = [Yy1] ]]; then
-  #       sourceLinkDirectory="$HOME/.mozilla"
+  #       sourceLinkDirectory="$HOMEDIR/.mozilla"
   #       if [ -d "$sourceLinkDirectory" ]; then
   #         rm -R "$sourceLinkDirectory"
   #         ln -s /data/.mozilla "$sourceLinkDirectory"
   #       fi
   #     fi
   #   else
-  #     sourceLinkDirectory"$HOME/.mozilla"
+  #     sourceLinkDirectory"$HOMEDIR/.mozilla"
   #     if [ -d "$sourceLinkDirectory" ]; then
   #       rm -R "$sourceLinkDirectory"
   #       ln -s /data/.mozilla "$sourceLinkDirectory"
@@ -719,14 +721,14 @@ displayLinkInstallApp () {
   println_blue "display Link Install App                                             "
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
-  cd "$HOME/tmp" || return
+  cd "$HOMEDIR/tmp" || return
 	wget -r -t 10 --output-document=displaylink.zip  http://www.displaylink.com/downloads/file?id=1123
-  mkdir -p "$HOME/tmp/displaylink"
-  unzip displaylink.zip -d "$HOME/tmp/displaylink/"
-  chmod +x "$HOME/tmp/displaylink/displaylink-driver-4.2.run"
-  sudo "$HOME/tmp/displaylink/displaylink-driver-4.2.run"
+  mkdir -p "$HOMEDIR/tmp/displaylink"
+  unzip displaylink.zip -d "$HOMEDIR/tmp/displaylink/"
+  chmod +x "$HOMEDIR/tmp/displaylink/displaylink-driver-4.2.run"
+  sudo "$HOMEDIR/tmp/displaylink/displaylink-driver-4.2.run"
 
-  sudo chown -R "$USER":"$USER" "$HOME/tmp/displaylink/"
+  sudo chown -R "$USER":"$USER" "$HOMEDIR/tmp/displaylink/"
   cd "$currentPath" || return
   sudo apt install -yf
 }
@@ -819,8 +821,8 @@ devAppsInstall() {
   sudo snap install eclipse --classic
   sudo snap install shellcheck
   sudo apt install -yf abs-guide idle3 idle3-tools eric eric-api-files maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
-  # wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  # sudo dpkg -i --force-depends "$HOME/tmp/gitkraken-amd64.deb"
+  # wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+  # sudo dpkg -i --force-depends "$HOMEDIR/tmp/gitkraken-amd64.deb"
   # bashdbInstall
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
@@ -846,11 +848,11 @@ bashdbInstall() {
   currentPath=$(pwd)
   log_info "Bash Debugger 4.4-0.94 install"
   println_banner_yellow "Bash Debugger 4.4-0.94 install                                       "
-  cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
+  cd "$HOMEDIR/tmp" || die "Path $HOMEDIR/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
   curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
-  tar -xzf "$HOME/tmp/bashdb.tar.gz"
-  cd "$HOME/tmp/bashdb-4.4-0.94" || die "Path bashdb-4.4-0.94 does not exist"
+  tar -xzf "$HOMEDIR/tmp/bashdb.tar.gz"
+  cd "$HOMEDIR/tmp/bashdb-4.4-0.94" || die "Path bashdb-4.4-0.94 does not exist"
   ./configure
   make
   sudo make install
@@ -995,7 +997,7 @@ insyncInstall () {
 doublecmdInstall () {
   log_info "Install Doublecmd"
   println_blue "Install Doublecmd"
-  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
+  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOMEDIR/tmp/Release.key" | sudo apt-key add -
   if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
     wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
     echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
@@ -1086,7 +1088,7 @@ dockerInstall () {
 dropboxInstall () {
   log_info "Dropbox Install"
   println_blue "Dropbox Install"
-  rm -R "${HOMEDIR/.dropbox-dist/*:?}"
+  rm -R "${HOMEDIR}/.dropbox-dist/*:?"
   cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to start the Dropbox initiation and setup? (Y/N)" answer
@@ -1272,19 +1274,16 @@ etcherInstall () {
 
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the repo(default) or snap? (repo/snap)" answer
-    if [[ $answer = [snap] ]]; then
-      sudo snap install etcher
-    else
+    if [[ $answer = "repo" ]]; then
       echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
       repoUpdate
       sudo apt install -y etcher-electron
+    else
+      sudo snap install etcher
     fi
   else
-    echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
-    repoUpdate
-    sudo apt install -y etcher-electron
+    sudo snap install etcher
   fi
 }
 
@@ -1358,7 +1357,7 @@ latteDockInstall() {
   println_blue "Latte Dock for KDE Install"
   sudo add-apt-repository -y ppa:rikmills/latte-dock
   sudo apt install -y latte-dock
-  kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
+  kwriteconfig5 --file "$HOMEDIR/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
   qdbus org.kde.KWin /KWin reconfigure
 }
 
@@ -1479,8 +1478,8 @@ rapidPhotoDownloaderInstall() {
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
-  wget -P "$HOME/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
-  cd "$HOME/tmp" || return
+  wget -P "$HOMEDIR/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
+  cd "$HOMEDIR/tmp" || return
   python3 install.py
   cd "$currentPath" || return
 }
@@ -1611,7 +1610,7 @@ installUniverseApps () {
 			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
-			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte ambiance-colors radiance-colors;
+      sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
 			;;
 		"xubuntu" )
 			sudo apt install -y gmountiso gnome-commander;
@@ -2568,6 +2567,9 @@ mainMenu() {
           kde )
             menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
+          ubuntu )
+            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
         esac
         menuSelectionsInput+=(2 3)
         if [[ $noPrompt = 1 ]]; then
@@ -2589,6 +2591,9 @@ mainMenu() {
           ;;
           kde )
             menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+          ubuntu )
+            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
         menuSelectionsInput+=(2 3)
@@ -2612,6 +2617,9 @@ mainMenu() {
           kde )
             menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
           ;;
+          ubuntu )
+            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+          ;;
         esac
         menuSelectionsInput+=(2 3)
         if [[ $noPrompt = 1 ]]; then
@@ -2633,6 +2641,9 @@ mainMenu() {
           ;;
           kde )
             menuSelectionsInput+=(11 12 33 71)  #: Install KDE Desktop from backports #: Digikam
+          ;;
+          ubuntu )
+            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
         menuSelectionsInput+=(2 3)

@@ -1,9 +1,10 @@
 #! /bin/bash
+# Version 3.2
 
 # Remove existing files.
 
 MOUNTDIR=$1
-HOMEDIR="$MOUNTDIR/home/vagrant"
+HOMEDIR="$MOUNTDIR/home/$USER"
 dotFilesParentDir="/data/dotfiles/home"
 etcFilesParentDir="/data/dotfiles/etc"
 ETCDIR="$MOUNTDIR/etc"

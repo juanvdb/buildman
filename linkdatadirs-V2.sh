@@ -1,5 +1,5 @@
 #! /bin/bash
-# Version 2.1
+
 # Remove existing files.
 
 MOUNTDIR=$1
@@ -164,7 +164,7 @@ checkParameters() {
   HOMEDIR="$MOUNTDIR/home/$USER"
   # ETCDIR="$MOUNTDIR/etc"
   printf "\nThe target home directory is: %s\n" "$HOMEDIR"
-  printf "\nThe source data directory for HOME is: %s\n" "${DATADIR}"
+  printf "\nThe source data directory for HOME is: %s" "${DATADIR}"
   read -rp "Please press enter to keep ${dotFilesParentDir} or enter a new directory: " answer
   if [[ ! -z "${answer// }" ]]; then
     if [[ -d ${answer} ]]; then
@@ -173,15 +173,15 @@ checkParameters() {
       die "Please enter a valid directory."
     fi
   fi
-  # printf "\nThe source dotfiles directory for etc is: %s" "${etcFilesParentDir}"
-  # read -rp "Please press enter to keep ${etcFilesParentDir} or enter a new directory: " answer
-  # if [[ ! -z "${answer// }" ]]; then
-  #   if [[ -d ${answer} ]]; then
-  #     etcFilesParentDir=${answer}
-  #   else
-  #     die "Please enter a valid directory."
-  #   fi
-  # fi
+  printf "\nThe source dotfiles directory for etc is: %s" "${etcFilesParentDir}"
+  read -rp "Please press enter to keep ${etcFilesParentDir} or enter a new directory: " answer
+  if [[ ! -z "${answer// }" ]]; then
+    if [[ -d ${answer} ]]; then
+      etcFilesParentDir=${answer}
+    else
+      die "Please enter a valid directory."
+    fi
+  fi
 }
 
 linkDataDir() {
