@@ -7,9 +7,9 @@ if [[ -z "${1// }" ]] || [[ -z "${2// }" ]]; then
 fi
 vagrant halt
 rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
-vagrant package --base $2 --output /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box || exit 1
-vagrant destroy -f || exit 1
-vagrant box remove $1 -f || exit 1
-vagrant box add $1 /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box || exit 1
+vagrant package --base $2 --output /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
+vagrant destroy -f
+vagrant box remove $1 -f 
+vagrant box add $1 /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box 
 rm /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrantboxes/package.box
 rm -r $HOME/.vagrant.d/tmp/vagrant-package-*

@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kbionic')
+system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kcosmic')
 
 
 # Load our custom configuration and prepare some global variables

@@ -1,7 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kbionic')
+system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kcosmic')
+
 
 # Load our custom configuration and prepare some global variables
 # require 'yaml'
@@ -27,10 +28,10 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "kbionic"
+  config.vm.box = "kcosmic"
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
-  config.vm.network "private_network", ip: "172.28.128.131", auto_config: false
+  config.vm.network "private_network", ip: "172.28.128.111", auto_config: false
   # config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provider :virtualbox do |vb|
     vb.gui = true

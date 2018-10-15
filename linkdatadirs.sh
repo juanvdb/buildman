@@ -14,7 +14,6 @@ errorLogFile="$MOUNTDIR/tmp/linkdatafileserror.log"
 
 linkDataDirectories=(
 "bin"
-"Development"
 "Documents"
 "Downloads"
 "Music"
@@ -30,7 +29,8 @@ linkDataDirectories=(
 ".cxoffice"
 ".atom"
 ".nylas"
-'.mozilla'
+".mozilla"
+# "snap"
 )
 
 
@@ -193,11 +193,11 @@ linkDataDir() {
         # It's a directory!
         log_warning "Remove directory $HOMEDIR/data"
         rm -R "${HOMEDIR/data:?}"
-        ln -s "$DATADIR" "$HOMEDIR/data"
+        ln -sfn "$DATADIR" "$HOMEDIR/data"
       fi
     else
       log_info "Link directory $HOMEDIR/data"
-      ln -s "$DATADIR" "$HOMEDIR/data"
+      ln -sfn "$DATADIR" "$HOMEDIR/data"
     fi
 }
 
