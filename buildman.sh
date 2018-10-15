@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# DateVer 2018/07/10
-# Buildman V3.3
+# DateVer 2018/10/15
+# Buildman
+buildmanVersion=V3.4
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -2509,7 +2510,7 @@ mainMenu() {
     # printf \n    MESSAGE : In case of options, one value is displayed as the default value.\n"
     # printf "    Do erase it to use other value.\n"
 
-    printf "\n    BuildMan v3.3\n"
+    printf "\n    BuildMan %s\n" $buildmanVersion
     printf "\n    This script is documented in README.md file.\n"
     printf "\n    Running: "
     println_yellow "${distReleaseName} ${distReleaseVer} ${desktopEnvironment}\n"
