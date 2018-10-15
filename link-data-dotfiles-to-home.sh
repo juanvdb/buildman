@@ -49,6 +49,7 @@ dotFilesList=(
 ".kube"
 ".lastpass"
 ".lesshst"
+".local"
 ".m2"
 ".mime.types"
 ".minishift"
@@ -60,7 +61,6 @@ dotFilesList=(
 ".rvm"
 ".rvmrc"
 ".remmina"
-"snap"
 ".ssh"
 ".shutter"
 ".var"
@@ -75,8 +75,11 @@ dotFilesList=(
 )
 
 etcFilesList=(
+"auto.master"
 "auto.jupiter.nfs"
 "auto.neptune0.nfs"
+"auto.mars.nfs"
+"auto.saturn.nfs"
 "exports"
 "hosts"
 )

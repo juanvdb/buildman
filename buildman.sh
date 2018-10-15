@@ -356,7 +356,8 @@ kernelUprade () {
   fi
   if [[ $answer = [Yy1] ]]; then
     repoUpdate
-    sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
+    # sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-"$kernelRelease" linux-signed-image-"$kernelRelease" linux-image-extra-virtual;
+    sudo apt install -yf build-essential linux-headers-"$kernelRelease" linux-image-extra-virtual;
     sudo apt upgrade -y;
     sudo apt full-upgrade -y;
     sudo apt dist-upgrade -y;
@@ -559,7 +560,7 @@ dataDirLinksSetup () {
 
     linkDataDirectories=(
     "bin"
-    "Development"
+    # "Development"
     "Documents"
     "Downloads"
     "Music"
@@ -817,10 +818,13 @@ devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
-  sudo snap install atom --classic
+  curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+  sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
+  repoUpdate
+  # sudo snap install atom --classic
   sudo snap install eclipse --classic
-  sudo snap install shellcheck
-  sudo apt install -yf abs-guide idle3 idle3-tools eric eric-api-files maven hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
+  # sudo snap install shellcheck
+  sudo apt install -yf atom abs-guide idle3 idle3-tools eric eric-api-files maven shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
   # wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   # sudo dpkg -i --force-depends "$HOMEDIR/tmp/gitkraken-amd64.deb"
   # bashdbInstall
@@ -907,16 +911,7 @@ googleChromeInstall () {
   println_blue "Google Chrome Install"
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
-  log_info "UGet Chrome Wrapper"
-  println_blue "UGet Chrome Wrapper"
-  sudo add-apt-repository -y ppa:slgobinath/uget-chrome-wrapper
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the UGet Chrome Wrapper apt sources."
-    println_red "Beta Code or no new repo, revert the UGet Chrome Wrapper apt sources."
-    changeAptSource "/etc/apt/sources.list.d/slgobinath-ubuntu-uget-chrome-wrapper-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  fi
-  sudo apt install -y google-chrome-stable uget-chrome-wrapper
+  sudo apt install -y google-chrome-stable
 }
 
 # ############################################################################
@@ -1017,7 +1012,29 @@ kvmInstall () {
   log_info "KVM Applications Install"
   println_blue "KVM Applications Install                                               "
 
-  sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
+  if ! [[ "$distReleaseName" =~ ^(cosmic)$ ]]; then
+    sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
+  else
+    sudo apt install -y qemu-kvm libvirt-client libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm
+  fi
+  case $desktopEnvironment in
+    "kde" )
+      sudo apt install -y aqemu qt-virt-manager
+      ;;
+    "gnome" )
+      sudo apt install -y gnome-boxes
+      ;;
+    "ubuntu" )
+      sudo apt install -y gnome-boxes
+      ;;
+    "xubuntu" )
+      # sudo apt install -y gmountiso;
+      ;;
+    "lubuntu" )
+      # sudo apt install -y gmountiso;
+      ;;
+  esac
+
 }
 
 # ############################################################################
@@ -1119,9 +1136,15 @@ vagrantInstall () {
   println_blue "Vagrant Applications Install                                               "
   rubyRepo
   sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the Vagrant apt sources."
+    println_red "Beta Code or no new repo, revert the Vagrant apt sources."
+    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
 
-  sudo apt install -yf libvirt-bin libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
-  vagrant plugin install vbguest vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
+  sudo apt install -yf libvirt-clients libvirt-daemon dnsutils vagrant vagrant-cachier vagrant-libvirt vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
+  vagrant plugin install vagrant-vbguest vagrant-dns vagrant-registration vagrant-gem vagrant-auto_network vagrant-sshf
   sudo gem install rubydns nio4r pristine hitimes libvirt libvirt-ruby ruby-libvirt rb-fsevent nokogiri vagrant-dns
 }
 
@@ -1273,17 +1296,20 @@ etcherInstall () {
   println_blue "Install Etcher USB loader"
 
   if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the repo(default) or snap? (repo/snap)" answer
-    if [[ $answer = "repo" ]]; then
+    read -rp "Do you want to install from the repo(default) or AppImage? (repo/appimage)" answer
+    if [[ $answer = "appimage" ]]; then
+      curl -s https://github.com/resin-io/etcher/releases/latest | grep "etcher-electron-*-x86_64.AppImage" | cut -d '"' -f 4   | wget -qi -
+    else
       echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
       repoUpdate
       sudo apt install -y etcher-electron
-    else
-      sudo snap install etcher
     fi
   else
-    sudo snap install etcher
+    echo "deb https://dl.bintray.com/resin-io/debian stable etcher" | sudo tee /etc/apt/sources.list.d/etcher.list
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
+    repoUpdate
+    sudo apt install -y etcher-electron
   fi
 }
 
@@ -1553,7 +1579,7 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-gnome vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect uget flatpak traceroute
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-gnome vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
 
 	# desktop specific applications
 	case $desktopEnvironment in
@@ -1585,9 +1611,19 @@ installUniverseApps () {
   println_banner_yellow "Start Applications installation the general apps                     "
   sudo add-apt-repository -y universe
 
+  log_info "UGet Integrator"
+  println_blue "UGet Integrator"
+  sudo add-apt-repository ppa:uget-team/ppa
+  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "Beta Code or no new repo, revert the UGet Integrator apt sources."
+    println_red "Beta Code or no new repo, revert the UGet Integrator apt sources."
+    changeAptSource "/etc/apt/sources.list.d/uget-team-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic aptitude mc filezilla remmina rdiff-backup luckybackup printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter chromium-browser blender caffeine gufw cockpit thunderbird
+	sudo apt install -yf synaptic aptitude mc filezilla remmina rdiff-backup luckybackup printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
 
   # Older packages...
   # Still active, but replaced with other apps
@@ -1859,6 +1895,7 @@ menuRun() {
       76   #: Spotify
       77   #: Google Play Music Desktop Player
       78   #: Inkscape
+      79   #: Variety
 
            #: submenuVirtualization
       81   #: Setup for a VirtualBox guest
@@ -2016,6 +2053,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "76" ]]; then printf "%s%s76%s" "${rev}" "${bold}" "${normal}"; else printf "76"; fi; printf "  : Spotify.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "77" ]]; then printf "%s%s77%s" "${rev}" "${bold}" "${normal}"; else printf "77"; fi; printf "  : Google Play Music Desktop Player.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "78" ]]; then printf "%s%s78%s" "${rev}" "${bold}" "${normal}"; else printf "78"; fi; printf "  : Inkscape.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "79" ]]; then printf "%s%s79%s" "${rev}" "${bold}" "${normal}"; else printf "79"; fi; printf "  : Variety.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2216,7 +2254,7 @@ menuRun() {
     elif ((36<=choiceOpt && choiceOpt<=49))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((50<=choiceOpt && choiceOpt<=78))
+    elif ((50<=choiceOpt && choiceOpt<=79))
     then
       howToRun "$choiceOpt" "$typeOfRun"
     elif ((81<=choiceOpt && choiceOpt<=89))
@@ -2255,7 +2293,7 @@ menuRun() {
             submenuPhoto "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((70<=choiceOpt && choiceOpt<=78))
+            if ((70<=choiceOpt && choiceOpt<=79))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2375,6 +2413,7 @@ runSelection() {
     76 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
     77 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
     78 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
+    79 ) asking varietyInstall "install Variety" "Variety installed." ;;
     81 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
     82 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
     83 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
@@ -2559,7 +2598,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(9 1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
+        menuSelectionsInput=(1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 54 70 72 73 74 75 76 77 78 79 82 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -2584,7 +2623,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(9 1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 70 72 73 74 75 76 77 82 85 84)
+        menuSelectionsInput=(1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 54 70 72 73 74 75 76 77 78 79 82 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -2634,7 +2673,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(9 1 2 3 4 5 6 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 36 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 78 85 84)
+        menuSelectionsInput=(9 1 2 3 4 5 6 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 36 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 78 79 85 84)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
