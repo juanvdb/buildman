@@ -2,7 +2,7 @@
 
 # DateVer 2018/10/15
 # Buildman
-buildmanVersion=V3.4
+buildmanVersion=V3.5
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -32,11 +32,11 @@ buildmanVersion=V3.4
 # Ready for Bionic
 # Global Variables
 {
-  betaReleaseName="cosmic"
-  betaReleaseVer="18.10"
-  stableReleaseName="bionic"
-  stableReleaseVer="18.04"
-  previousStableReleaseName="artful"
+  betaReleaseName="dontknow"
+  betaReleaseVer="19.04"
+  stableReleaseName="cosmic"
+  stableReleaseVer="18.10"
+  previousStableReleaseName="bionic"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -773,6 +773,8 @@ gnome3Settings () {
   log_info "Change Gnome3 settings"
   println_blue "Change Gnome3 settings                                               "
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
+  gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
+  gsettings set org.gnome.desktop.interface show-battery-percentage true
 }
 
 # ############################################################################
