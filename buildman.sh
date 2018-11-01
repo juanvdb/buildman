@@ -2,7 +2,7 @@
 
 # DateVer 2018/10/15
 # Buildman
-buildmanVersion=V3.5
+buildmanVersion=V3.6
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -32,11 +32,12 @@ buildmanVersion=V3.5
 # Ready for Bionic
 # Global Variables
 {
-  betaReleaseName="dontknow"
+  betaReleaseName="disco"
   betaReleaseVer="19.04"
   stableReleaseName="cosmic"
   stableReleaseVer="18.10"
   previousStableReleaseName="bionic"
+  previousStableReleaseVer="18.04"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -337,8 +338,17 @@ repoUpgrade () {
   sudo apt upgrade -y;
   sudo apt full-upgrade -y;
   sudo apt dist-upgrade -y;
-  sudo apt autoremove -y;
+  sudo apt autoremove -y;apt-get clean
+
   # sudo apt clean -y
+}
+
+repoCleanAll () {
+  sudo apt-get clean -y
+  sudo rm /var/lib/apt/lists/*
+  sudo rm /var/lib/apt/lists/partial/*
+  sudo apt-get clean -y
+  sudo apt update
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -403,22 +413,30 @@ virtualboxHostInstall () {
   println_blue "VirtualBox Host setup                                                         "
 
   # Uncomment to add repository and get latest releases
-  # wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-  # wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-  # sudo sh -c "echo 'deb https://download.virtualbox.org/virtualbox/debian $distReleaseName contrib' >> /etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
-  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-  #   log_warning "Beta Code or no new repo, revert the Virtualbox apt sources."
-  #   println_red "Beta Code or no new repo, revert the Virtaulbox apt sources."
-  #   changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  #   # repoUpdate
-  # fi
-  # repoUpdate
+  wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+  wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+  echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $distReleaseName contrib" | sudo tee "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Virtualbox apt sources."
+    println_red "Beta Code, revert the Virtaulbox apt sources."
+    changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    # repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Virtualbox apt sources."
+    println_red "No new repo, revert the Virtaulbox apt sources."
+    changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
+  repoUpdate
   # Uncomment up the here
 
   # VirtualBox 5.1
   # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  #VirtualBox 5.2
-  sudo apt install -y virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  #VirtualBox from Universe
+  # sudo apt install -y virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  #VirtualBox from VirtaulBox Repo
+  sudo apt install -y virtualbox-5.2 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  # sudo apt install -y virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso
   # case $desktopEnvironment in
   #   "kde" )
   #   # sudo apt install -y virtualbox-qt;
@@ -705,9 +723,12 @@ ownCloudClientInstallApp () {
   if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
     wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
     echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseName.list"
-  else
+  elif [[ $betaAns == 1 ]]; then
     wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
     echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$stableReleaseName.list"
+  else
+    wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$previousStableReleaseVer/Release.key" | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$previousStableReleaseName.list"
   fi
   repoUpdate
   sudo apt install -yf owncloud-client
@@ -756,17 +777,24 @@ gnome3Backports () {
   println_blue "Install Gnome3 Backports                                                      "
   sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
   sudo add-apt-repository -y ppa:gnome3-team/gnome3
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Gnome3 apt sources."
-    println_red "Beta Code or no new repo, revert the Gnome3 apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Gnome3 apt sources."
+    println_red "Beta Code, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Gnome3 apt sources."
+    println_red "No new repo, revert the Gnome3 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   fi
 
   repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
 }
+
 # ############################################################################
 # gnome3Settings
 gnome3Settings () {
@@ -783,12 +811,18 @@ kdeBetaBackportsRepo () {
   log_info "Add KDE Beta Backports Repo"
   println_blue "Add KDE Beta Backports Repo                                               "
   sudo add-apt-repository -y ppa:kubuntu-ppa/beta
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
-    println_red "Beta Code or no new repo, revert the KDE Backports Beta apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the KDE Backports Beta apt sources."
+    println_red "Beta Code, revert the KDE Backports Beta apt sources."
     changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-beta-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   fi
+  # if [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "No new repo, revert the KDE Backports Beta apt sources."
+  #   println_red "No new repo, revert the KDE Backports Beta apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-beta-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  #   repoUpdate
+  # fi
 }
 
 # ############################################################################
@@ -821,12 +855,13 @@ devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
+  sudo apt install -y curl
   curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
   sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
   repoUpdate
-  # sudo snap install atom --classic
-  sudo snap install eclipse --classic
   # sudo snap install shellcheck
+  sudo snap install eclipse --classic
+  # sudo snap install atom --classic
   sudo apt install -yf atom abs-guide idle3 idle3-tools eric eric-api-files maven shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
   # wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
   # sudo dpkg -i --force-depends "$HOMEDIR/tmp/gitkraken-amd64.deb"
@@ -914,6 +949,7 @@ googleChromeInstall () {
   println_blue "Google Chrome Install"
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
   echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
+  repoUpdate
   sudo apt install -y google-chrome-stable
 }
 
@@ -981,11 +1017,12 @@ insyncInstall () {
   println_blue "Install inSync for GoogleDrive"
   if [[  $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
     echo "deb http://apt.insynchq.com/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$distReleaseName.list"
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
-  else
+  elif [[ $betaAns == 1 ]]; then
     echo "deb http://apt.insynchq.com/ubuntu $stableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$stableReleaseName.list"
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
+  else
+    echo "deb http://apt.insynchq.com/ubuntu $previousStableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$previousStableReleaseName.list"
   fi
+  sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
   repoUpdate
   sudo apt install -y insync
 }
@@ -999,9 +1036,12 @@ doublecmdInstall () {
   if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
     wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
     echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
-  else
+  elif [[ $betaAns == 1 ]]; then
     wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$stableReleaseVer/Release.key" -O- | sudo apt-key add -
     echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$stableReleaseName.list"
+  else
+    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$previousStableReleaseVer/Release.key" -O- | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$previousStableReleaseName.list"
   fi
   # sudo apt-add-repository -y ppa:alexx2000/doublecmd
 
@@ -1018,7 +1058,8 @@ kvmInstall () {
   if ! [[ "$distReleaseName" =~ ^(cosmic)$ ]]; then
     sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
   else
-    sudo apt install -y qemu-kvm libvirt-client libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm
+    sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm aqemu
+
   fi
   case $desktopEnvironment in
     "kde" )
@@ -1053,9 +1094,12 @@ dockerInstall () {
   if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
     # log_warning "Add Docker to repository."
     echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$distReleaseName.list"
-  else
+  elif [[ $betaAns == 1 ]]; then
     log_info "Add Docker to repository with stable release $stableReleaseName"
     echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$stableReleaseName.list"
+  else
+    log_info "Add Docker to repository with stable release $previousStableReleaseName"
+    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
   fi
   repoUpdate;
 	# Make sure that apt is pulling from the right repository
@@ -1124,10 +1168,16 @@ rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
   sudo apt-add-repository -y ppa:brightbox/ruby-ng
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Ruby Repo apt sources."
-    println_red "Beta Code or no new repo, revert the Ruby Repo apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Ruby Repo apt sources."
+    println_red "Beta Code, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Ruby Repo apt sources."
+    println_red "No new repo, revert the Ruby Repo apt sources."
+    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
 }
@@ -1139,10 +1189,16 @@ vagrantInstall () {
   println_blue "Vagrant Applications Install                                               "
   rubyRepo
   sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Vagrant apt sources."
-    println_red "Beta Code or no new repo, revert the Vagrant apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Vagrant apt sources."
+    println_red "Beta Code, revert the Vagrant apt sources."
     changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Vagrant apt sources."
+    println_red "No new repo, revert the Vagrant apt sources."
+    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
 
@@ -1171,9 +1227,15 @@ webupd8AppsInstall() {
   log_info "WebUpd8: SyncWall, ?WoeUSB? Applictions Install"
   println_blue "WebUpd8: SyncWall, WoeUSB Applications Install"
   sudo add-apt-repository -y ppa:nilarimogard/webupd8
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the WebUpd8 apt sources."
-    println_red "Beta Code or no new repo, revert the WebUpd8 apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the WebUpd8 apt sources."
+    println_red "Beta Code, revert the WebUpd8 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the WebUpd8 apt sources."
+    println_red "No new repo, revert the WebUpd8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
@@ -1198,10 +1260,16 @@ yppaManagerInstall() {
   log_info "Y-PPA Manager Appliction Install"
   println_blue "Y-PPA Manager Application Install"
   sudo add-apt-repository -y ppa:webupd8team/y-ppa-manager
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Codeo, revert the Y-PPA Manager apt sources."
+    println_red "Beta Code, revert the Y-PPA Manager apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
     println_red "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
-    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
   sudo apt install -y y-ppa-manager
@@ -1213,27 +1281,34 @@ oracleJava8Install() {
   log_info "Oracle Java8 Installer from WebUpd8"
   println_blue "Oracle Java8 Installer from WebUpd8"
   sudo add-apt-repository -y ppa:webupd8team/java
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Oracle Java 8 apt sources."
-    println_red "Beta Code or no new repo, revert the Oracle Java 8 apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Oracle Java 8 apt sources."
+    println_red "Beta Code, revert the Oracle Java 8 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Oracle Java 8 apt sources."
+    println_red "No new repo, revert the Oracle Java 8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
+
   fi
   sudo apt install -y oracle-java8-installer
 }
 
 
-oracleJava10Install() {
-  log_info "Oracle Java10 Installer from WebUpd8"
-  println_blue "Oracle Java10 Installer from WebUpd8"
+oracleJavaLatestInstall() {
+  log_info "Oracle Java Latest Installer from WebUpd8"
+  println_blue "Oracle Java Latest Installer from WebUpd8"
   sudo add-apt-repository -y ppa:linuxuprising/java
   # if [[ $noCurrentReleaseRepo == 1 ]]; then
-  #   log_warning "Repos not available as yet, downgrade Oracle Java10 Installer apt sources."
+  #   log_warning "Repos not available as yet, downgrade Oracle Java Latest Installer apt sources."
   #   # println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
   #   changeAptSource "/etc/apt/sources.list.d/linuxuprising-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   # fi
-  sudo apt install -y oracle-java10-installer
-  sudo apt install -y oracle-java10-set-default
+  sudo apt install -y oracle-java11-installer
+  sudo apt install -y oracle-java11-set-default
 }
 
 # ############################################################################
@@ -1268,9 +1343,15 @@ bootRepairInstall() {
   log_info "Boot Repair Appliction Install"
   println_blue "Boot Repair Application Install"
   sudo add-apt-repository -y ppa:yannubuntu/boot-repair
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Boot Repair apt sources."
-    println_red "Beta Code or no new repo, revert the Boot Repair apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Boot Repair apt sources."
+    println_red "Beta Code, revert the Boot Repair apt sources."
+    changeAptSource "/etc/apt/sources.list.d/yannubuntu-ubuntu-boot-repair-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Boot Repair apt sources."
+    println_red "No new repo, revert the Boot Repair apt sources."
     changeAptSource "/etc/apt/sources.list.d/yannubuntu-ubuntu-boot-repair-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
@@ -1283,9 +1364,15 @@ unetbootinInstall() {
   log_info "UNetbootin Appliction Install"
   println_blue "UNetbootin Application Install"
   sudo add-apt-repository -y ppa:gezakovacs/ppa
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the UNetbootin apt sources."
-    println_red "Beta Code or no new repo, revert the UNetbootin apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the UNetbootin apt sources."
+    println_red "Beta Code, revert the UNetbootin apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the UNetbootin apt sources."
+    println_red "No new repo, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
@@ -1331,13 +1418,18 @@ stacerInstall() {
   log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
   println_blue "Stacer Linux System Optimizer and Monitoring Application Install"
   sudo add-apt-repository -y ppa:oguzhaninan/stacer
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Stacer apt sources."
-    println_red "Beta Code or no new repo, revert the Stacer apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Stacer apt sources."
+    println_red "Beta Code, revert the Stacer apt sources."
     changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   fi
-
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Stacer apt sources."
+    println_red "No new repo, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  fi
   sudo apt install -y stacer
 
   # AppImage
@@ -1557,16 +1649,22 @@ flatpakInstall() {
   log_info "Flatpak Install and Setup"
   println_blue "Flatpak Install and Setup"
   sudo add-apt-repository -y ppa:alexlarsson/flatpak
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the Flatpak apt sources."
-    println_red "Beta Code or no new repo, revert the Flatpak apt sources."
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Flatpak apt sources."
+    println_red "Beta Code, revert the Flatpak apt sources."
     changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Flatpak apt sources."
+    println_red "No new repo, revert the Flatpak apt sources."
+    changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
   sudo apt install -y flatpak
   sudo apt install -y gnome-software-plugin-flatpak
-  sudo flatpak remote-add -y --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-  sudo flatpak remote-add -y --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
+  sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+  sudo flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
   sudo flatpak install -y kdeapps org.kde.okular
   sudo flatpak install -y flathub org.kde.Platform//5.9
   sudo flatpak install -y flathub org.kde.Sdk//5.9
@@ -1616,11 +1714,17 @@ installUniverseApps () {
 
   log_info "UGet Integrator"
   println_blue "UGet Integrator"
-  sudo add-apt-repository ppa:uget-team/ppa
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the UGet Integrator apt sources."
-    println_red "Beta Code or no new repo, revert the UGet Integrator apt sources."
+  sudo add-apt-repository -y ppa:uget-team/ppa
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the UGet Integrator apt sources."
+    println_red "Beta Code, revert the UGet Integrator apt sources."
     changeAptSource "/etc/apt/sources.list.d/uget-team-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  fi
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the UGet Integrator apt sources."
+    println_red "No new repo, revert the UGet Integrator apt sources."
+    changeAptSource "/etc/apt/sources.list.d/uget-team-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
 
@@ -1634,7 +1738,7 @@ installUniverseApps () {
 
 
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
   fi
 	# desktop specific applications
@@ -1682,6 +1786,7 @@ setUbuntuVersionParameters() {
            that are known for not having beta or early releases:
       Key  : Stable Release
       -----: ---------------------------------------
+      c    : 19.04 Disco Dingo
       c    : 18.10 Cosmic Cuttlefish
       b    : 18.04 Bionic Beaver
       a    : 17.10 Artful Aardvark
@@ -1708,12 +1813,20 @@ setUbuntuVersionParameters() {
       read -rp "Enter your choice : " stablechoice
       printf "\n"
       case $stablechoice in
+        d)
+          stableReleaseName="cosmic"
+          stableReleaseVer="18.10"
+          betaReleaseName="disco"
+          betaReleaseVer="19.04"
+          previousStableReleaseName="bionic"
+          validchoice=1
+        ;;
         c)
-          stableReleaseName="bionic"
-          stableReleaseVer="18.04"
-          betaReleaseName="cosmic"
-          betaReleaseVer="18.10"
-          previousStableReleaseName="artful"
+          stableReleaseName="cosmic"
+          stableReleaseVer="18.10"
+          betaReleaseName="disco"
+          betaReleaseVer="19.04"
+          previousStableReleaseName="bionic"
           validchoice=1
         ;;
         b)
@@ -1886,7 +1999,7 @@ menuRun() {
       59   #: Add Ruby Repositories
       67   #: Oracle Java 8
       68   #: Oracle Java 9
-      69   #: Oracle Java 10
+      69   #: Oracle Java Latest
 
            #: submenu Media and Photo
       70   #: Photography Apps
@@ -2014,7 +2127,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "59" ]]; then printf "%s%s59%s" "${rev}" "${bold}" "${normal}"; else printf "59"; fi; printf "  : Ruby Repo.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "67" ]]; then printf "%s%s67%s" "${rev}" "${bold}" "${normal}"; else printf "67"; fi; printf "  : Oracle Java 8.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "68" ]]; then printf "%s%s68%s" "${rev}" "${bold}" "${normal}"; else printf "68"; fi; printf "  : Oracle Java 9.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "69" ]]; then printf "%s%s69%s" "${rev}" "${bold}" "${normal}"; else printf "69"; fi; printf "  : Oracle Java 10.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "69" ]]; then printf "%s%s69%s" "${rev}" "${bold}" "${normal}"; else printf "69"; fi; printf "  : Oracle Java Latest.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2406,7 +2519,7 @@ runSelection() {
     59 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
     67 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
     68 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
-    69 ) asking oracleJava10Install "Install Oracle Java 10" "Oracle Java 10 install complete." ;;
+    69 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
     70 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
     71 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
     72 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
@@ -2440,8 +2553,8 @@ runSelection() {
     98)
       if [[ $noCurrentReleaseRepo = 0 ]]; then
         noCurrentReleaseRepo=1
-        println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
-        log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${stableReleaseName}."
+        println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${previousStableReleaseName}."
+        log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${previousStableReleaseName}."
       else
         noCurrentReleaseRepo=0
         println_blue "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
@@ -2565,8 +2678,8 @@ mainMenu() {
       2)
         if [[ $noCurrentReleaseRepo = 0 ]]; then
           noCurrentReleaseRepo=1
-          println_blue "Using older repositories ON.\n The repos will be installed against ${stableReleaseName}."
-          log_debug "Using older repositories ON.\n The repos will be installed against ${stableReleaseName}."
+          println_blue "Using older repositories ON.\n The repos will be installed against ${previousStableReleaseName}."
+          log_debug "Using older repositories ON.\n The repos will be installed against ${previousStableReleaseName}."
         else
           noCurrentReleaseRepo=0
           println_blue "Using older repositories OFF.\n The repos will be installed against ${distReleaseName}."
