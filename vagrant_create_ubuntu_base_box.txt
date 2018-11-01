@@ -102,7 +102,7 @@ vagrant ssh -c "sudo dd if=/dev/zero of=/EMPTY bs=1M"
 vagrant ssh -c "sudo rm -f /EMPTY"
 
 # Using Buildman
-vagrant ssh -c "/srv/share/build/buildmanV2.sh"
+vagrant ssh -c "/srv/share/build/buildman.sh"
 vagrant ssh -c "tail -f /tmp/buildman.log"
 
 # Vagrant mount
