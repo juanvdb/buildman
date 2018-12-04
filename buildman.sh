@@ -610,19 +610,19 @@ dataDirLinksSetup () {
           if [ -L "$HOMEDIR/$sourceLinkDirectory" ]; then
             # It is a symlink!
             # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
-            rm "$HOMEDIR/$sourceLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            # rm "$HOMEDIR/$sourceLinkDirectory"
+            ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
             # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           else
             # It's a directory!
             # log_debug "Remove directory $HOMEDIR/data"
-            rmdir "$HOMEDIR/$sourceLinkDirectory"
+            rmdir -r "$HOMEDIR/$sourceLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
             # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           fi
         else
           rm "$HOMEDIR/$sourceLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
         fi
       else
@@ -630,11 +630,12 @@ dataDirLinksSetup () {
         if [ -L "$HOMEDIR/$sourceLinkDirectory" ];  then
           # It is a symlink!
           # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
-          rm "$HOMEDIR/$sourceLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          # rm "$HOMEDIR/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
+        else
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
         fi
-        ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
         # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
       fi
     done
@@ -869,6 +870,28 @@ devAppsInstall() {
   # The following packages was installed in the past but never used or I could not figure out how to use them.
   #
   # sudo snap install --classic --beta atom
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install atom
+      sudo apt install -yf shellcheck hunspell hunspell-af hunspell-en-
+    else
+      sudo apt install -y curl
+      curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+      sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
+      repoUpdate
+      # sudo snap install atom --classic
+      sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-
+    fi
+  else
+    sudo apt install -y curl
+    curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+    sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
+    repoUpdate
+    # sudo snap install atom --classic
+    sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-
+  fi
+
   cd "$currentPath" || return
 }
 
@@ -936,6 +959,15 @@ bracketsInstall() {
   println_blue "Brackets"
   log_info "Brackets"
   sudo snap install brackets --classic
+}
+
+# ############################################################################
+# Postman DevApp installation
+postmanInstall() {
+  # Postman
+  println_blue "Postman"
+  log_info "Postman"
+  sudo snap install postman
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1499,7 +1531,7 @@ librecadInstall() {
 
 # ############################################################################
 # Calibre installation
-calibreInstal() {
+calibreInstall() {
   log_info "Calibre"
   println_blue "Calibre"
 
@@ -1514,6 +1546,30 @@ calibreInstal() {
 }
 
 # ############################################################################
+# Powerline installation
+powerlineInstall() {
+  log_info "Powerline"
+  println_blue "Powerline"
+
+  sudo apt install -y powerline powerline-doc powerline-gitstatus jsonlint
+}
+
+# ############################################################################
+# Anbox installation
+anboxInstall() {
+  log_info "Anbox"
+  println_blue "Anbox"
+
+  sudo add-apt-repository -y ppa:morphis/anbox-support
+  sudo apt install -y anbox-modules-dkms
+  sudo modprobe ashmem_linux
+  sudo modprobe binder_linux
+  sudo snap install --devmode --beta anbox
+  pressEnterToContinue 'Add "snap refresh --beta --devmode anbox" to bin/upgrade.sh for regular upgrades of Anbox'
+}
+
+
+# ############################################################################
 # Ambiance and Radiance Theme Color packages installation
 ambianceRadianceThemeInstall() {
   log_info "Ambiance and Radiance Theme Color Install"
@@ -1524,6 +1580,7 @@ ambianceRadianceThemeInstall() {
       println_yellow "Change ravefinity-project to $previousStableReleaseName"
       changeAptSource "/etc/apt/sources.list.d/ravefinity-project-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   fi
+
 }
 
 # ############################################################################
@@ -1987,6 +2044,8 @@ menuRun() {
       47   #: FreeFileSync
       48   #: LibreCAD
       49   #: Calibre
+      129  #: Powerline
+      130  #: Anbox - Android Box
 
            #: submenuDev
       50   #: Install Development Apps and IDEs
@@ -1996,6 +2055,7 @@ menuRun() {
       54   #: PyCharm
       57   #: Visual Studio Code
       58   #: Brackets IDE
+      307  #: Postman
       59   #: Add Ruby Repositories
       67   #: Oracle Java 8
       68   #: Oracle Java 9
@@ -2124,6 +2184,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "54" ]]; then printf "%s%s54%s" "${rev}" "${bold}" "${normal}"; else printf "54"; fi; printf "  : PyCharm IDE.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "57" ]]; then printf "%s%s57%s" "${rev}" "${bold}" "${normal}"; else printf "57"; fi; printf "  : Visual Studio Code.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "58" ]]; then printf "%s%s58%s" "${rev}" "${bold}" "${normal}"; else printf "58"; fi; printf "  : Brackets IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "307" ]]; then printf "%s%s307%s" "${rev}" "${bold}" "${normal}"; else printf "307"; fi; printf "  : Postman.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "59" ]]; then printf "%s%s59%s" "${rev}" "${bold}" "${normal}"; else printf "59"; fi; printf "  : Ruby Repo.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "67" ]]; then printf "%s%s67%s" "${rev}" "${bold}" "${normal}"; else printf "67"; fi; printf "  : Oracle Java 8.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "68" ]]; then printf "%s%s68%s" "${rev}" "${bold}" "${normal}"; else printf "68"; fi; printf "  : Oracle Java 9.\n"
@@ -2212,6 +2273,8 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "47" ]]; then printf "%s%s47%s" "${rev}" "${bold}" "${normal}"; else printf "47"; fi; printf "  : FreeFileSync.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "48" ]]; then printf "%s%s48%s" "${rev}" "${bold}" "${normal}"; else printf "48"; fi; printf "  : LibreCAD.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "49" ]]; then printf "%s%s49%s" "${rev}" "${bold}" "${normal}"; else printf "49"; fi; printf "  : Calibre.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "129" ]]; then printf "%s%s129%s" "${rev}" "${bold}" "${normal}"; else printf "129"; fi; printf "  : Powerline.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "130" ]]; then printf "%s%s130%s" "${rev}" "${bold}" "${normal}"; else printf "130"; fi; printf "  : Anbox.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2370,6 +2433,9 @@ menuRun() {
     elif ((36<=choiceOpt && choiceOpt<=49))
     then
       howToRun "$choiceOpt" "$typeOfRun"
+    elif ((121<=choiceOpt && choiceOpt<=130))
+    then
+      howToRun "$choiceOpt" "$typeOfRun"
     elif ((50<=choiceOpt && choiceOpt<=79))
     then
       howToRun "$choiceOpt" "$typeOfRun"
@@ -2421,7 +2487,7 @@ menuRun() {
             submenuUtils "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((36<=choiceOpt && choiceOpt<=49))
+            if ((36<=choiceOpt && choiceOpt<=130))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2499,7 +2565,7 @@ runSelection() {
     33 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
     47 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
     48 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
-    49 ) asking calibreInstal "install Calibre" "Calibre install complete." ;;
+    49 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
     34 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
     35 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
     36 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
@@ -2516,6 +2582,7 @@ runSelection() {
     54 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
     57 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
     58 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
+    307 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
     59 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
     67 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
     68 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
@@ -2539,6 +2606,8 @@ runSelection() {
     89 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
     90 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     91 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
+    129 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
+    130 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
     97)
       if [[ $noPrompt = 0 ]]; then
         noPrompt=1
@@ -2789,7 +2858,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(9 1 2 3 4 5 6 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 36 41 42 43 44 45 46 50 51 52 53 54 57 58 59 67 69 70 71 72 73 74 75 76 77 78 79 85 84)
+        menuSelectionsInput=(9 1 2 3 4 5 6 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 36 41 42 43 44 45 46 50 51 52 53 54 57 58 307 59 67 69 70 71 72 73 74 75 76 77 78 79 85 84 129 130)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
