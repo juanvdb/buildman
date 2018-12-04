@@ -1,9 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/VirtualBox/vagrant/kcosmic/')
-
-
+system ('VBoxManage setproperty machinefolder /media/juan/xvms/VirtualMachines/VirtualBox/vagrant/kbionic')
 
 # Load our custom configuration and prepare some global variables
 # require 'yaml'
@@ -19,9 +17,7 @@ Vagrant.configure("2") do |config|
     config.cache.scope = :box
     config.cache.synced_folder_opts = {
       type: :nfs,
-      owner: "_apt",
-      group: "_apt",
-      mount_options: ["dmode=777", "fmode=666", 'rw', 'vers=4', 'tcp', 'nolock'],
+      mount_options: ['rw', 'vers=4', 'tcp', 'nolock']
     }
     # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
   end
@@ -31,11 +27,10 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "kcosmic"
+  config.vm.box = "kbionic"
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
-  config.vm.network "private_network", ip: "172.28.128.111", auto_config: false
-  # config.vm.network "private_network", type: "dhcp", auto_config: false
+  config.vm.network "private_network", type: "dhcp", auto_config: false
   config.vm.provider :virtualbox do |vb|
     vb.gui = true
 #    vb.customize ["modifyvm", :id, "--groups", "vagrant"]
