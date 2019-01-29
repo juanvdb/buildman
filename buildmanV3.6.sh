@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/01/11
+# DateVer 2018/10/15
 # Buildman
-buildmanVersion=V4.0
+buildmanVersion=V3.6
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt

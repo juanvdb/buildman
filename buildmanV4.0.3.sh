@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/01/11
+# DateVer 2019/01/29
 # Buildman
-buildmanVersion=V4.0
+buildmanVersion=V4.0.3
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -434,8 +434,10 @@ virtualboxHostInstall () {
   # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
   #VirtualBox from Universe
   # sudo apt install -y virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  #VirtualBox from VirtaulBox Repo
-  sudo apt install -y virtualbox-5.2 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  #VirtualBox 5.2 from VirtaulBox Repo
+  # sudo apt install -y virtualbox-5.2 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
+  #VirtualBox 6.0 from VirtaulBox Repo
+  sudo apt install -y virtualbox-6.0 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
   # sudo apt install -y virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso
   # case $desktopEnvironment in
   #   "kde" )
@@ -1495,8 +1497,8 @@ getdebRepository() {
   log_warning "getdeb Repository is set at Zesty"
   println_yellow "getdeb Repository is set at Zesty"
   # GetDeb for Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync
-  log_info "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
-  println_blue "Filezilla, PyCharm, Calibre, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+  log_info "Filezilla, PyCharm, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
+  println_blue "Filezilla, PyCharm, Divedemux, Luminance, RemoteBox, UMLet, FreeFileSync"
   wget -q -O - http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
   sudo sh -c 'echo "deb http://archive.getdeb.net/ubuntu zesty-getdeb apps" >> /etc/apt/sources.list.d/getdeb-zesty.list'
   # Downgrade getdeb as there are no current repos
@@ -1518,7 +1520,8 @@ FreeFileSyncInstall() {
 latteDockInstall() {
   log_info "Latte Dock for KDE Install"
   println_blue "Latte Dock for KDE Install"
-  sudo add-apt-repository -y ppa:rikmills/latte-dock
+  # sudo add-apt-repository -y ppa:rikmills/latte-dock
+  # sudo apt install cmake extra-cmake-modules qtdeclarative5-dev libqt5x11extras5-dev libkf5iconthemes-dev libkf5plasma-dev libkf5windowsystem-dev libkf5declarative-dev libkf5xmlgui-dev libkf5activities-dev build-essential libxcb-util-dev libkf5wayland-dev git gettext libkf5archive-dev libkf5notifications-dev libxcb-util0-dev libsm-dev libkf5crash-dev libkf5newstuff-dev
   sudo apt install -y latte-dock
   kwriteconfig5 --file "$HOMEDIR/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
   qdbus org.kde.KWin /KWin reconfigure
@@ -1562,6 +1565,15 @@ powerlineInstall() {
   println_blue "Powerline"
 
   sudo apt install -y powerline powerline-doc powerline-gitstatus jsonlint
+}
+
+# ############################################################################
+# KMyMoney installation
+kMyMoneyInstall() {
+  log_info "KMyMoney"
+  println_blue "kMyMoney"
+
+  sudo apt install -y kmymoney
 }
 
 # ############################################################################
@@ -1752,7 +1764,7 @@ installBaseApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras kfind
 			;;
 		"gnome" )
 			sudo apt install -y gmountiso dconf-tools ubuntu-restricted-extras
@@ -1811,7 +1823,7 @@ installUniverseApps () {
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron amarok-doc libqt4-sql-psql libqt4-sql-sqlite moodbar libterm-readline-gnu-perl libterm-readline-perl-perl djvulibre-bin finger hspell sg3-utils;
       latteDockInstall
       # Old packages:
       # ufw-kde
@@ -2013,94 +2025,95 @@ menuRun() {
   selectionMenu(){
 
     menuSelectionsInput=(
-      1    #: Kernel upgrade
-      2    #: Repositories update
-      3    #: Repositories upgrade
-      4    #: Install and configure Flatpak
-      5    #: Install additional basic utilties and applications
-      6    #: Install my selection of Universe applications
-      9    #: Setup the home directories to link to the data disk directories
+      111    #: Kernel upgrade
+      112    #: Repositories update
+      113    #: Repositories upgrade
+      125    #: Install and configure Flatpak
+      121    #: Install additional basic utilties and applications
+      122    #: Install my selection of Universe applications
+      131    #: Setup the home directories to link to the data disk directories
 
-      11   #: Install KDE Desktop from backports
-      12   #: Upgrae KDE to Beta KDE on backports
-      13   #: Placeholder for KDE Desktop settings
-      15   #: Install Gnome Desktop from backports
-      16   #: Gnome Settings
+      141   #: Install KDE Desktop from backports
+      142   #: Upgrae KDE to Beta KDE on backports
+      143   #: Placeholder for KDE Desktop settings
+      151   #: Install Gnome Desktop from backports
+      152   #: Gnome Settings
 
-      21   #: ownCloudClient
-      22   #: Docker
-      23   #: Dropbox
-      24   #: inSync for GoogleDrive
-      25   #: Thunderbird email
-      26   #: Evolution email
-      27   #: Mailspring desktop email client
-      28   #: Winds RSS Reader and Podcast application
-      29   #: Skype
+      161   #: ownCloudClient
+      811   #: Docker
+      162   #: Dropbox
+      163   #: inSync for GoogleDrive
+      321   #: Thunderbird email
+      324   #: Evolution email
+      323   #: Mailspring desktop email client
+      341   #: Winds RSS Reader and Podcast application
+      331   #: Skype
 
-      31   #: Google Chrome browser
-      32   #: Doublecmd
-      33   #: Latte Dock
-      34   #: Y-PPA Manager
-      35   #: Install extra fonts
-      36   #: Opera browser
+      311   #: Google Chrome browser
+      212   #: Doublecmd
+      211   #: Latte Dock
+      271   #: Y-PPA Manager
+      291   #: Install extra fonts
+      312   #: Opera browser
 
            #: submenuUtils
-      41   #: bootRepair
-      42   #: rEFInd Boot Manager
-      43   #: UNetbootin
-      44   #: Etcher USB Loader
-      45   #: Stacer Linux system info and cleaner
-      46   #: Bitwarden Password Manager
-      47   #: FreeFileSync
-      48   #: LibreCAD
-      49   #: Calibre
-      129  #: Powerline
-      130  #: Anbox - Android Box
+      272   #: bootRepair
+      281   #: rEFInd Boot Manager
+      261   #: UNetbootin
+      251   #: Etcher USB Loader
+      241   #: Stacer Linux system info and cleaner
+      231   #: Bitwarden Password Manager
+      213   #: FreeFileSync
+      461   #: LibreCAD
+      441   #: Calibre
+      442   #: KMyMoney
+      221  #: Powerline
+      451  #: Anbox - Android Box
 
            #: submenuDev
-      50   #: Install Development Apps and IDEs
-      51   #: Git
-      52   #: AsciiDoc
-      53   #: Bashdb
-      54   #: PyCharm
-      57   #: Visual Studio Code
-      58   #: Brackets IDE
-      307  #: Postman
-      59   #: Add Ruby Repositories
-      67   #: Oracle Java 8
-      68   #: Oracle Java 9
-      69   #: Oracle Java Latest
+      511   #: Install Development Apps and IDEs
+      512   #: Git
+      541   #: AsciiDoc
+      521   #: Bashdb
+      522   #: PyCharm
+      523   #: Visual Studio Code
+      524   #: Brackets IDE
+      531  #: Postman
+      591   #: Add Ruby Repositories
+      552   #: Oracle Java 8
+      553   #: Oracle Java 9
+      551   #: Oracle Java Latest
 
            #: submenu Media and Photo
-      70   #: Photography Apps
-      71   #: Digikam
-      72   #: Darktable
-      73   #: RapidPhotoDownloader
-      74   #: Image Editing Applications
-      75   #: Music and Video Applications
-      76   #: Spotify
-      77   #: Google Play Music Desktop Player
-      78   #: Inkscape
-      79   #: Variety
+      611   #: Photography Apps
+      621   #: Digikam
+      622   #: Darktable
+      631   #: RapidPhotoDownloader
+      641   #: Image Editing Applications
+      711   #: Music and Video Applications
+      713   #: Spotify
+      712   #: Google Play Music Desktop Player
+      651   #: Inkscape
+      612   #: Variety
 
            #: submenuVirtualization
-      81   #: Setup for a VirtualBox guest
-      82   #: VirtualBox Host
-      83   #: Setup for a Vmware guest
-      84   #: Vagrant
-      85   #: KVM
+      821   #: Setup for a VirtualBox guest
+      822   #: VirtualBox Host
+      831   #: Setup for a Vmware guest
+      851   #: Vagrant
+      881   #: KVM
 
-           #: submenuHardwareDrivers
-      88   #: Laptop Display Drivers for Intel en Nvidia
-      89   #: DisplayLink
+           #: submenuOther
+      911   #: Laptop Display Drivers for Intel en Nvidia
+      921   #: DisplayLink
 
            #: submenuSettings
-      90   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
-      91   #: Create test data directories on data drive.
-      97   #: Toggle No Questions asked
-      98   #: Toggle noCurrentReleaseRepo
+      191   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
+      132   #: Create test data directories on data drive.
+      2   #: Toggle No Questions asked
+      3   #: Toggle noCurrentReleaseRepo
 
-      99   #: Run Selection
+      1   #: Run Selection
     )
 
     clear
@@ -2119,44 +2132,155 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "1" ]]; then printf "%s%s1%s" "${rev}" "${bold}" "${normal}"; else printf "1"; fi; printf "   : Kernel upgrade.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Repositories update.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Repositories upgrade.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "4" ]]; then printf "%s%s4%s" "${rev}" "${bold}" "${normal}"; else printf "4"; fi; printf "   : Flatpak install and configure.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "5" ]]; then printf "%s%s5%s" "${rev}" "${bold}" "${normal}"; else printf "5"; fi; printf "   : Install the base utilites and applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "6" ]]; then printf "%s%s6%s" "${rev}" "${bold}" "${normal}"; else printf "6"; fi; printf "   : Install all my Universe application.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "9" ]]; then printf "%s%s9%s" "${rev}" "${bold}" "${normal}"; else printf "9"; fi; printf "   : Setup the home directories to link to the data disk directories.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "11" ]]; then printf "%s%s11%s" "${rev}" "${bold}" "${normal}"; else printf "11"; fi; printf "  : Install KDE Desktop from backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "12" ]]; then printf "%s%s12%s" "${rev}" "${bold}" "${normal}"; else printf "12"; fi; printf "  : Upgrae KDE to Beta KDE on backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "15" ]]; then printf "%s%s15%s" "${rev}" "${bold}" "${normal}"; else printf "15"; fi; printf "  : Install Gnome Desktop from backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "16" ]]; then printf "%s%s16%s" "${rev}" "${bold}" "${normal}"; else printf "16"; fi; printf "  : Change Gnome desktop settings.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "21" ]]; then printf "%s%s21%s" "${rev}" "${bold}" "${normal}"; else printf "21"; fi; printf "  : ownCloudClient.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "22" ]]; then printf "%s%s22%s" "${rev}" "${bold}" "${normal}"; else printf "22"; fi; printf "  : Docker.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "23" ]]; then printf "%s%s23%s" "${rev}" "${bold}" "${normal}"; else printf "23"; fi; printf "  : Dropbox.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "24" ]]; then printf "%s%s24%s" "${rev}" "${bold}" "${normal}"; else printf "24"; fi; printf "  : inSync for GoogleDrive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "25" ]]; then printf "%s%s25%s" "${rev}" "${bold}" "${normal}"; else printf "25"; fi; printf "  : Thunderbird email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "26" ]]; then printf "%s%s26%s" "${rev}" "${bold}" "${normal}"; else printf "26"; fi; printf "  : Evolution email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "27" ]]; then printf "%s%s27%s" "${rev}" "${bold}" "${normal}"; else printf "27"; fi; printf "  : Mailspring desktop email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "28" ]]; then printf "%s%s28%s" "${rev}" "${bold}" "${normal}"; else printf "28"; fi; printf "  : Winds RSS Reader and Podcast application.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "29" ]]; then printf "%s%s29%s" "${rev}" "${bold}" "${normal}"; else printf "29"; fi; printf "  : Skype.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "31" ]]; then printf "%s%s31%s" "${rev}" "${bold}" "${normal}"; else printf "31"; fi; printf "  : Google Chrome browser.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "32" ]]; then printf "%s%s32%s" "${rev}" "${bold}" "${normal}"; else printf "32"; fi; printf "  : Doublecmd.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "33" ]]; then printf "%s%s33%s" "${rev}" "${bold}" "${normal}"; else printf "33"; fi; printf "  : Latte Dock.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "34" ]]; then printf "%s%s34%s" "${rev}" "${bold}" "${normal}"; else printf "34"; fi; printf "  : Y-PPA Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "35" ]]; then printf "%s%s35%s" "${rev}" "${bold}" "${normal}"; else printf "35"; fi; printf "  : Install extra fonts.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "111" ]]; then printf "%s%s111%s" "${rev}" "${bold}" "${normal}"; else printf "111"; fi; printf "  : Kernel upgrade.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "112" ]]; then printf "%s%s112%s" "${rev}" "${bold}" "${normal}"; else printf "112"; fi; printf "  : Repositories update.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "113" ]]; then printf "%s%s113%s" "${rev}" "${bold}" "${normal}"; else printf "113"; fi; printf "  : Repositories upgrade.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "121" ]]; then printf "%s%s121%s" "${rev}" "${bold}" "${normal}"; else printf "121"; fi; printf "  : Install the base utilites and applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "122" ]]; then printf "%s%s122%s" "${rev}" "${bold}" "${normal}"; else printf "122"; fi; printf "  : Install all my Universe application.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "125" ]]; then printf "%s%s125%s" "${rev}" "${bold}" "${normal}"; else printf "125"; fi; printf "  : Flatpak install and configure.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "131" ]]; then printf "%s%s131%s" "${rev}" "${bold}" "${normal}"; else printf "131"; fi; printf "  : Setup the home directories to link to the data disk directories.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "141" ]]; then printf "%s%s141%s" "${rev}" "${bold}" "${normal}"; else printf "141"; fi; printf "  : Install KDE Desktop from backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "142" ]]; then printf "%s%s142%s" "${rev}" "${bold}" "${normal}"; else printf "142"; fi; printf "  : Upgrade KDE to Beta KDE on backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "151" ]]; then printf "%s%s151%s" "${rev}" "${bold}" "${normal}"; else printf "151"; fi; printf "  : Install Gnome Desktop from backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "152" ]]; then printf "%s%s152%s" "${rev}" "${bold}" "${normal}"; else printf "152"; fi; printf "  : Change Gnome desktop settings.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "161" ]]; then printf "%s%s161%s" "${rev}" "${bold}" "${normal}"; else printf "161"; fi; printf "  : ownCloudClient.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "162" ]]; then printf "%s%s162%s" "${rev}" "${bold}" "${normal}"; else printf "162"; fi; printf "  : Dropbox.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "163" ]]; then printf "%s%s163%s" "${rev}" "${bold}" "${normal}"; else printf "163"; fi; printf "  : inSync for GoogleDrive.\n"
     printf "\n"
-    printf "     a   : Development Apps and IDEs Menu.\n"
-    printf "     b   : Photography and Imaging Menu.\n"
-    printf "     c   : More Utilities Menu.\n"
-    printf "     d   : Virtualization Applictions Menu.\n"
-    printf "     h   : Hardware Drivers.\n"
-    printf "     s   : Buildman Settings, Utilities and tests.\n"
-    printf "     x   : Clear selections.\n"
+    printf "     a    : Utilities Menu.\n"
+    printf "     b    : Internet and eMail Menu.\n"
+    printf "     c    : Applications Menu.\n"
+    printf "     d    : Development Apps and IDEs Menu.\n"
+    printf "     e    : Photography and Imaging Menu.\n"
+    printf "     f    : Virtualization Applictions Menu.\n"
+    printf "     g    : Other (Hardware Drivers, ).\n"
+    printf "     h    : Buildman Settings, Utilities and tests.\n"
+    printf "     x    : Clear selections.\n"
     printf "\n"
     printf "\n"
-    printf "     %s99  : RUN%s\n" "${bold}" "${normal}"
+    printf "     %s1   : RUN%s\n" "${bold}" "${normal}"
     printf "\n"
-    printf "    0/q  : Return to main menu\n\n"
+    printf "    0/q   : Return to main menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuUtils(){
+    clear
+    printf "\n\n"
+    printf "  %s%sUtilities%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "211" ]]; then printf "%s%s211%s" "${rev}" "${bold}" "${normal}"; else printf "211"; fi; printf "  : Latte Dock.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "212" ]]; then printf "%s%s212%s" "${rev}" "${bold}" "${normal}"; else printf "212"; fi; printf "  : Doublecmd.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "213" ]]; then printf "%s%s213%s" "${rev}" "${bold}" "${normal}"; else printf "213"; fi; printf "  : FreeFileSync.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "221" ]]; then printf "%s%s221%s" "${rev}" "${bold}" "${normal}"; else printf "221"; fi; printf "  : Powerline.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "261" ]]; then printf "%s%s261%s" "${rev}" "${bold}" "${normal}"; else printf "261"; fi; printf "  : UNetbootin ISO to USB Application.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "271" ]]; then printf "%s%s271%s" "${rev}" "${bold}" "${normal}"; else printf "271"; fi; printf "  : Y-PPA Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "272" ]]; then printf "%s%s272%s" "${rev}" "${bold}" "${normal}"; else printf "272"; fi; printf "  : Boot Repair Appliction.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "291" ]]; then printf "%s%s291%s" "${rev}" "${bold}" "${normal}"; else printf "291"; fi; printf "  : Install extra fonts.\n"
+    printf "\n"
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuInternet(){
+    clear
+    printf "\n\n"
+    printf "  %s%sInternet and eMail%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "311" ]]; then printf "%s%s311%s" "${rev}" "${bold}" "${normal}"; else printf "311"; fi; printf "  : Google Chrome browser.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "312" ]]; then printf "%s%s312%s" "${rev}" "${bold}" "${normal}"; else printf "312"; fi; printf "  : Opera Browser.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "321" ]]; then printf "%s%s321%s" "${rev}" "${bold}" "${normal}"; else printf "321"; fi; printf "  : Thunderbird email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "323" ]]; then printf "%s%s323%s" "${rev}" "${bold}" "${normal}"; else printf "323"; fi; printf "  : Mailspring desktop email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "324" ]]; then printf "%s%s324%s" "${rev}" "${bold}" "${normal}"; else printf "324"; fi; printf "  : Evolution email client.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "331" ]]; then printf "%s%s331%s" "${rev}" "${bold}" "${normal}"; else printf "331"; fi; printf "  : Skype.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "341" ]]; then printf "%s%s341%s" "${rev}" "${bold}" "${normal}"; else printf "341"; fi; printf "  : Winds RSS Reader and Podcast application.\n"
+
+    printf "    0/q  : Return to Selection menu\n\n"
+
+    if [[ ! $1 = "SelectItem" ]]; then
+      printf "Current Selection is: "
+      for i in "${menuSelections[@]}"; do
+        printf "%s, " "${i}"
+      done
+      printf "\n\n"
+    fi
+  }
+
+  submenuApps(){
+    clear
+    printf "\n\n"
+    printf "  %s%sApplications%s\n\n" "${bold}" "${rev}" "${normal}"
+    case $typeOfRun in
+      SelectThenAutoRun )
+        printf "  Select items and then install the items without prompting.\n"
+      ;;
+      SelectThenStepRun )
+        printf "  Select items and then install the items each with a prompt.\n"
+      ;;
+      SelectItem )
+        printf "  Select items and for individual installation with prompt.\n"
+      ;;
+    esac
+    printf "
+
+    There are the following options for this script
+    TASK : DESCRIPTION
+    -----: ---------------------------------------\n"
+    printf "\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "441" ]]; then printf "%s%s441%s" "${rev}" "${bold}" "${normal}"; else printf "441"; fi; printf "  : Calibre.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "442" ]]; then printf "%s%s442%s" "${rev}" "${bold}" "${normal}"; else printf "442"; fi; printf "  : KMyMoney.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "451" ]]; then printf "%s%s451%s" "${rev}" "${bold}" "${normal}"; else printf "451"; fi; printf "  : Anbox.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "461" ]]; then printf "%s%s461%s" "${rev}" "${bold}" "${normal}"; else printf "461"; fi; printf "  : LibreCAD.\n"
+    printf "    0/q  : Return to Selection menu\n\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
@@ -2187,18 +2311,18 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "50" ]]; then printf "%s%s50%s" "${rev}" "${bold}" "${normal}"; else printf "50"; fi; printf "  : Install Development Apps and IDEs.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "51" ]]; then printf "%s%s51%s" "${rev}" "${bold}" "${normal}"; else printf "51"; fi; printf "  : Git.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "52" ]]; then printf "%s%s52%s" "${rev}" "${bold}" "${normal}"; else printf "52"; fi; printf "  : AsciiDoc.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "53" ]]; then printf "%s%s53%s" "${rev}" "${bold}" "${normal}"; else printf "53"; fi; printf "  : Bashdb.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "54" ]]; then printf "%s%s54%s" "${rev}" "${bold}" "${normal}"; else printf "54"; fi; printf "  : PyCharm IDE.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "57" ]]; then printf "%s%s57%s" "${rev}" "${bold}" "${normal}"; else printf "57"; fi; printf "  : Visual Studio Code.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "58" ]]; then printf "%s%s58%s" "${rev}" "${bold}" "${normal}"; else printf "58"; fi; printf "  : Brackets IDE.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "307" ]]; then printf "%s%s307%s" "${rev}" "${bold}" "${normal}"; else printf "307"; fi; printf "  : Postman.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "59" ]]; then printf "%s%s59%s" "${rev}" "${bold}" "${normal}"; else printf "59"; fi; printf "  : Ruby Repo.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "67" ]]; then printf "%s%s67%s" "${rev}" "${bold}" "${normal}"; else printf "67"; fi; printf "  : Oracle Java 8.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "68" ]]; then printf "%s%s68%s" "${rev}" "${bold}" "${normal}"; else printf "68"; fi; printf "  : Oracle Java 9.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "69" ]]; then printf "%s%s69%s" "${rev}" "${bold}" "${normal}"; else printf "69"; fi; printf "  : Oracle Java Latest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "511" ]]; then printf "%s%s511%s" "${rev}" "${bold}" "${normal}"; else printf "511"; fi; printf "  : Install Development Apps and IDEs.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "512" ]]; then printf "%s%s512%s" "${rev}" "${bold}" "${normal}"; else printf "512"; fi; printf "  : Git.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "521" ]]; then printf "%s%s521%s" "${rev}" "${bold}" "${normal}"; else printf "521"; fi; printf "  : Bashdb.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "522" ]]; then printf "%s%s522%s" "${rev}" "${bold}" "${normal}"; else printf "522"; fi; printf "  : PyCharm IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Visual Studio Code.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Brackets IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "551" ]]; then printf "%s%s551%s" "${rev}" "${bold}" "${normal}"; else printf "551"; fi; printf "  : Oracle Java Latest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "552" ]]; then printf "%s%s552%s" "${rev}" "${bold}" "${normal}"; else printf "552"; fi; printf "  : Oracle Java 8.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "553" ]]; then printf "%s%s553%s" "${rev}" "${bold}" "${normal}"; else printf "553"; fi; printf "  : Oracle Java 9.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "591" ]]; then printf "%s%s591%s" "${rev}" "${bold}" "${normal}"; else printf "591"; fi; printf "  : Ruby Repo.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2231,16 +2355,13 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "70" ]]; then printf "%s%s70%s" "${rev}" "${bold}" "${normal}"; else printf "70"; fi; printf "  : Photography Apps.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "71" ]]; then printf "%s%s71%s" "${rev}" "${bold}" "${normal}"; else printf "71"; fi; printf "  : Digikam.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "72" ]]; then printf "%s%s72%s" "${rev}" "${bold}" "${normal}"; else printf "72"; fi; printf "  : Darktable.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "73" ]]; then printf "%s%s73%s" "${rev}" "${bold}" "${normal}"; else printf "73"; fi; printf "  : RapidPhotoDownloader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "74" ]]; then printf "%s%s74%s" "${rev}" "${bold}" "${normal}"; else printf "74"; fi; printf "  : Image Editing Applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "75" ]]; then printf "%s%s75%s" "${rev}" "${bold}" "${normal}"; else printf "75"; fi; printf "  : Music and Video Applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "76" ]]; then printf "%s%s76%s" "${rev}" "${bold}" "${normal}"; else printf "76"; fi; printf "  : Spotify.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "77" ]]; then printf "%s%s77%s" "${rev}" "${bold}" "${normal}"; else printf "77"; fi; printf "  : Google Play Music Desktop Player.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "78" ]]; then printf "%s%s78%s" "${rev}" "${bold}" "${normal}"; else printf "78"; fi; printf "  : Inkscape.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "79" ]]; then printf "%s%s79%s" "${rev}" "${bold}" "${normal}"; else printf "79"; fi; printf "  : Variety.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "611" ]]; then printf "%s%s611%s" "${rev}" "${bold}" "${normal}"; else printf "611"; fi; printf "  : Photography Apps.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "612" ]]; then printf "%s%s612%s" "${rev}" "${bold}" "${normal}"; else printf "612"; fi; printf "  : Variety.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "621" ]]; then printf "%s%s621%s" "${rev}" "${bold}" "${normal}"; else printf "621"; fi; printf "  : Digikam.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "622" ]]; then printf "%s%s622%s" "${rev}" "${bold}" "${normal}"; else printf "622"; fi; printf "  : Darktable.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "631" ]]; then printf "%s%s631%s" "${rev}" "${bold}" "${normal}"; else printf "631"; fi; printf "  : RapidPhotoDownloader.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "641" ]]; then printf "%s%s641%s" "${rev}" "${bold}" "${normal}"; else printf "641"; fi; printf "  : Image Editing Applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "651" ]]; then printf "%s%s651%s" "${rev}" "${bold}" "${normal}"; else printf "651"; fi; printf "  : Inkscape.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2253,10 +2374,10 @@ menuRun() {
     fi
   }
 
-  submenuUtils(){
+  submenuMedia(){
     clear
     printf "\n\n"
-    printf "  %s%sUtilities%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "  %s%sAudio, Video and Media Applications%s\n\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
         printf "  Select items and then install the items without prompting.\n"
@@ -2273,18 +2394,9 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "36" ]]; then printf "%s%s36%s" "${rev}" "${bold}" "${normal}"; else printf "36"; fi; printf "  : Opera Browser.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "41" ]]; then printf "%s%s41%s" "${rev}" "${bold}" "${normal}"; else printf "41"; fi; printf "  : Boot Repair Appliction.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "42" ]]; then printf "%s%s42%s" "${rev}" "${bold}" "${normal}"; else printf "42"; fi; printf "  : rEFInd Boot Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "43" ]]; then printf "%s%s43%s" "${rev}" "${bold}" "${normal}"; else printf "43"; fi; printf "  : UNetbootin ISO to USB Application.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "44" ]]; then printf "%s%s44%s" "${rev}" "${bold}" "${normal}"; else printf "44"; fi; printf "  : Etcher USB loader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "45" ]]; then printf "%s%s45%s" "${rev}" "${bold}" "${normal}"; else printf "45"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "46" ]]; then printf "%s%s46%s" "${rev}" "${bold}" "${normal}"; else printf "46"; fi; printf "  : Bitwarden Password Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "47" ]]; then printf "%s%s47%s" "${rev}" "${bold}" "${normal}"; else printf "47"; fi; printf "  : FreeFileSync.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "48" ]]; then printf "%s%s48%s" "${rev}" "${bold}" "${normal}"; else printf "48"; fi; printf "  : LibreCAD.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "49" ]]; then printf "%s%s49%s" "${rev}" "${bold}" "${normal}"; else printf "49"; fi; printf "  : Calibre.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "129" ]]; then printf "%s%s129%s" "${rev}" "${bold}" "${normal}"; else printf "129"; fi; printf "  : Powerline.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "130" ]]; then printf "%s%s130%s" "${rev}" "${bold}" "${normal}"; else printf "130"; fi; printf "  : Anbox.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "711" ]]; then printf "%s%s711%s" "${rev}" "${bold}" "${normal}"; else printf "711"; fi; printf "  : Music and Video Applications.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "713" ]]; then printf "%s%s713%s" "${rev}" "${bold}" "${normal}"; else printf "713"; fi; printf "  : Spotify.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : Google Play Music Desktop Player.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2317,11 +2429,12 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "81" ]]; then printf "%s%s81%s" "${rev}" "${bold}" "${normal}"; else printf "81"; fi; printf "  : Setup for a VirtualBox guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "82" ]]; then printf "%s%s82%s" "${rev}" "${bold}" "${normal}"; else printf "82"; fi; printf "  : VirtualBox Host.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "83" ]]; then printf "%s%s83%s" "${rev}" "${bold}" "${normal}"; else printf "83"; fi; printf "  : Setup for a Vmware guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "84" ]]; then printf "%s%s84%s" "${rev}" "${bold}" "${normal}"; else printf "84"; fi; printf "  : Vagrant.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "85" ]]; then printf "%s%s85%s" "${rev}" "${bold}" "${normal}"; else printf "85"; fi; printf "  : KVM.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "811" ]]; then printf "%s%s811%s" "${rev}" "${bold}" "${normal}"; else printf "811"; fi; printf "  : Docker.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "821" ]]; then printf "%s%s821%s" "${rev}" "${bold}" "${normal}"; else printf "821"; fi; printf "  : Setup for a VirtualBox guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "822" ]]; then printf "%s%s822%s" "${rev}" "${bold}" "${normal}"; else printf "822"; fi; printf "  : VirtualBox Host.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "831" ]]; then printf "%s%s831%s" "${rev}" "${bold}" "${normal}"; else printf "831"; fi; printf "  : Setup for a Vmware guest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "851" ]]; then printf "%s%s851%s" "${rev}" "${bold}" "${normal}"; else printf "851"; fi; printf "  : Vagrant.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "881" ]]; then printf "%s%s881%s" "${rev}" "${bold}" "${normal}"; else printf "881"; fi; printf "  : KVM.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2334,7 +2447,7 @@ menuRun() {
     fi
   }
 
-  submenuHardwareDrivers(){
+  submenuOther(){
     clear
     printf "\n\n"
     printf "  %s%Hardware Drivers%s\n\n" "${bold}" "${rev}" "${normal}"
@@ -2354,8 +2467,8 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "88" ]]; then printf "%s%s88%s" "${rev}" "${bold}" "${normal}"; else printf "88"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "89" ]]; then printf "%s%s89%s" "${rev}" "${bold}" "${normal}"; else printf "89"; fi; printf "  : DisplayLink.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "911" ]]; then printf "%s%s911%s" "${rev}" "${bold}" "${normal}"; else printf "911"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "921" ]]; then printf "%s%s921%s" "${rev}" "${bold}" "${normal}"; else printf "921"; fi; printf "  : DisplayLink.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2388,10 +2501,10 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "90" ]]; then printf "%s%s90%s" "${rev}" "${bold}" "${normal}"; else printf "90"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "91" ]]; then printf "%s%s91%s" "${rev}" "${bold}" "${normal}"; else printf "91"; fi; printf "  : Create test data directories on data drive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "97" ]]; then printf "%s%s97%s" "${rev}" "${bold}" "${normal}"; else printf "97"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 97 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "98" ]]; then printf "%s%s98%s" "${rev}" "${bold}" "${normal}"; else printf "98"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 98 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2403,7 +2516,6 @@ menuRun() {
       printf "\n\n"
     fi
   }
-
 
   howToRun() {
     if [[ ! $2 = "SelectItem" ]]; then
@@ -2431,31 +2543,10 @@ menuRun() {
     selectionMenu "$typeOfRun"
     read -rp "Enter your choice : " choiceOpt
     printf "\n"
-    if ((1<=choiceOpt && choiceOpt<=9))
+    if ((1<choiceOpt && choiceOpt<=999))
     then
       howToRun "$choiceOpt" "$typeOfRun"
-    elif ((11<=choiceOpt && choiceOpt<=16))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((21<=choiceOpt && choiceOpt<=38))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((36<=choiceOpt && choiceOpt<=49))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((121<=choiceOpt && choiceOpt<=130))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((50<=choiceOpt && choiceOpt<=79))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((81<=choiceOpt && choiceOpt<=89))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((90<=choiceOpt && choiceOpt<=98))
-    then
-      howToRun "$choiceOpt" "$typeOfRun"
-    elif ((choiceOpt==99))
+    elif ((choiceOpt==1))
     then
       if [[ $typeOfRun = "SelectThenAutoRun" ]]; then
         noPrompt=1
@@ -2470,10 +2561,10 @@ menuRun() {
       case $choiceOpt in
         a )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-            submenuDev "$typeOfRun"
+            submenuUtils "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((50<=choiceOpt && choiceOpt<=69))
+            if ((200<=choiceOpt && choiceOpt<=299))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2482,10 +2573,10 @@ menuRun() {
         ;;
         b )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-            submenuPhoto "$typeOfRun"
+            submenuInternet "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((70<=choiceOpt && choiceOpt<=79))
+            if ((300<=choiceOpt && choiceOpt<=399))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2494,10 +2585,10 @@ menuRun() {
         ;;
         c )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-            submenuUtils "$typeOfRun"
+            submenuApps "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((36<=choiceOpt && choiceOpt<=130))
+            if ((400<=choiceOpt && choiceOpt<=499))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2506,22 +2597,58 @@ menuRun() {
         ;;
         d )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-            submenuVirtualization "$typeOfRun"
+            submenuDev "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((81<=choiceOpt && choiceOpt<=85))
+            if ((500<=choiceOpt && choiceOpt<=599))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
           choiceOpt=NULL
         ;;
-        h )
+        e )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-            submenuHardwareDrivers "$typeOfRun"
+            submenuPhoto "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((88<=choiceOpt && choiceOpt<=89))
+            if ((600<=choiceOpt && choiceOpt<=699))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        e )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuMedia "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            printf "\n"
+            if ((700<=choiceOpt && choiceOpt<=799))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        f )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuVirtualization "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            printf "\n"
+            if ((800<=choiceOpt && choiceOpt<=899))
+            then
+              howToRun "$choiceOpt" "$typeOfRun"
+            fi
+          done
+          choiceOpt=NULL
+        ;;
+        g )
+          until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
+            submenuOther "$typeOfRun"
+            read -rp "Enter your choice : " choiceOpt
+            printf "\n"
+            if ((911<=choiceOpt && choiceOpt<=999))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -2533,7 +2660,7 @@ menuRun() {
             submenuSettings "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\n"
-            if ((90<=choiceOpt && choiceOpt<=96)); then
+            if ((2<=choiceOpt && choiceOpt<=199)); then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
           done
@@ -2550,75 +2677,76 @@ menuRun() {
 runSelection() {
   # take inputs and perform as necessary
   case $1 in
-    1 ) asking kernelUprade "do a Kernel Upgrade" "Kernel Upgrade Complete." ;;
-    2 ) asking repoUpdate "do a Repository Update" "Repository Update Complete." ;;
-    3 ) asking repoUpgrade "do a Repository Upgrade" "Repository Upgrade Complete." ;;
-    4 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
-    5 ) asking installBaseApps "Install the base utilities and applications" "Base Utilities and applications install complete." ;;
-    6 ) asking installUniverseApps "Install all my Universe applications" "Universe applications install complete." ;;
-    9 ) asking dataDirLinksSetup "Setup the home directories to link to the data disk directories" "Setup of the home directories to link to the data disk directories complete." ;;
-    11 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
-    12 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
-    15 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
-    16 ) asking gnome3Settings "run Gnome settings" "Gnome Settings done." ;;
-    21 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
-    22 ) asking dockerInstall "install Docker" "Docker install complete." ;;
-    23 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
-    24 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
-    25 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
-    26 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
-    27 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
-    28 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
-    29 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
-    31 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
-    32 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
-    33 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
-    47 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
-    48 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
-    49 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
-    34 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
-    35 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
-    36 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
-    41 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
-    42 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
-    43 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
-    44 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
-    45 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
-    46 ) asking bitwardenInstall "install Bitwarden Password Manager" "Bitwarden Password Manager install complete." ;;
-    50 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
-    51 ) asking gitInstall "install Git" "Git install complete." ;;
-    52 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
-    53 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
-    54 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
-    57 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
-    58 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
-    307 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
-    59 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
-    67 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
-    68 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
-    69 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
-    70 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
-    71 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
-    72 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
-    73 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
-    74 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
-    75 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
-    76 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
-    77 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
-    78 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
-    79 ) asking varietyInstall "install Variety" "Variety installed." ;;
-    81 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
-    82 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
-    83 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
-    84 ) asking vagrantInstall "install Vagrant" "Vagrant install complete." ;;
-    85 ) asking kvmInstall "install KVM" "KVM install complete." ;;
-    88 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
-    89 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
-    90 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
-    91 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
-    129 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
-    130 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
-    97)
+    111 ) asking kernelUprade "do a Kernel Upgrade" "Kernel Upgrade Complete." ;;
+    112 ) asking repoUpdate "do a Repository Update" "Repository Update Complete." ;;
+    113 ) asking repoUpgrade "do a Repository Upgrade" "Repository Upgrade Complete." ;;
+    125 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
+    121 ) asking installBaseApps "Install the base utilities and applications" "Base Utilities and applications install complete." ;;
+    122 ) asking installUniverseApps "Install all my Universe applications" "Universe applications install complete." ;;
+    131 ) asking dataDirLinksSetup "Setup the home directories to link to the data disk directories" "Setup of the home directories to link to the data disk directories complete." ;;
+    141 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
+    142 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
+    151 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
+    152 ) asking gnome3Settings "run Gnome settings" "Gnome Settings done." ;;
+    161 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
+    811 ) asking dockerInstall "install Docker" "Docker install complete." ;;
+    162 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
+    163 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
+    321 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
+    324 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
+    323 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
+    341 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
+    331 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
+    311 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
+    212 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
+    211 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
+    213 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
+    461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
+    441 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
+    442 ) asking kMyMoneyInstall "install KMyMoney" "KMyMoney install complete." ;;
+    271 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
+    291 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    312 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
+    272 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
+    281 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
+    261 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
+    251 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
+    241 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
+    231 ) asking bitwardenInstall "install Bitwarden Password Manager" "Bitwarden Password Manager install complete." ;;
+    511 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
+    512 ) asking gitInstall "install Git" "Git install complete." ;;
+    541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
+    521 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
+    522 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
+    523 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
+    524 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
+    531 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
+    591 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
+    552 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
+    553 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
+    551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
+    611 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
+    621 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
+    622 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
+    631 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
+    641 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
+    711 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
+    713 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
+    712 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
+    651 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
+    612 ) asking varietyInstall "install Variety" "Variety installed." ;;
+    821 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
+    822 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
+    831 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
+    851 ) asking vagrantInstall "install Vagrant" "Vagrant install complete." ;;
+    881 ) asking kvmInstall "install KVM" "KVM install complete." ;;
+    911 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
+    921 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
+    191 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
+    132 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
+    221 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
+    451 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
+    2)
       if [[ $noPrompt = 0 ]]; then
         noPrompt=1
         println_blue "Questions asked is OFF.\n No questions will be asked."
@@ -2629,7 +2757,7 @@ runSelection() {
         log_debug "Questions asked is ON.\n All questions will be asked."
       fi
     ;;
-    98)
+    3)
       if [[ $noCurrentReleaseRepo = 0 ]]; then
         noCurrentReleaseRepo=1
         println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${previousStableReleaseName}."
@@ -2793,19 +2921,19 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 54 70 72 73 74 75 76 77 78 79 82 85 84)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
-            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(2 3)
+        menuSelectionsInput+=(112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated installation for a Laptop\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
@@ -2818,19 +2946,19 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(1 2 3 4 5 6 21 22 23 24 25 27 28 29 31 32 49 35 34 41 43 44 45 46 50 51 52 53 54 70 72 73 74 75 76 77 78 79 82 85 84)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
-            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(2 3)
+        menuSelectionsInput+=(112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated installation for a Workstation\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
@@ -2843,19 +2971,19 @@ mainMenu() {
       ;;
       12 )
         # Install a Virtual Machine with pre-selected applications
-        menuSelectionsInput=(1 2 3 5 6 32 34 45)
+        menuSelectionsInput=(111 112 113 121 122 212 271 241)
         case $desktopEnvironment in
           gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 33 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
-            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(2 3)
+        menuSelectionsInput+=(112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated install for a virtual machine\n"
           menuRun "AutoRun" "${menuSelectionsInput[@]}"
@@ -2868,19 +2996,19 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(9 1 2 3 4 5 6 11 12 15 16 21 22 23 24 25 26 27 28 29 31 32 47 48 49 35 34 36 41 42 43 44 45 46 50 51 52 53 54 57 58 307 59 67 69 70 71 72 73 74 75 76 77 78 79 85 84 129 130)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 651 612 881 851 221 451)
         case $desktopEnvironment in
           gnome )
-            menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(11 12 33 71)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 142 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
-            # menuSelectionsInput+=(15 16)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
+            # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(2 3)
+        menuSelectionsInput+=(112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated Test install all apps on a VirtualBox VM\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"

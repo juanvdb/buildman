@@ -15,16 +15,17 @@ system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/Virtual
 
 Vagrant.configure("2") do |config|
 
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-    config.cache.synced_folder_opts = {
-      type: :nfs,
-      owner: "_apt",
-      group: "_apt",
-      mount_options: ["dmode=777", "fmode=666", 'rw', 'vers=4', 'tcp', 'nolock'],
-    }
+   if Vagrant.has_plugin?("vagrant-cachier")
+     config.cache.scope = :box
+     config.cache.synced_folder_opts = {
+       type: :nfs,
+       owner: "_apt",
+       group: "_apt",
+       mount_options: ['rw', 'vers=4', 'tcp', 'nolock'],
+       # mount_options: ["dmode=777", "fmode=666", 'rw', 'vers=4', 'tcp', 'nolock'],
+     }
     # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
-  end
+   end
 
   # DNS for boxes
   #if Vagrant.has_plugin?("vagrant-dns")

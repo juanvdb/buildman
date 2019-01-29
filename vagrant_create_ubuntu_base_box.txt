@@ -125,3 +125,17 @@ rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
 
 # Cosmic issues with crypto
 vagrant ssh -c "sudo apt remove cryptsetup-initramfs"
+
+
+sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/kcosmic/apt/
+
+# Host rsyncs
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
+rsync -avxP --exclude="lock" --exclude="partial" /var/lib/apt/lists/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/lists/
+rsync -avxP /var/lib/flatpak/repo/refs/remotes/ /data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
+rsync -avxP /var/lib/gems/ /data/Backups/vagrantcache/k$(lsb_release -cs)/gems/
+
+# Vagrant guest rsyncs
+rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
+sudo rsync -avxP juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/ /var/lib/flatpak/repo/refs/remotes/
