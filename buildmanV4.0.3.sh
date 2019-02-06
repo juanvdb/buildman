@@ -785,14 +785,12 @@ gnome3Backports () {
     println_red "Beta Code, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Gnome3 apt sources."
     println_red "No new repo, revert the Gnome3 apt sources."
-    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-  fi
-  if ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
+  elif ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
     log_warning "No new repo, revert the Gnome3 apt sources."
     println_red "No new repo, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1095,7 +1093,7 @@ kvmInstall () {
   log_info "KVM Applications Install"
   println_blue "KVM Applications Install                                               "
 
-  if ! [[ "$distReleaseName" =~ ^(cosmic)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
     sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
   else
     sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm aqemu
@@ -1419,8 +1417,12 @@ unetbootinInstall() {
     println_red "Beta Code, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the UNetbootin apt sources."
+    println_red "No new repo, revert the UNetbootin apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
     log_warning "No new repo, revert the UNetbootin apt sources."
     println_red "No new repo, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1449,7 +1451,7 @@ etcherInstall () {
     echo "deb https://deb.etcher.io stable etcher" | sudo tee /etc/apt/sources.list.d/balena-etcher.list
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
     repoUpdate
-    sudo apt install balena-etcher-electron
+    sudo apt install -y balena-etcher-electron
   fi
 }
 
@@ -1650,12 +1652,20 @@ spotifyInstall () {
 }
 
 # ############################################################################
+# Install Kodi media center
+kodiInstall () {
+  log_info "Install Kodi media center"
+  println_blue "Install Kodi media center"
+  sudo add-apt-repository -y ppa:team-xbmc/ppa
+  sudo apt install -y kodi
+}
+
+# ############################################################################
 # Install Google Play Music Desktop Player
 google-play-music-desktop-playerInstall () {
   log_info "Install Google Play Music Desktop Player"
   println_blue "Install Google Play Music Desktop Player"
   sudo snap install google-play-music-desktop-player
-
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -2099,6 +2109,7 @@ menuRun() {
       711   #: Music and Video Applications
       713   #: Spotify
       712   #: Google Play Music Desktop Player
+      721   #: Kodi
       651   #: Inkscape
       612   #: Variety
 
@@ -2403,6 +2414,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "711" ]]; then printf "%s%s711%s" "${rev}" "${bold}" "${normal}"; else printf "711"; fi; printf "  : Music and Video Applications.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "713" ]]; then printf "%s%s713%s" "${rev}" "${bold}" "${normal}"; else printf "713"; fi; printf "  : Spotify.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : Google Play Music Desktop Player.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "721" ]]; then printf "%s%s721%s" "${rev}" "${bold}" "${normal}"; else printf "721"; fi; printf "  : Kodi media center.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2739,6 +2751,7 @@ runSelection() {
     711 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
     713 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
     712 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
+    721 ) asking kodiInstall "install Kodi media center" "Kodi media center installed." ;;
     651 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
     612 ) asking varietyInstall "install Variety" "Variety installed." ;;
     821 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
@@ -2927,7 +2940,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -2952,7 +2965,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3002,7 +3015,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 651 612 881 851 221 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 221 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports

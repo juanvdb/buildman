@@ -136,11 +136,13 @@ rsync -avxP --exclude="lock" --exclude="partial" /var/lib/apt/lists/ /data/Backu
 rsync -avxP /var/lib/flatpak/repo/refs/remotes/ /data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
 rsync -avxP /var/lib/gems/ /data/Backups/vagrantcache/k$(lsb_release -cs)/gems/
 
-# Host rsynch from Vagrant guest
-rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.4:/var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
+# Host rsync from Vagrant guest
+rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
 
-# Vagrant to host rsynch
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1/data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/ 
+sudo rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/ && sudo chown -R juan:juan /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
+
+# Vagrant to host rsync
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
 
 # Vagrant guest rsyncs
 rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
