@@ -792,6 +792,12 @@ gnome3Backports () {
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   fi
+  if ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
+    log_warning "No new repo, revert the Gnome3 apt sources."
+    println_red "No new repo, revert the Gnome3 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  fi
 
   repoUpdate
 	repoUpgrade
