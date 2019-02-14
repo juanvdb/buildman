@@ -1,5 +1,7 @@
 #! /bin/bash
 
+# ############################################################################
+# Build Vagrant box
 sudo apt -y install linux-headers-$(uname -r) build-essential dkms vim openssh-server ssh net-tools gcc make
 
 cd /media/vagrant/vboxcd
@@ -62,7 +64,7 @@ sudo apt -y full-upgrade
 sudo apt -y autoremove
 sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
 
-rsync -avxP --exclude="lock" exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/home/juan/.vagrant.d/cache/kcosmic/apt/
+rsync -avxP --exclude="lock" exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
 
 sudo apt -y clean
 

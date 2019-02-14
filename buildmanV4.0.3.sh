@@ -421,8 +421,7 @@ virtualboxHostInstall () {
     println_red "Beta Code, revert the Virtaulbox apt sources."
     changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     # repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Virtualbox apt sources."
     println_red "No new repo, revert the Virtaulbox apt sources."
     changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -618,7 +617,7 @@ dataDirLinksSetup () {
           else
             # It's a directory!
             # log_debug "Remove directory $HOMEDIR/data"
-            rmdir -r "$HOMEDIR/$sourceLinkDirectory"
+            rmdir "$HOMEDIR/$sourceLinkDirectory"
             ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
             # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
           fi
@@ -785,19 +784,21 @@ gnome3Backports () {
     println_red "Beta Code, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
   elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Gnome3 apt sources."
     println_red "No new repo, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-  elif ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
+    repoUpdate
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Gnome3 apt sources."
     println_red "No new repo, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
   fi
 
-  repoUpdate
 	repoUpgrade
   sudo apt install -y gnome gnome-shell
 }
@@ -908,7 +909,19 @@ gitInstall() {
   log_info "Git Apps install"
   println_banner_yellow "Git Apps install                                                     "
   sudo apt install -y gitk git-flow giggle gitg git-cola
-  sudo snap install gitkraken
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install Gitkraken from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install gitkraken
+    else
+      wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+      sudo apt install "$HOMEDIR/tmp/gitkraken-amd64.deb"
+    fi
+  else
+    wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+    sudo apt install "$HOMEDIR/tmp/gitkraken-amd64.deb"
+  fi
+
   sudo apt install -yf
   cd "$currentPath" || return
 }
@@ -917,13 +930,13 @@ gitInstall() {
 # Bashdb packages installation
 bashdbInstall() {
   currentPath=$(pwd)
-  log_info "Bash Debugger 4.4-0.94 install"
-  println_banner_yellow "Bash Debugger 4.4-0.94 install                                       "
+  log_info "Bash Debugger 4.4-1.0.1 install"
+  println_banner_yellow "Bash Debugger 4.4-1.0.1 install                                       "
   cd "$HOMEDIR/tmp" || die "Path $HOMEDIR/tmp does not exist."
-  # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
-  curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-0.94/bashdb-4.4-0.94.tar.gz
+  # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
+  curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
   tar -xzf "$HOMEDIR/tmp/bashdb.tar.gz"
-  cd "$HOMEDIR/tmp/bashdb-4.4-0.94" || die "Path bashdb-4.4-0.94 does not exist"
+  cd "$HOMEDIR/tmp/bashdb-4.4-1.0.1" || die "Path bashdb-4.4-1.0.1 does not exist"
   ./configure
   make
   sudo make install
@@ -1093,10 +1106,10 @@ kvmInstall () {
   log_info "KVM Applications Install"
   println_blue "KVM Applications Install                                               "
 
-  if ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
-    sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
-  else
+  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm aqemu
+  else
+    sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
 
   fi
   case $desktopEnvironment in
@@ -1211,8 +1224,12 @@ rubyRepo () {
     println_red "Beta Code, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Ruby Repo apt sources."
+    println_red "No new repo, revert the Ruby Repo apt sources."
+    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Ruby Repo apt sources."
     println_red "No new repo, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1232,8 +1249,12 @@ vagrantInstall () {
     println_red "Beta Code, revert the Vagrant apt sources."
     changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Vagrant apt sources."
+    println_red "No new repo, revert the Vagrant apt sources."
+    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Vagrant apt sources."
     println_red "No new repo, revert the Vagrant apt sources."
     changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1280,8 +1301,7 @@ webupd8AppsInstall() {
     println_red "Beta Code, revert the WebUpd8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the WebUpd8 apt sources."
     println_red "No new repo, revert the WebUpd8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/nilarimogard-ubuntu-webupd8-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1313,8 +1333,7 @@ yppaManagerInstall() {
     println_red "Beta Code, revert the Y-PPA Manager apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
     println_red "Beta Code or no new repo, revert the Y-PPA Manager apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-y-ppa-manager-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1334,8 +1353,7 @@ oracleJava8Install() {
     println_red "Beta Code, revert the Oracle Java 8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Oracle Java 8 apt sources."
     println_red "No new repo, revert the Oracle Java 8 apt sources."
     changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1396,8 +1414,7 @@ bootRepairInstall() {
     println_red "Beta Code, revert the Boot Repair apt sources."
     changeAptSource "/etc/apt/sources.list.d/yannubuntu-ubuntu-boot-repair-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Boot Repair apt sources."
     println_red "No new repo, revert the Boot Repair apt sources."
     changeAptSource "/etc/apt/sources.list.d/yannubuntu-ubuntu-boot-repair-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1422,7 +1439,7 @@ unetbootinInstall() {
     println_red "No new repo, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif ! [[ "$distReleaseName" =~ ^(cosmic|disco)$ ]]; then
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the UNetbootin apt sources."
     println_red "No new repo, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1475,8 +1492,12 @@ stacerInstall() {
     println_red "Beta Code, revert the Stacer apt sources."
     changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Stacer apt sources."
+    println_red "No new repo, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Stacer apt sources."
     println_red "No new repo, revert the Stacer apt sources."
     changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1749,8 +1770,7 @@ flatpakInstall() {
     println_red "Beta Code, revert the Flatpak apt sources."
     changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Flatpak apt sources."
     println_red "No new repo, revert the Flatpak apt sources."
     changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1815,8 +1835,7 @@ installUniverseApps () {
     println_red "Beta Code, revert the UGet Integrator apt sources."
     changeAptSource "/etc/apt/sources.list.d/uget-team-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
-  fi
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the UGet Integrator apt sources."
     println_red "No new repo, revert the UGet Integrator apt sources."
     changeAptSource "/etc/apt/sources.list.d/uget-team-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -2673,7 +2692,7 @@ menuRun() {
           done
           choiceOpt=NULL
         ;;
-        s )
+        h )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuSettings "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
