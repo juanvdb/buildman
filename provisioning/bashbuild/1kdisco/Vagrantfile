@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/VirtualBox/vagrant/kcosmic/')
+system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/VirtualBox/vagrant/kdisco/')
 
 
 
@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
   #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
   #end
 
-  config.vm.box = "kcosmic"
+  config.vm.box = "kdisco"
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
   config.vm.network "private_network", ip: "172.28.128.111", auto_config: false
@@ -49,19 +49,16 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../../../", "/srv/share/build", disabled: false, type: "nfs"
   # config.vm.synced_folder "../../../../is/oss/automationandmessaging/jbossintegrationpatterns/", "/srv/share/ascidoc", disabled: false, type: "nfs"
   config.vm.synced_folder "/home/juan/Downloads/", "/srv/share/downloads", disabled: false, type: "nfs"
-  config.vm.synced_folder "/data/Backups/vagrantcache/kcosmic/apt/", "/var/cache/apt/archives/", type: "rsync",
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/apt/archives/", "/var/cache/apt/archives/", type: "rsync",
     rsync__exclude: ["partial/", "lock"],
     rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
-  config.vm.synced_folder "/data/Backups/vagrantcache/kcosmic/apt/archives/", "/var/cache/apt/archives/", type: "rsync",
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/apt/lists/", "/var/lib/apt/lists/", type: "rsync",
     rsync__exclude: ["partial/", "lock"],
     rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
-  config.vm.synced_folder "/data/Backups/vagrantcache/kcosmic/apt/lists/", "/var/lib/apt/lists/", type: "rsync",
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/gems/", "/var/lib/gems/", type: "rsync",
     rsync__exclude: ["partial/", "lock"],
     rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
-  config.vm.synced_folder "/data/Backups/vagrantcache/kcosmic/gems/", "/var/lib/gems/", type: "rsync",
-    rsync__exclude: ["partial/", "lock"],
-    rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
-  config.vm.synced_folder "/data/Backups/vagrantcache/kcosmic/flatpak/", "/var/lib/flatpak/", type: "rsync",
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/flatpak/", "/var/lib/flatpak/", type: "rsync",
     rsync__exclude: ["partial/", "lock"],
     rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
 
