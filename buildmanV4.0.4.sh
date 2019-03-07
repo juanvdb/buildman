@@ -2,7 +2,7 @@
 
 # DateVer 2019/01/29
 # Buildman
-buildmanVersion=V4.0.6
+buildmanVersion=V4.0.4
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -722,22 +722,17 @@ ownCloudClientInstallApp () {
   log_info "ownCloud Install"
   println_blue "ownCloud Install                                                     "
 
-  if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the ownCloud repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
-      if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
-        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseName.list"
-      elif [[ $betaAns == 1 ]]; then
-        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
-        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$stableReleaseName.list"
-      else
-        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$previousStableReleaseVer/Release.key" | sudo apt-key add -
-        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$previousStableReleaseName.list"
-      fi
-      repoUpdate
-    fi
+  if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
+    wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseName.list"
+  elif [[ $betaAns == 1 ]]; then
+    wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$stableReleaseName.list"
+  else
+    wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$previousStableReleaseVer/Release.key" | sudo apt-key add -
+    echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$previousStableReleaseName.list"
   fi
+  repoUpdate
   sudo apt install -yf owncloud-client
   # sudo apt install -yf
 }
@@ -784,26 +779,27 @@ gnome3Backports () {
   println_blue "Install Gnome3 Backports                                                      "
   sudo add-apt-repository -y ppa:gnome3-team/gnome3-staging
   sudo add-apt-repository -y ppa:gnome3-team/gnome3
-  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-  log_warning "No new repo, revert the Gnome3 apt sources."
-  println_red "No new repo, revert the Gnome3 apt sources."
-  changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-  changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-  repoUpdate
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Gnome3 apt sources."
+    println_red "Beta Code, revert the Gnome3 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
   elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Gnome3 apt sources."
     println_red "No new repo, revert the Gnome3 apt sources."
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Gnome3 apt sources."
-    println_red "Beta Code, revert the Gnome3 apt sources."
-    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
+    log_warning "No new repo, revert the Gnome3 apt sources."
+    println_red "No new repo, revert the Gnome3 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/gnome3-team-ubuntu-gnome3-staging-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
 
+	repoUpgrade
   sudo apt install -y gnome gnome-shell
 }
 
@@ -844,13 +840,13 @@ kdeBackportsApps () {
   println_blue "Add KDE Backports                                                             "
   sudo add-apt-repository -y ppa:kubuntu-ppa/backports
   # sudo add-apt-repository -y ppa:kubuntu-ppa/backports-landing
-  if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "Beta Code or no new repo, revert the KDE Backports apt sources."
-    println_red "Beta Code or no new repo, revert the KDE Backports apt sources."
-    changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    # changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  fi
+  # if [[ $betaAns == 1 ]] || [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "Beta Code or no new repo, revert the KDE Backports apt sources."
+  #   println_red "Beta Code or no new repo, revert the KDE Backports apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   changeAptSource "/etc/apt/sources.list.d/kubuntu-ppa-ubuntu-backports-landing-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   repoUpdate
+  # fi
 
   repoUpdate
   repoUpgrade
@@ -1013,7 +1009,8 @@ googleChromeInstall () {
 fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
-  sudo apt install -y cabextract fonts-3270 fonts-breip fonts-dejavu fonts-dejavu-core fonts-dejavu-extra fonts-dkg-handwriting fonts-dustin fonts-firacode fonts-georgewilliams fonts-hack fonts-hack-otf fonts-hack-ttf fonts-hack-web fonts-inconsolata fonts-isabella t1-xfree86-nonfree ttf-aenigma ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-mscorefonts-installer ttf-sjfonts ttf-staypuft ttf-summersby ttf-xfree86-nonfree ;
+  sudo apt install -y fonts-inconsolata ttf-staypuft ttf-dejavu-extra fonts-dustin ttf-marvosym fonts-breip fonts-dkg-handwriting ttf-isabella ttf-summersby ttf-sjfonts ttf-mscorefonts-installer ttf-xfree86-nonfree cabextract t1-xfree86-nonfree ttf-dejavu ttf-georgewilliams ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-aenigma fonts-firacode;
+	# sudo apt install -y  ttf-dejavu-udeb ttf-dejavu-mono-udeb ttf-liberation ttf-freefont;
 }
 
 # ############################################################################
@@ -1100,7 +1097,7 @@ doublecmdInstall () {
   # sudo apt-add-repository -y ppa:alexx2000/doublecmd
 
   repoUpdate
-  sudo apt install -y doublecmd-qt doublecmd-help-en doublecmd-plugins
+  sudo apt install -y doublecmd-qt5 doublecmd-help-en doublecmd-plugins
 }
 
 # ############################################################################
@@ -1109,7 +1106,7 @@ kvmInstall () {
   log_info "KVM Applications Install"
   println_blue "KVM Applications Install                                               "
 
-  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     sudo apt install -y qemu-kvm libvirt-clients libvirt-daemon virtinst bridge-utils cpu-checker virt-manager linux-image-kvm linux-kvm linux-image-virtual linux-tools-kvm aqemu
   else
     sudo apt install -y qemu-kvm libvirt-bin virtinst bridge-utils cpu-checker virt-manager
@@ -1232,7 +1229,7 @@ rubyRepo () {
     println_red "No new repo, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Ruby Repo apt sources."
     println_red "No new repo, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1257,7 +1254,7 @@ vagrantInstall () {
     println_red "No new repo, revert the Vagrant apt sources."
     changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Vagrant apt sources."
     println_red "No new repo, revert the Vagrant apt sources."
     changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
@@ -1432,20 +1429,20 @@ unetbootinInstall() {
   log_info "UNetbootin Appliction Install"
   println_blue "UNetbootin Application Install"
   sudo add-apt-repository -y ppa:gezakovacs/ppa
-  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-    log_warning "No new repo, revert the UNetbootin apt sources."
-    println_red "No new repo, revert the UNetbootin apt sources."
-    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the UNetbootin apt sources."
+    println_red "Beta Code, revert the UNetbootin apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the UNetbootin apt sources."
     println_red "No new repo, revert the UNetbootin apt sources."
     changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the UNetbootin apt sources."
-    println_red "Beta Code, revert the UNetbootin apt sources."
-    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
+    log_warning "No new repo, revert the UNetbootin apt sources."
+    println_red "No new repo, revert the UNetbootin apt sources."
+    changeAptSource "/etc/apt/sources.list.d/gezakovacs-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
   sudo apt install -y unetbootin
@@ -1456,22 +1453,22 @@ unetbootinInstall() {
 etcherInstall () {
   log_info "Install Etcher USB loader"
   println_blue "Install Etcher USB loader"
+
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the repo(default) or AppImage? (repo/appimage)" answer
-  fi
-  if [[ $answer = "appimage" ]]; then
-    curl -s https://github.com/resin-io/etcher/releases/latest | grep "etcher-electron-*-x86_64.AppImage" | cut -d '"' -f 4   | wget -qi -
+    if [[ $answer = "appimage" ]]; then
+      curl -s https://github.com/resin-io/etcher/releases/latest | grep "etcher-electron-*-x86_64.AppImage" | cut -d '"' -f 4   | wget -qi -
+    else
+      echo "deb https://deb.etcher.io stable etcher" | sudo tee /etc/apt/sources.list.d/balena-etcher.list
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
+      repoUpdate
+      sudo apt install balena-etcher-electron
+    fi
   else
     echo "deb https://deb.etcher.io stable etcher" | sudo tee /etc/apt/sources.list.d/balena-etcher.list
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
-    # if [[ $betaAns == 1 ]]; then
-    #   changeAptSource "/etc/apt/sources.list.d/-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    # elif [[ $noCurrentReleaseRepo == 1 ]]; then
-    #   changeAptSource "/etc/apt/sources.list.d/-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    # fi
     repoUpdate
     sudo apt install -y balena-etcher-electron
-    # sudo apt install -y etcher-electron
   fi
 }
 
@@ -1487,28 +1484,27 @@ rEFIndInstall() {
 # ############################################################################
 # Stacer Linux system info and cleaner packages installation
 stacerInstall() {
-  set -x
   log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
   println_blue "Stacer Linux System Optimizer and Monitoring Application Install"
   sudo add-apt-repository -y ppa:oguzhaninan/stacer
-  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-    log_warning "No new repo, revert the Stacer apt sources."
-    println_red "No new repo, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Stacer apt sources."
+    println_red "Beta Code, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Stacer apt sources."
     println_red "No new repo, revert the Stacer apt sources."
     changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
-  elif [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Stacer apt sources."
-    println_red "Beta Code, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"betaReleaseName")$ ]]; then
+    log_warning "No new repo, revert the Stacer apt sources."
+    println_red "No new repo, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
     repoUpdate
   fi
   sudo apt install -y stacer
-  set +x
+
   # AppImage
   # wget https://github.com/oguzhaninan/Stacer/releases/download/v1.0.9/Stacer-x86_64.AppImage
 }
@@ -1568,7 +1564,7 @@ librecadInstall() {
 
   # sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
   sudo add-apt-repository -y ppa:librecad-dev/librecad-daily
-  changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+  changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" $ltsReleaseName
 
   repoUpdate
 
@@ -1643,7 +1639,7 @@ ambianceRadianceThemeInstall() {
 inkscapeInstall() {
   log_info "Inkscape Install"
   println_blue "Inkscape Install"
-  sudo snap install inkscape --classic
+  sudo snap install inkscape
 }
 
 # ############################################################################
@@ -1712,39 +1708,7 @@ darktableInstall() {
   currentPath=$(pwd)
   log_info "Darktable Repo"
   println_blue "Darktable Repo"
-  if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the repo(default) or Snap? (repo/snap)" answer
-    if [[ $answer = "snap" ]]; then
-      sudo snap install darktable
-    else
-      read -rp "Do you want to install from the Darktable repo? (y/n)" answer
-      if [[ $answer = "y|Y|1" ]]; then
-        sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release
-        if [[ $betaAns == 1 ]]; then
-          log_warning "Beta Code, revert the Darktable apt sources."
-          println_red "Beta Code, revert the Darktable apt sources."
-          changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-          repoUpdate
-        elif [[ $noCurrentReleaseRepo == 1 ]]; then
-          log_warning "No new repo, revert the Darktable apt sources."
-          println_red "No new repo, revert the Darktable apt sources."
-          changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-          repoUpdate
-        elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-          log_warning "No new repo, revert the Darktable apt sources."
-          println_red "No new repo, revert the Darktable apt sources."
-          changeAptSource "/etc/apt/sources.list.d/pmjdebruijn-ubuntu-darktable-release-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-          repoUpdate
-        fi
-        sudo apt install -y darktable
-      else
-        sudo apt install -y darktable
-      fi
-    fi
-  else
-    sudo apt install -y darktable
-  fi
-
+  sudo snap install darktable
 }
 
 rapidPhotoDownloaderInstall() {
@@ -1880,7 +1844,7 @@ installUniverseApps () {
 
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic aptitude mc filezilla remmina rdiff-backup luckybackup printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
+	sudo apt install -yf synaptic aptitude mc filezilla remmina rdiff-backup luckybackup printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner shutter chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
 
   # Older packages...
   # Still active, but replaced with other apps
@@ -1890,9 +1854,6 @@ installUniverseApps () {
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
-  fi
-  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco)$ ]]; then
-   sudo apt install -yf shutter
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
