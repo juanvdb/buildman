@@ -1610,6 +1610,15 @@ kMyMoneyInstall() {
 }
 
 # ############################################################################
+# KMyMoney installation
+fbReaderInstall() {
+  log_info "Favorite Book Reader"
+  println_blue "Favorite Book Reader"
+
+  sudo apt install -y fbreader
+}
+
+# ############################################################################
 # Anbox installation
 anboxInstall() {
   log_info "Anbox"
@@ -2139,6 +2148,7 @@ menuRun() {
       231   #: Bitwarden Password Manager
       213   #: FreeFileSync
       461   #: LibreCAD
+      421   #: Favorite Book Reader
       441   #: Calibre
       442   #: KMyMoney
       221  #: Powerline
@@ -2351,6 +2361,7 @@ menuRun() {
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
     printf "\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "421" ]]; then printf "%s%s421%s" "${rev}" "${bold}" "${normal}"; else printf "421"; fi; printf "  : Favorite Book Reader.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "441" ]]; then printf "%s%s441%s" "${rev}" "${bold}" "${normal}"; else printf "441"; fi; printf "  : Calibre.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "442" ]]; then printf "%s%s442%s" "${rev}" "${bold}" "${normal}"; else printf "442"; fi; printf "  : KMyMoney.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "451" ]]; then printf "%s%s451%s" "${rev}" "${bold}" "${normal}"; else printf "451"; fi; printf "  : Anbox.\n"
@@ -2778,6 +2789,7 @@ runSelection() {
     211 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
     213 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
     461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
+    421 ) asking fbReaderInstall "install Favorite Book Reader" "Favorite Book Reader install complete." ;;
     441 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
     442 ) asking kMyMoneyInstall "install KMyMoney" "KMyMoney install complete." ;;
     271 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
@@ -2998,7 +3010,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3023,7 +3035,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3073,7 +3085,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 221 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 221 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports

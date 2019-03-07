@@ -1,0 +1,93 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/VirtualBox/vagrant/kdisco/')
+
+
+
+# Load our custom configuration and prepare some global variables
+# require 'yaml'
+# cwd       = File.dirname(File.expand_path(__FILE__))
+# ext_conf  = YAML.load_file("#{cwd}/build.yaml")
+#_opts     = Hash[ext_conf.select {|hash| hash["option"] == "general"}[0]]
+# machines  = ext_conf.select {|hash| hash["option"] == "machine"}
+#
+
+Vagrant.configure("2") do |config|
+
+  # if Vagrant.has_plugin?("vagrant-cachier")
+    # config.cache.scope = :box
+    # config.cache.synced_folder_opts = {
+      # type: :nfs,
+      # owner: "_apt",
+      # group: "_apt",
+      # mount_options: ['rw', 'vers=4', 'tcp', 'nolock'],
+      # mount_options: ["dmode=777", "fmode=666", 'rw', 'vers=4', 'tcp', 'nolock'],
+    # }
+    # For more information please check http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
+  # end
+
+  # DNS for boxes
+  #if Vagrant.has_plugin?("vagrant-dns")
+  #  config.dns.tld = "#{_opts["domain"]}.#{_opts["tld"]}"
+  #end
+
+  config.vm.box = "kdisco"
+
+  # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
+  config.vm.network "private_network", ip: "172.28.128.111", auto_config: false
+  # config.vm.network "private_network", type: "dhcp", auto_config: false
+  config.vm.provider :virtualbox do |vb|
+    vb.gui = true
+#    vb.customize ["modifyvm", :id, "--groups", "vagrant"]
+    vb.memory = "2048"
+#    vb.name = "vagrant_kubuntu1710"
+  end
+
+  config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant", disabled: false
+  config.vm.synced_folder "../../../", "/srv/share/build", disabled: false, type: "nfs"
+  # config.vm.synced_folder "../../../../is/oss/automationandmessaging/jbossintegrationpatterns/", "/srv/share/ascidoc", disabled: false, type: "nfs"
+  config.vm.synced_folder "/home/juan/Downloads/", "/srv/share/downloads", disabled: false, type: "nfs"
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/apt/archives/", "/var/cache/apt/archives/", type: "rsync",
+    rsync__exclude: ["partial/", "lock"],
+    rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/apt/lists/", "/var/lib/apt/lists/", type: "rsync",
+    rsync__exclude: ["partial/", "lock"],
+    rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/gems/", "/var/lib/gems/", type: "rsync",
+    rsync__exclude: ["partial/", "lock"],
+    rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
+  config.vm.synced_folder "/data/Backups/vagrantcache/disco/flatpak/", "/var/lib/flatpak/", type: "rsync",
+    rsync__exclude: ["partial/", "lock"],
+    rsync__args: ["--verbose", "--rsync-path='sudo rsync'", "--archive", "-z", "-P"]
+
+  # Do an update, upgrade and virtualbox additions
+  #config.vm.provision "shell", inline: "sudo apt-get update"
+  #config.vm.provision "shell", inline: "sudo apt-get -y upgrade"
+  #config.vm.provision "shell", inline: "sudo apt-get -y dist-upgrade"
+  #config.vm.provision "shell", inline: "sudo apt-get -y full-upgrade"
+  #config.vm.provision "shell", inline: "sudo apt-get -yf install"
+  # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11"
+  # Permit anyone to start the GUI
+  #config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+
+  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+   config.vm.provision "shell", inline: <<-SHELL
+     sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config
+     apt-get update
+     apt-get -y upgrade
+     apt-get -y dist-upgrade
+     apt-get -y full-upgrade
+     apt-get -yf install
+   SHELL
+
+
+  #config.vm.provision "ansible" do |ansible|
+  #  ansible.verbose = "v"
+  #  ansible.playbook = "build.yml"
+  #end
+
+end
