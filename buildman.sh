@@ -2,7 +2,7 @@
 
 # DateVer 2019/01/29
 # Buildman
-buildmanVersion=V4.0.6
+buildmanVersion=V4.0.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -1610,6 +1610,15 @@ kMyMoneyInstall() {
 }
 
 # ############################################################################
+# Favorite Book Reader installation
+fbReaderInstall() {
+  log_info "Favorite Book Reader"
+  println_blue "Favorite Book Reader"
+
+  sudo apt install -y fbreader
+}
+
+# ############################################################################
 # Anbox installation
 anboxInstall() {
   log_info "Anbox"
@@ -1622,6 +1631,16 @@ anboxInstall() {
   sudo snap install --devmode --beta anbox
   pressEnterToContinue 'Add "snap refresh --beta --devmode anbox" to bin/upgrade.sh for regular upgrades of Anbox'
 }
+
+# ############################################################################
+# Bleachbit installation
+bleachbitInstall() {
+  log_info "Bleachbit"
+  println_blue "Bleachbit"
+
+  sudo apt install -y bleachbit
+}
+
 
 
 # ############################################################################
@@ -2126,6 +2145,7 @@ menuRun() {
       311   #: Google Chrome browser
       212   #: Doublecmd
       211   #: Latte Dock
+      221   #: Bleachbit
       271   #: Y-PPA Manager
       291   #: Install extra fonts
       312   #: Opera browser
@@ -2139,6 +2159,7 @@ menuRun() {
       231   #: Bitwarden Password Manager
       213   #: FreeFileSync
       461   #: LibreCAD
+      421   #: Favorite Book Reader
       441   #: Calibre
       442   #: KMyMoney
       221  #: Powerline
@@ -2270,6 +2291,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "212" ]]; then printf "%s%s212%s" "${rev}" "${bold}" "${normal}"; else printf "212"; fi; printf "  : Doublecmd.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "213" ]]; then printf "%s%s213%s" "${rev}" "${bold}" "${normal}"; else printf "213"; fi; printf "  : FreeFileSync.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "221" ]]; then printf "%s%s221%s" "${rev}" "${bold}" "${normal}"; else printf "221"; fi; printf "  : Powerline.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "222" ]]; then printf "%s%s222%s" "${rev}" "${bold}" "${normal}"; else printf "222"; fi; printf "  : Bleachbit.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\n"
@@ -2351,6 +2373,7 @@ menuRun() {
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
     printf "\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "421" ]]; then printf "%s%s421%s" "${rev}" "${bold}" "${normal}"; else printf "421"; fi; printf "  : Favorite Book Reader.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "441" ]]; then printf "%s%s441%s" "${rev}" "${bold}" "${normal}"; else printf "441"; fi; printf "  : Calibre.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "442" ]]; then printf "%s%s442%s" "${rev}" "${bold}" "${normal}"; else printf "442"; fi; printf "  : KMyMoney.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "451" ]]; then printf "%s%s451%s" "${rev}" "${bold}" "${normal}"; else printf "451"; fi; printf "  : Anbox.\n"
@@ -2577,10 +2600,10 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2756,62 +2779,68 @@ runSelection() {
     111 ) asking kernelUprade "do a Kernel Upgrade" "Kernel Upgrade Complete." ;;
     112 ) asking repoUpdate "do a Repository Update" "Repository Update Complete." ;;
     113 ) asking repoUpgrade "do a Repository Upgrade" "Repository Upgrade Complete." ;;
-    125 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
     121 ) asking installBaseApps "Install the base utilities and applications" "Base Utilities and applications install complete." ;;
     122 ) asking installUniverseApps "Install all my Universe applications" "Universe applications install complete." ;;
+    125 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
     131 ) asking dataDirLinksSetup "Setup the home directories to link to the data disk directories" "Setup of the home directories to link to the data disk directories complete." ;;
+    132 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
     141 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
     142 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
     151 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
     152 ) asking gnome3Settings "run Gnome settings" "Gnome Settings done." ;;
     161 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
-    811 ) asking dockerInstall "install Docker" "Docker install complete." ;;
     162 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
     163 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
-    321 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
-    324 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
-    323 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
-    341 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
-    331 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
-    311 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
+    191 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     212 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     211 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
     213 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
-    461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
-    441 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
-    442 ) asking kMyMoneyInstall "install KMyMoney" "KMyMoney install complete." ;;
+    221 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
+    222 ) asking bleachbitInstall "install Bleachbit" "Bleachbit install complete." ;;
+    231 ) asking bitwardenInstall "install Bitwarden Password Manager" "Bitwarden Password Manager install complete." ;;
+    241 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
+    251 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
+    261 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
     271 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
-    291 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
-    312 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
     272 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
     281 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
-    261 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
-    251 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
-    241 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
-    231 ) asking bitwardenInstall "install Bitwarden Password Manager" "Bitwarden Password Manager install complete." ;;
+    291 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    311 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
+    312 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
+    321 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
+    323 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
+    324 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
+    331 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
+    341 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
+    421 ) asking fbReaderInstall "install Favorite Book Reader" "Favorite Book Reader install complete." ;;
+    441 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
+    442 ) asking kMyMoneyInstall "install KMyMoney" "KMyMoney install complete." ;;
+    451 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
+    461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
     511 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
     512 ) asking gitInstall "install Git" "Git install complete." ;;
-    541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
     521 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
     522 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
     523 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
     524 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
     531 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
-    591 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
+    541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
+    551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
     552 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
     553 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
-    551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
+    591 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
     611 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
     621 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
     622 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
     631 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
     641 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
     711 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
-    713 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
     712 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
+    713 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
     721 ) asking kodiInstall "install Kodi media center" "Kodi media center installed." ;;
-    651 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
     612 ) asking varietyInstall "install Variety" "Variety installed." ;;
+    651 ) asking inkscapeInstall "install Inkscape" "Inkscape installed." ;;
+    811 ) asking dockerInstall "install Docker" "Docker install complete." ;;
     821 ) asking virtualboxGuestSetup "Setup and install VirtualBox guest" "VirtaulBox Guest install complete." ;;
     822 ) asking virtualboxHostInstall "Install VirtualBox Host" "VirtualBox Host install complete." ;;
     831 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
@@ -2819,10 +2848,6 @@ runSelection() {
     881 ) asking kvmInstall "install KVM" "KVM install complete." ;;
     911 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
     921 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
-    191 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
-    132 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
-    221 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
-    451 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
     2)
       if [[ $noPrompt = 0 ]]; then
         noPrompt=1
@@ -2998,7 +3023,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3023,7 +3048,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3073,7 +3098,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 221 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
