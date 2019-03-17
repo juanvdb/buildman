@@ -57,6 +57,7 @@ sudo software-properties-kde
 sudo software-properties-gtk
 
 sudo dpkg --configure -a
+sudo apt update && sudo apt --fix-broken install
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y dist-upgrade
@@ -137,27 +138,28 @@ rm -r $HOME/.vagrant.d/tmp/vagrant-package-*
 vagrant ssh -c "sudo apt remove cryptsetup-initramfs"
 
 
-sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/kcosmic/apt/
+# ############################################################################
+# Full command to upgrade and rsync and clean on a vagrant guest
+sudo apt update && sudo apt --fix-broken install && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove && rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/ && sudo apt clean && sudo dd if=/dev/zero of=/EMPTY bs=1M && sudo rm -f /EMPTY
 
 # ############################################################################
-# Host rsyncs
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
-rsync -avxP --exclude="lock" --exclude="partial" /var/lib/apt/lists/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/lists/
-rsync -avxP /var/lib/flatpak/repo/refs/remotes/ /data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
-rsync -avxP /var/lib/gems/ /data/Backups/vagrantcache/k$(lsb_release -cs)/gems/
+# Host rsyncs from /var/cache to vagrant backup
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ /data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+rsync -avxP --exclude="lock" --exclude="partial" /var/lib/apt/lists/ /data/Backups/vagrantcache/$(lsb_release -cs)/apt/lists/
+rsync -avxP /var/lib/flatpak/repo/refs/remotes/ /data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/
+rsync -avxP /var/lib/gems/ /data/Backups/vagrantcache/$(lsb_release -cs)/gems/
 
 # ############################################################################
-# Host rsync from Vagrant guest
-rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
+# rsync Vagrant guest from host
+rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/
 
-sudo rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/ && sudo chown -R juan:juan /data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
-
-# ############################################################################
-# Vagrant to host rsync
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/apt/archives/
+sudo rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/ && sudo chown -R juan:juan /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/
 
 # ############################################################################
-# Vagrant guest rsyncs
-rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/
-sudo rsync -avxP juan@172.28.128.1:/data/Backups/vagrantcache/k$(lsb_release -cs)/flatpak/repo/refs/remotes/ /var/lib/flatpak/repo/refs/remotes/
+# rsync Vagrant guest from guest to host
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+
+# ############################################################################
+# Vagrant guest rsyncs from guest to host
+rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/
+sudo rsync -avxP juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/ /var/lib/flatpak/repo/refs/remotes/
