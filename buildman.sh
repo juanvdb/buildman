@@ -1487,7 +1487,6 @@ rEFIndInstall() {
 # ############################################################################
 # Stacer Linux system info and cleaner packages installation
 stacerInstall() {
-  set -x
   log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
   println_blue "Stacer Linux System Optimizer and Monitoring Application Install"
   sudo add-apt-repository -y ppa:oguzhaninan/stacer
@@ -1508,7 +1507,6 @@ stacerInstall() {
     repoUpdate
   fi
   sudo apt install -y stacer
-  set +x
   # AppImage
   # wget https://github.com/oguzhaninan/Stacer/releases/download/v1.0.9/Stacer-x86_64.AppImage
 }
@@ -1568,7 +1566,23 @@ librecadInstall() {
 
   # sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
   sudo add-apt-repository -y ppa:librecad-dev/librecad-daily
-  changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Stacer apt sources."
+    println_red "Beta Code, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Stacer apt sources."
+    println_red "No new repo, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+    log_warning "No new repo, revert the Stacer apt sources."
+    println_red "No new repo, revert the Stacer apt sources."
+    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  fi
+
 
   repoUpdate
 

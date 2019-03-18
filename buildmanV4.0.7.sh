@@ -2,7 +2,7 @@
 
 # DateVer 2019/01/29
 # Buildman
-buildmanVersion=V4.0.6
+buildmanVersion=V4.0.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -1610,7 +1610,7 @@ kMyMoneyInstall() {
 }
 
 # ############################################################################
-# KMyMoney installation
+# Favorite Book Reader installation
 fbReaderInstall() {
   log_info "Favorite Book Reader"
   println_blue "Favorite Book Reader"
@@ -1631,6 +1631,16 @@ anboxInstall() {
   sudo snap install --devmode --beta anbox
   pressEnterToContinue 'Add "snap refresh --beta --devmode anbox" to bin/upgrade.sh for regular upgrades of Anbox'
 }
+
+# ############################################################################
+# Bleachbit installation
+bleachbitInstall() {
+  log_info "Bleachbit"
+  println_blue "Bleachbit"
+
+  sudo apt install -y bleachbit
+}
+
 
 
 # ############################################################################
@@ -2135,6 +2145,7 @@ menuRun() {
       311   #: Google Chrome browser
       212   #: Doublecmd
       211   #: Latte Dock
+      221   #: Bleachbit
       271   #: Y-PPA Manager
       291   #: Install extra fonts
       312   #: Opera browser
@@ -2280,6 +2291,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "212" ]]; then printf "%s%s212%s" "${rev}" "${bold}" "${normal}"; else printf "212"; fi; printf "  : Doublecmd.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "213" ]]; then printf "%s%s213%s" "${rev}" "${bold}" "${normal}"; else printf "213"; fi; printf "  : FreeFileSync.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "221" ]]; then printf "%s%s221%s" "${rev}" "${bold}" "${normal}"; else printf "221"; fi; printf "  : Powerline.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "222" ]]; then printf "%s%s222%s" "${rev}" "${bold}" "${normal}"; else printf "222"; fi; printf "  : Bleachbit.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\n"
@@ -2588,10 +2600,10 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2834,6 +2846,7 @@ runSelection() {
     191 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     132 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
     221 ) asking powerlineInstall "install Powerline" "Powerline install complete." ;;
+    222 ) asking bleachbitInstall "install Bleachbit" "Bleachbit install complete." ;;
     451 ) asking anboxInstall "install Anbox" "Anbox install complete." ;;
     2)
       if [[ $noPrompt = 0 ]]; then
@@ -3085,7 +3098,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 221 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports

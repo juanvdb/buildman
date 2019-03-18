@@ -143,23 +143,31 @@ vagrant ssh -c "sudo apt remove cryptsetup-initramfs"
 sudo apt update && sudo apt --fix-broken install && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove && rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/ && sudo apt clean && sudo dd if=/dev/zero of=/EMPTY bs=1M && sudo rm -f /EMPTY
 
 # ############################################################################
-# Host rsyncs from /var/cache to vagrant backup
+# Host initiated rsyncs from Host dirs to vagrant cache
 rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ /data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+
 rsync -avxP --exclude="lock" --exclude="partial" /var/lib/apt/lists/ /data/Backups/vagrantcache/$(lsb_release -cs)/apt/lists/
+
 rsync -avxP /var/lib/flatpak/repo/refs/remotes/ /data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/
+
 rsync -avxP /var/lib/gems/ /data/Backups/vagrantcache/$(lsb_release -cs)/gems/
 
+sudo rsync -avxP /var/lib/snapd/snaps/ /data/Backups/vagrantcache/disco/snapd/snaps/ && sudo chown -R juan:juan /data/Backups/vagrantcache/disco/snapd/snaps/
+
 # ############################################################################
-# rsync Vagrant guest from host
+# Host initiated rsync Vagrant guest dirs to host cache
 rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/
 
 sudo rsync -avxP --exclude="lock" --exclude="partial" vagrant@172.28.128.X:/var/cache/apt/archives/ /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/ && sudo chown -R juan:juan /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/apt/archives/
 
-# ############################################################################
-# rsync Vagrant guest from guest to host
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/
+
+sudo rsync -avxP vagrant@172.28.128.X:/var/lib/snapd/snaps/ /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/snapd/snaps/ && sudo chown -R juan:juan /data/Backups/vagrantcache/<distro$(lsb_release -cs)>/snapd/snaps/
 
 # ############################################################################
-# Vagrant guest rsyncs from guest to host
-rsync -avxP  /var/lib/flatpak/repo/refs/remotes/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/
+# Guest initiated rsync Vagrant guest from guest to host
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+
 sudo rsync -avxP juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/flatpak/repo/refs/remotes/ /var/lib/flatpak/repo/refs/remotes/
+
+sudo rsync -avxP /var/lib/snapd/snaps/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/snapd/snaps/
