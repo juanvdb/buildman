@@ -752,11 +752,11 @@ displayLinkInstallApp () {
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
   cd "$HOMEDIR/tmp" || return
-	wget -r -t 10 --output-document=displaylink.zip  http://www.displaylink.com/downloads/file?id=1123
+	wget -r -t 10 --output-document=displaylink.zip  http://www.displaylink.com/downloads/file?id=1304
   mkdir -p "$HOMEDIR/tmp/displaylink"
   unzip displaylink.zip -d "$HOMEDIR/tmp/displaylink/"
-  chmod +x "$HOMEDIR/tmp/displaylink/displaylink-driver-4.2.run"
-  sudo "$HOMEDIR/tmp/displaylink/displaylink-driver-4.2.run"
+  chmod +x "$HOMEDIR/tmp/displaylink/displaylink-driver-5.1.run"
+  sudo "$HOMEDIR/tmp/displaylink/displaylink-driver-5.1.run"
 
   sudo chown -R "$USER":"$USER" "$HOMEDIR/tmp/displaylink/"
   cd "$currentPath" || return
@@ -1222,15 +1222,15 @@ rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
   sudo apt-add-repository -y ppa:brightbox/ruby-ng
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Ruby Repo apt sources."
-    println_red "Beta Code, revert the Ruby Repo apt sources."
-    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+  if [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Ruby Repo apt sources."
     println_red "No new repo, revert the Ruby Repo apt sources."
     changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+  elif [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Ruby Repo apt sources."
+    println_red "Beta Code, revert the Ruby Repo apt sources."
+    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Ruby Repo apt sources."
@@ -1245,7 +1245,7 @@ rubyRepo () {
 vagrantInstall () {
   log_info "Vagrant Applications Install"
   println_blue "Vagrant Applications Install                                               "
-  rubyRepo
+  # rubyRepo
   sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
   if [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, revert the Vagrant apt sources."
@@ -1286,7 +1286,7 @@ asciiDocInstall() {
   log_info "AsciiDoc Apps install"
   println_banner_yellow "AsciiDoc Apps install                                                     "
 
-  rubyRepo
+  # rubyRepo
   # repoUpdate
   sudo apt install -y asciidoctor graphviz asciidoc umlet pandoc asciidoctor ruby plantuml;
   sudo gem install bundler guard rake asciidoctor-diagram asciidoctor-plantuml
@@ -1564,27 +1564,29 @@ librecadInstall() {
   log_info "Install LibreCAD"
   println_blue "Install LibreCAD"
 
-  # sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
-  sudo add-apt-repository -y ppa:librecad-dev/librecad-daily
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Stacer apt sources."
-    println_red "Beta Code, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  elif [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "No new repo, revert the Stacer apt sources."
-    println_red "No new repo, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
-  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-    log_warning "No new repo, revert the Stacer apt sources."
-    println_red "No new repo, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the LibreCAD Daily Dev repo? (y/n))" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      # sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
+      sudo add-apt-repository -y ppa:librecad-dev/librecad-daily
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the LibreCAD apt sources."
+        println_red "Beta Code, revert the LibreCAD apt sources."
+        changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the LibreCAD apt sources."
+        println_red "No new repo, revert the LibreCAD apt sources."
+        changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+        log_warning "No new repo, revert the LibreCAD apt sources."
+        println_red "No new repo, revert the LibreCAD apt sources."
+        changeAptSource "/etc/apt/sources.list.d/librecad-dev-ubuntu-librecad-stable-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      fi
+    fi
   fi
-
-
-  repoUpdate
 
   sudo apt install -y librecad
 }
