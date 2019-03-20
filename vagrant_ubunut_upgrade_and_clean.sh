@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo -en "\e[7;40;93m update                                               \e[0m\n"
+echo -en "\e[7;40;93m Update                                               \e[0m\n"
 sudo apt update
 echo -en "\e[7;40;93m dpkg fix broken                                      \e[0m\n"
 sudo dpkg --configure -a
