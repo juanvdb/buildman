@@ -1,0 +1,7 @@
+if [[ "$noPrompt" -eq 0 ]]; then
+  read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
+  if [[ $answer = "y|Y|1" ]]; then
+  else
+  fi
+else
+fi
