@@ -2,7 +2,7 @@
 
 # DateVer 2019/01/29
 # Buildman
-buildmanVersion=V4.0.7
+buildmanVersion=V4.0.8
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -412,44 +412,30 @@ virtualboxHostInstall () {
   log_info "VirtualBox Host setup"
   println_blue "VirtualBox Host setup                                                         "
 
-  # Uncomment to add repository and get latest releases
-  wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
-  wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-  echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $distReleaseName contrib" | sudo tee "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Virtualbox apt sources."
-    println_red "Beta Code, revert the Virtaulbox apt sources."
-    changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    # repoUpdate
-  elif [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "No new repo, revert the Virtualbox apt sources."
-    println_red "No new repo, revert the Virtaulbox apt sources."
-    changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the VirtualBox repo? (y/n))" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      # Uncomment to add repository and get latest releases
+      wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+      wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+      echo "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian $distReleaseName contrib" | sudo tee "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list"
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the Virtualbox apt sources."
+        println_red "Beta Code, revert the Virtaulbox apt sources."
+        changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        # repoUpdate
+      elif [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the Virtualbox apt sources."
+        println_red "No new repo, revert the Virtaulbox apt sources."
+        changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+      fi
+      repoUpdate
+      sudo apt install -y virtualbox-6.0 dkms
+    else
+      sudo apt install -y virtualbox dkms
+  else
+    sudo apt install -y virtualbox dkms
   fi
-  repoUpdate
-  # Uncomment up the here
-
-  # VirtualBox 5.1
-  # sudo apt install virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso virtualbox-qt vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  #VirtualBox from Universe
-  # sudo apt install -y virtualbox virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  #VirtualBox 5.2 from VirtaulBox Repo
-  # sudo apt install -y virtualbox-5.2 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  #VirtualBox 6.0 from VirtaulBox Repo
-  sudo apt install -y virtualbox-6.0 vde2 vde2-cryptcab qemu qemu-user-static qemu-efi openbios-ppc openhackware dkms
-  # sudo apt install -y virtualbox-dkms virtualbox-ext-pack virtualbox-guest-additions-iso
-  # case $desktopEnvironment in
-  #   "kde" )
-  #   # sudo apt install -y virtualbox-qt;
-  #   ;;
-  # esac
-
-
-  # LINE1="192.168.56.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
-  # sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  # LINE2="192.168.56.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
-  # sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  # sudo mount -a
 }
 
 # ############################################################################
@@ -867,41 +853,8 @@ devAppsInstall() {
   currentPath=$(pwd)
   log_info "Dev Apps install"
   println_banner_yellow "Dev Apps install                                                     "
-  sudo apt install -y curl
-  curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
-  sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
-  repoUpdate
-  # sudo snap install shellcheck
-  sudo snap install eclipse --classic
-  # sudo snap install atom --classic
-  sudo apt install -yf atom abs-guide idle3 idle3-tools eric eric-api-files maven shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb geany;
-  # wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-  # sudo dpkg -i --force-depends "$HOMEDIR/tmp/gitkraken-amd64.deb"
-  # bashdbInstall
-  # The following packages was installed in the past but never used or I could not figure out how to use them.
-  #
-  # sudo snap install --classic --beta atom
-  if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the repo(default) or Snap? (repo/snap)" answer
-    if [[ $answer = "snap" ]]; then
-      sudo snap install atom
-      sudo apt install -yf shellcheck hunspell hunspell-af hunspell-en-
-    else
-      sudo apt install -y curl
-      curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
-      sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
-      repoUpdate
-      # sudo snap install atom --classic
-      sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-
-    fi
-  else
-    sudo apt install -y curl
-    curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
-    sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
-    repoUpdate
-    # sudo snap install atom --classic
-    sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-
-  fi
+
+  sudo apt install -yf abs-guide idle3 idle3-tools eric eric-api-files maven geany;
 
   cd "$currentPath" || return
 }
@@ -949,14 +902,67 @@ bashdbInstall() {
 }
 
 # ############################################################################
+# Brackets DevApp installation
+atomInstall() {
+  # Brackets
+  println_blue "Atom Editor"
+  log_info "Atom Editor"
+  currentPath=$(pwd)
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install AtomEditor from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install atom --classic
+      sudo apt install -yf shellcheck hunspell hunspell-af hunspell-en-gb
+    else
+      sudo apt install -y curl
+      curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+      sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
+      repoUpdate
+      # sudo snap install atom --classic
+      sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+    fi
+  else
+    sudo apt install -y curl
+    curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+    sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
+    repoUpdate
+    # sudo snap install atom --classic
+    sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+  fi
+  cd "$currentPath" || return
+}
+
+# ############################################################################
+# Brackets DevApp installation
+bracketsInstall() {
+  # Brackets
+  println_blue "Brackets"
+  log_info "Brackets"
+  sudo snap install brackets --classic
+}
+
+
+# ############################################################################
+# Visual Studio Code Install
+eclipseInstall() {
+  println_blue "Eclipse"
+  log_info "Eclipse"
+  sudo snap install --classic eclipse
+}
+
+# ############################################################################
 # Visual Studio Code Install
 vscodeInstall() {
+  println_blue "Visual Studio"
+  log_info "Visual Studio"
   sudo snap install --classic vscode
 }
 
 # ############################################################################
 # PyCharm Install
 pycharmInstall() {
+  println_blue "Pycharm"
+  log_info "Pycharm"
   sudo snap install pycharm-community --classic
 }
 
@@ -973,15 +979,6 @@ lightTableInstall() {
   changeAptSource "/etc/apt/sources.list.d/dr-akulavich-ubuntu-lighttable-$distReleaseName.list" "$distReleaseName" "$ltsReleaseName"
   sudo apt install -y lighttable-installer
   cd "$currentPath" || return
-}
-
-# ############################################################################
-# Brackets DevApp installation
-bracketsInstall() {
-  # Brackets
-  println_blue "Brackets"
-  log_info "Brackets"
-  sudo snap install brackets --classic
 }
 
 # ############################################################################
@@ -1045,7 +1042,7 @@ evolutionInstall () {
 mailspringInstall () {
   log_info "Install Mailspring desktop email client"
   println_blue "Install Mailspring desktop email client"
-  sudo snap install mailspring
+  sudo snap install mailspring --classic
 }
 
 # ############################################################################
@@ -1087,20 +1084,39 @@ doublecmdInstall () {
   log_info "Install Doublecmd"
   println_blue "Install Doublecmd"
   # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOMEDIR/tmp/Release.key" | sudo apt-key add -
-  if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
-    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
-  elif [[ $betaAns == 1 ]]; then
-    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$stableReleaseVer/Release.key" -O- | sudo apt-key add -
-    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$stableReleaseName.list"
-  else
-    wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$previousStableReleaseVer/Release.key" -O- | sudo apt-key add -
-    echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$previousStableReleaseName.list"
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
+        wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
+        echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
+      elif [[ $betaAns == 1 ]]; then
+        wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$stableReleaseVer/Release.key" -O- | sudo apt-key add -
+        echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$stableReleaseName.list"
+      else
+        wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$previousStableReleaseVer/Release.key" -O- | sudo apt-key add -
+        echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$previousStableReleaseName.list"
+      fi
+      repoUpdate
+    fi
   fi
-  # sudo apt-add-repository -y ppa:alexx2000/doublecmd
-
-  repoUpdate
-  sudo apt install -y doublecmd-qt doublecmd-help-en doublecmd-plugins
+  case $desktopEnvironment in
+    "kde" )
+      sudo apt install -y doublecmd-qt doublecmd-help-en doublecmd-plugins
+      ;;
+    "gnome" )
+      sudo apt install -y doublecmd-gtk doublecmd-help-en doublecmd-plugins
+      ;;
+    "ubuntu" )
+      sudo apt install -y doublecmd-common doublecmd-help-en doublecmd-plugins
+      ;;
+    "xubuntu" )
+      sudo apt install -y doublecmd-common doublecmd-help-en doublecmd-plugins
+      ;;
+    "lubuntu" )
+      sudo apt install -y doublecmd-common doublecmd-help-en doublecmd-plugins
+      ;;
+  esac
 }
 
 # ############################################################################
@@ -1143,31 +1159,41 @@ dockerInstall () {
   println_blue "Configure Docker Install"
 	# Purge the old repo
 	sudo apt purge -y lxc-docker docker-engine docker.io
-  sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-    # log_warning "Add Docker to repository."
-    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$distReleaseName.list"
-  elif [[ $betaAns == 1 ]]; then
-    log_info "Add Docker to repository with stable release $stableReleaseName"
-    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$stableReleaseName.list"
-  else
-    log_info "Add Docker to repository with stable release $previousStableReleaseName"
-    echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
-  fi
-  repoUpdate;
-	# Make sure that apt is pulling from the right repository
-	# sudo apt-cache policy docker-engine
-	sudo apt-cache policy docker-ce
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
+        # log_warning "Add Docker to repository."
+        echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $distReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$distReleaseName.list"
+      elif [[ $betaAns == 1 ]]; then
+        log_info "Add Docker to repository with stable release $stableReleaseName"
+        echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $stableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$stableReleaseName.list"
+      else
+        log_info "Add Docker to repository with stable release $previousStableReleaseName"
+        echo "deb [arch=amd64] https://download.docker.com/linux/ubuntu $previousStableReleaseName stable" | sudo tee "/etc/apt/sources.list.d/docker-$previousStableReleaseName.list"
+      fi
+      repoUpdate;
+      # Make sure that apt is pulling from the right repository
+      # sudo apt-cache policy docker-engine
+      sudo apt-cache policy docker-ce
 
-	# Add the additional kernel packages and install Docker
-	# sudo apt install -y "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
-	sudo apt install -y linux-image-extra-virtual docker-ce
+      # Add the additional kernel packages and install Docker
+      # sudo apt install -y "build-essential linux-headers-$kernelRelease linux-image-extra-$kernelRelease" linux-image-extra-virtual
+      sudo apt install -y linux-image-extra-virtual docker-ce
+    else
+      sudo apt install -y linux-image-extra-virtual docker.io
+    fi
+  else
+    sudo apt install -y linux-image-extra-virtual docker.io
+  fi
+
 
 	# Change the images and containers directory to /data/docker
 	# Un comment the following if it is a new install and comment the rm line
 	# sudo mv /var/lib/docker /data/docker
-  if [ -d "/data" ]; then
+  if [ -d "$HOME/data" ]; then
   # if /data exists then link docker directory to /data/docker.
     if [[ $(sudo docker ps -q) = 1 ]]; then
       sudo docker ps -q | xargs docker kill
@@ -1221,23 +1247,29 @@ dropboxInstall () {
 rubyRepo () {
   log_info "Ruby Repo"
   println_blue "Ruby Repo"
-  sudo apt-add-repository -y ppa:brightbox/ruby-ng
-  if [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "No new repo, revert the Ruby Repo apt sources."
-    println_red "No new repo, revert the Ruby Repo apt sources."
-    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
-  elif [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Ruby Repo apt sources."
-    println_red "Beta Code, revert the Ruby Repo apt sources."
-    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-    log_warning "No new repo, revert the Ruby Repo apt sources."
-    println_red "No new repo, revert the Ruby Repo apt sources."
-    changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Ruby repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo apt-add-repository -y ppa:brightbox/ruby-ng
+      if [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the Ruby Repo apt sources."
+        println_red "No new repo, revert the Ruby Repo apt sources."
+        changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      elif [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the Ruby Repo apt sources."
+        println_red "Beta Code, revert the Ruby Repo apt sources."
+        changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+        log_warning "No new repo, revert the Ruby Repo apt sources."
+        println_red "No new repo, revert the Ruby Repo apt sources."
+        changeAptSource "/etc/apt/sources.list.d/brightbox-ubuntu-ruby-ng-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      fi
+    fi
   fi
+  sudo apt install -yf ruby ruby-dev ruby-dnsruby
 }
 
 # ############################################################################
@@ -1245,23 +1277,33 @@ rubyRepo () {
 vagrantInstall () {
   log_info "Vagrant Applications Install"
   println_blue "Vagrant Applications Install                                               "
-  # rubyRepo
-  sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Vagrant apt sources."
-    println_red "Beta Code, revert the Vagrant apt sources."
-    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  elif [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "No new repo, revert the Vagrant apt sources."
-    println_red "No new repo, revert the Vagrant apt sources."
-    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
-  elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
-    log_warning "No new repo, revert the Vagrant apt sources."
-    println_red "No new repo, revert the Vagrant apt sources."
-    changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install the Ruby repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      rubyRepo
+    fi
+  fi
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Vagrant repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the Vagrant apt sources."
+        println_red "Beta Code, revert the Vagrant apt sources."
+        changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the Vagrant apt sources."
+        println_red "No new repo, revert the Vagrant apt sources."
+        changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+        log_warning "No new repo, revert the Vagrant apt sources."
+        println_red "No new repo, revert the Vagrant apt sources."
+        changeAptSource "/etc/apt/sources.list.d/tiagohillebrandt-ubuntu-vagrant-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+        repoUpdate
+      fi
+    fi
   fi
 
   sudo apt install -yf dnsutils vagrant vagrant-cachier vagrant-sshfs ruby ruby-dev ruby-dnsruby libghc-zlib-dev ifupdown numad radvd auditd systemtap zfsutils pm-utils;
@@ -1385,11 +1427,16 @@ oracleJavaLatestInstall() {
 grubCustomizerInstall() {
   log_info "Grub Customizer Appliction Install"
   println_blue "Grub Customizer Application Install"
-  sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Distribution, downgrade Grub Customizer apt sources."
-    println_red "Beta Distribution, downgrade Grub Customizer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Grub Customizer repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Distribution, downgrade Grub Customizer apt sources."
+        println_red "Beta Distribution, downgrade Grub Customizer apt sources."
+        changeAptSource "/etc/apt/sources.list.d/danielrichter2007-ubuntu-grub-customizer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+      fi
+    fi
   fi
   sudo apt install -y grub-customizer
 }
@@ -1399,10 +1446,16 @@ grubCustomizerInstall() {
 varietyInstall() {
   log_info "Variety Appliction Install"
   println_blue "Variety Application Install"
-  sudo add-apt-repository -y ppa:peterlevi/ppa
-  # sudo add-apt-repository -y ppa:variety/daily
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Variety repo? This will enable Variety Slideshow.(y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo add-apt-repository -y ppa:peterlevi/ppa
+      # sudo add-apt-repository -y ppa:variety/daily
 
-  sudo apt install -y variety variety-slideshow python3-pip
+      sudo apt install -y variety variety-slideshow python3-pip
+    fi
+  fi
+  sudo apt install -y variety python3-pip
   sudo pip3 install ndg-httpsclient # For variety
 }
 
@@ -1480,7 +1533,13 @@ etcherInstall () {
 rEFIndInstall() {
   log_info "rEFInd Boot Manager Appliction Install"
   println_blue "rEFInd Boot Manager Application Install"
-  sudo apt-add-repository -y ppa:rodsmith/refind
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the rEFInd repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo apt-add-repository -y ppa:rodsmith/refind
+    fi
+  fi
+
   sudo apt install -y refind
 }
 
@@ -1686,7 +1745,13 @@ inkscapeInstall() {
 imageEditingAppsInstall() {
   log_info "Imaging Editing Applications"
   println_blue "Imaging Editing Applications"
-  sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Gimp repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+    fi
+  fi
+
   # sudo apt install -y dia gimp gimp-plugin-registry gimp-ufraw;
   sudo apt install -y dia
   sudo snap install gimp
@@ -1716,7 +1781,12 @@ spotifyInstall () {
 kodiInstall () {
   log_info "Install Kodi media center"
   println_blue "Install Kodi media center"
-  sudo add-apt-repository -y ppa:team-xbmc/ppa
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Kodi repo? (y/n)" answer
+    if [[ $answer = "y|Y|1" ]]; then
+      sudo add-apt-repository -y ppa:team-xbmc/ppa
+    fi
+  fi
   sudo apt install -y kodi
 }
 
@@ -2134,98 +2204,103 @@ menuRun() {
   selectionMenu(){
 
     menuSelectionsInput=(
-      111    #: Kernel upgrade
-      112    #: Repositories update
-      113    #: Repositories upgrade
-      125    #: Install and configure Flatpak
-      121    #: Install additional basic utilties and applications
-      122    #: Install my selection of Universe applications
-      131    #: Setup the home directories to link to the data disk directories
+      1     #: Run Selection
 
+      111   #: Kernel upgrade
+      112   #: Repositories update
+      113   #: Repositories upgrade
+      121   #: Install additional basic utilties and applications
+      122   #: Install my selection of Universe applications
+      125   #: Install and configure Flatpak
+      131   #: Setup the home directories to link to the data disk directories
       141   #: Install KDE Desktop from backports
       142   #: Upgrae KDE to Beta KDE on backports
       143   #: Placeholder for KDE Desktop settings
       151   #: Install Gnome Desktop from backports
       152   #: Gnome Settings
-
       161   #: ownCloudClient
-      811   #: Docker
       162   #: Dropbox
       163   #: inSync for GoogleDrive
-      321   #: Thunderbird email
-      324   #: Evolution email
-      323   #: Mailspring desktop email client
-      341   #: Winds RSS Reader and Podcast application
-      331   #: Skype
 
-      311   #: Google Chrome browser
-      212   #: Doublecmd
+            #: submenuUtils
       211   #: Latte Dock
-      221   #: Bleachbit
+      212   #: Doublecmd
+      213   #: FreeFileSync
+      221   #: Powerline
+      222   #: Bleachbit
+      231   #: Bitwarden Password Manager
+      241   #: Stacer Linux system info and cleaner
+      251   #: Etcher USB Loader
+      261   #: UNetbootin
       271   #: Y-PPA Manager
-      291   #: Install extra fonts
-      312   #: Opera browser
-
-           #: submenuUtils
       272   #: bootRepair
       281   #: rEFInd Boot Manager
-      261   #: UNetbootin
-      251   #: Etcher USB Loader
-      241   #: Stacer Linux system info and cleaner
-      231   #: Bitwarden Password Manager
-      213   #: FreeFileSync
-      461   #: LibreCAD
+      291   #: Install extra fonts
+
+            #: submenuInternet
+      311   #: Google Chrome browser
+      312   #: Opera browser
+      321   #: Thunderbird email
+      323   #: Mailspring desktop email client
+      324   #: Evolution email
+      331   #: Skype
+      341   #: Winds RSS Reader and Podcast application
+
+            #: submenuApps
       421   #: Favorite Book Reader
       441   #: Calibre
       442   #: KMyMoney
-      221  #: Powerline
-      451  #: Anbox - Android Box
+      451   #: Anbox - Android Box
+      461   #: LibreCAD
 
-           #: submenuDev
+            #: submenuDev
       511   #: Install Development Apps and IDEs
       512   #: Git
-      541   #: AsciiDoc
+      513   #: Atom Editor
+      514   #: Brackets Editor
       521   #: Bashdb
       522   #: PyCharm
-      523   #: Visual Studio Code
-      524   #: Brackets IDE
-      531  #: Postman
-      591   #: Add Ruby Repositories
+      523   #: Eclipse IDE
+      524   #: Visual Studio Code
+      531   #: Postman
+      541   #: AsciiDoc
+      551   #: Oracle Java Latest
       552   #: Oracle Java 8
       553   #: Oracle Java 9
-      551   #: Oracle Java Latest
+      591   #: Add Ruby Repositories
 
-           #: submenu Media and Photo
+            #: submenuPhoto
       611   #: Photography Apps
+      612   #: Variety
       621   #: Digikam
       622   #: Darktable
       631   #: RapidPhotoDownloader
       641   #: Image Editing Applications
-      711   #: Music and Video Applications
-      713   #: Spotify
-      712   #: Google Play Music Desktop Player
-      721   #: Kodi
       651   #: Inkscape
-      612   #: Variety
 
-           #: submenuVirtualization
+            #: submenuMedia
+      711   #: Music and Video Applications
+      712   #: Google Play Music Desktop Player
+      713   #: Spotify
+      721   #: Kodi
+
+            #: submenuVirtualization
+      811   #: Docker
       821   #: Setup for a VirtualBox guest
       822   #: VirtualBox Host
       831   #: Setup for a Vmware guest
       851   #: Vagrant
       881   #: KVM
 
-           #: submenuOther
+            #: submenuOther
       911   #: Laptop Display Drivers for Intel en Nvidia
       921   #: DisplayLink
 
-           #: submenuSettings
-      191   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
-      132   #: Create test data directories on data drive.
-      2   #: Toggle No Questions asked
-      3   #: Toggle noCurrentReleaseRepo
-
-      1   #: Run Selection
+            #: submenuSettings
+      2     #: Toggle No Questions asked
+      3     #: Toggle noCurrentReleaseRepo
+      191   #: Create test data directories on data drive.
+      192   #: Set options for an Ubuntu Beta install with PPA references to a previous version.
     )
 
     clear
@@ -2427,10 +2502,12 @@ menuRun() {
     -----: ---------------------------------------\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "511" ]]; then printf "%s%s511%s" "${rev}" "${bold}" "${normal}"; else printf "511"; fi; printf "  : Install Development Apps and IDEs.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "512" ]]; then printf "%s%s512%s" "${rev}" "${bold}" "${normal}"; else printf "512"; fi; printf "  : Git.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "513" ]]; then printf "%s%s513%s" "${rev}" "${bold}" "${normal}"; else printf "513"; fi; printf "  : Atom Editor.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "514" ]]; then printf "%s%s514%s" "${rev}" "${bold}" "${normal}"; else printf "514"; fi; printf "  : Brackets Editor.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "521" ]]; then printf "%s%s521%s" "${rev}" "${bold}" "${normal}"; else printf "521"; fi; printf "  : Bashdb.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "522" ]]; then printf "%s%s522%s" "${rev}" "${bold}" "${normal}"; else printf "522"; fi; printf "  : PyCharm IDE.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Visual Studio Code.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Brackets IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Eclipse IDE.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Visual Studio Code.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "551" ]]; then printf "%s%s551%s" "${rev}" "${bold}" "${normal}"; else printf "551"; fi; printf "  : Oracle Java Latest.\n"
@@ -2618,8 +2695,8 @@ menuRun() {
     -----: ---------------------------------------\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
     printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "132" ]]; then printf "%s%s132%s" "${rev}" "${bold}" "${normal}"; else printf "132"; fi; printf "  : Create test data directories on data drive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Create test data directories on data drive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "192" ]]; then printf "%s%s192%s" "${rev}" "${bold}" "${normal}"; else printf "192"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2799,7 +2876,7 @@ runSelection() {
     122 ) asking installUniverseApps "Install all my Universe applications" "Universe applications install complete." ;;
     125 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
     131 ) asking dataDirLinksSetup "Setup the home directories to link to the data disk directories" "Setup of the home directories to link to the data disk directories complete." ;;
-    132 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
+    191 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
     141 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
     142 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
     151 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
@@ -2807,7 +2884,7 @@ runSelection() {
     161 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
     162 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
     163 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
-    191 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
+    192 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     212 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     211 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
     213 ) asking FreeFileSyncInstall "install FreeFileSync" "FreeFileSync install complete." ;;
@@ -2835,10 +2912,12 @@ runSelection() {
     461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
     511 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
     512 ) asking gitInstall "install Git" "Git install complete." ;;
+    514 ) asking atomInstall "Install Atom Editor" "Atom Editor install complete." ;;
+    514 ) asking bracketsInstall "Install Brackets Editor" "Brackets Editor install complete." ;;
     521 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
     522 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
-    523 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
-    524 ) asking bracketsInstall "Install Brackets" "Brackets install complete." ;;
+    523 ) asking eclipseInstall "Install Eclipse IDE" "Eclipse IDE install complete." ;;
+    524 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
     531 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
     541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
     551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
@@ -3114,7 +3193,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 513 514 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
