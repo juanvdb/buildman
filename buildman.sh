@@ -32,12 +32,12 @@ buildmanVersion=V4.0.8
 # Ready for Bionic
 # Global Variables
 {
-  betaReleaseName="disco"
-  betaReleaseVer="19.04"
-  stableReleaseName="cosmic"
-  stableReleaseVer="18.10"
-  previousStableReleaseName="bionic"
-  previousStableReleaseVer="18.04"
+  betaReleaseName="eoan"
+  betaReleaseVer="19.10"
+  stableReleaseName="disco"
+  stableReleaseVer="19.04"
+  previousStableReleaseName="cosmic"
+  previousStableReleaseVer="18.10"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -1765,10 +1765,9 @@ imageEditingAppsInstall() {
 musicVideoAppsInstall() {
   log_info "Music and Video apps"
   println_blue "Music and Video apps"
-  # sudo apt install -y vlc browser-plugin-vlc easytag
   sudo apt install -y easytag
   sudo snap install clementine
-  sudo snap install vlc
+  # sudo snap install vlc # default with ubuntu
 }
 
 # ############################################################################
