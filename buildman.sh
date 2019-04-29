@@ -433,6 +433,7 @@ virtualboxHostInstall () {
       sudo apt install -y virtualbox-6.0 dkms
     else
       sudo apt install -y virtualbox dkms
+    fi
   else
     sudo apt install -y virtualbox dkms
   fi
@@ -842,6 +843,8 @@ kdeBackportsApps () {
   repoUpgrade
   sudo apt full-upgrade -y;
 }
+
+
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                 Development Apps                                         O
@@ -1936,7 +1939,9 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-gnome vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre openjdk-12-jdk openjdk-12-jre dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-gnome vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+
+  # openjdk-12-jdk openjdk-12-jre
 
 	# desktop specific applications
 	case $desktopEnvironment in
@@ -2215,7 +2220,7 @@ menuRun() {
       131   #: Setup the home directories to link to the data disk directories
       141   #: Install KDE Desktop from backports
       142   #: Upgrae KDE to Beta KDE on backports
-      143   #: Placeholder for KDE Desktop settings
+      143   #: KDE Desktop settings
       151   #: Install Gnome Desktop from backports
       152   #: Gnome Settings
       161   #: ownCloudClient
