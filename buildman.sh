@@ -802,6 +802,14 @@ gnome3Settings () {
 	gsettings set org.gnome.desktop.wm.preferences button-layout 'close,minimize,maximize:'
   gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
   gsettings set org.gnome.desktop.interface show-battery-percentage true
+  case $desktopEnvironment in
+    # gnome )
+    # ;;
+    ubuntu )
+      # enable minimize on click for the Ubuntu Dock
+      gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
+    ;;
+  esac
 }
 
 # ############################################################################
