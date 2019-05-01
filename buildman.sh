@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/01/29
+# DateVer 2019/05/01
 # Buildman
-buildmanVersion=V4.0.8
+buildmanVersion=V4.0.9
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -875,7 +875,7 @@ gitInstall() {
       sudo snap install gitkraken
     else
       wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-      sudo apt install "$HOMEDIR/tmp/gitkraken-amd64.deb"
+      sudo apt install -y "$HOMEDIR/tmp/gitkraken-amd64.deb"
     fi
   else
     wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
@@ -1752,12 +1752,16 @@ imageEditingAppsInstall() {
     read -rp "Do you want to install from the Gimp repo? (y/n)" answer
     if [[ $answer = "y|Y|1" ]]; then
       sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
+      sudo apt install -y gimp
+    else
+      sudo snap install gimp --classic
     fi
+  else
+    sudo snap install gimp --classic
   fi
 
   # sudo apt install -y dia gimp gimp-plugin-registry gimp-ufraw;
   sudo apt install -y dia
-  sudo snap install gimp
 }
 
 # ############################################################################
