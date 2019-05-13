@@ -2,7 +2,7 @@
 
 # DateVer 2019/05/01
 # Buildman
-buildmanVersion=V4.0.9
+buildmanVersion=V4.1.0
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -313,6 +313,41 @@ desktopEnvironmentCheck () {
     desktopEnvironment="kde"
     ;;
   esac
+}
+
+############################################################################
+# Simple script to check for all PPAs refernced in your apt sources and
+# to grab any signing keys you are missing from keyserver.ubuntu.com.
+# Additionally copes with users on launchpad with multiple PPAs
+# (e.g., ~asac)
+#
+# Author: Dominic Evans https://launchpad.net/~oldman
+# License: LGPL v2
+ppaKeyCheck () {
+  println_banner_yellow "Repositories Key Check and Update                                    "
+
+  for APT in `find /etc/apt/ -name *.list`; do
+      grep -o "^deb http://ppa.launchpad.net/[a-z0-9\-]\+/[a-z0-9\-]\+" $APT | while read ENTRY ; do
+          # work out the referenced user and their ppa
+          USER=`echo $ENTRY | cut -d/ -f4`
+          PPA=`echo $ENTRY | cut -d/ -f5`
+          # some legacy PPAs say 'ubuntu' when they really mean 'ppa', fix that up
+          if [ "ubuntu" = "$PPA" ]
+          then
+              PPA=ppa
+          fi
+          # scrape the ppa page to get the keyid
+          KEYID=`wget -q --no-check-certificate https://launchpad.net/~$USER/+archive/$PPA -O- | grep -o "1024R/[A-Z0-9]\+" | cut -d/ -f2`
+          sudo apt-key adv --list-keys $KEYID >/dev/null 2>&1
+          if [ $? != 0 ]
+          then
+              echo Grabbing key $KEYID for archive $PPA by ~$USER
+              sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $KEYID
+          else
+              echo Already have key $KEYID for archive $PPA by ~$USER
+          fi
+      done
+  done
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -803,8 +838,10 @@ gnome3Settings () {
   gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
   gsettings set org.gnome.desktop.interface show-battery-percentage true
   case $desktopEnvironment in
-    # gnome )
-    # ;;
+    gnome )
+      # enable minimize on click for the Ubuntu Dock
+      gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
+    ;;
     ubuntu )
       # enable minimize on click for the Ubuntu Dock
       gsettings set org.gnome.shell.extensions.dash-to-dock click-action 'minimize'
@@ -1960,10 +1997,10 @@ installBaseApps () {
 			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras kfind
 			;;
 		"gnome" )
-			sudo apt install -y gmountiso dconf-tools ubuntu-restricted-extras
+			sudo apt install -y gmountiso dconf-tools ubuntu-restricted-extras gnome-tweak-tool
 			;;
 		"ubuntu" )
-			sudo apt install -y gmountiso dconf-tools ubuntu-restricted-extras
+			sudo apt install -y gmountiso dconf-tools ubuntu-restricted-extras gnome-tweak-tool
 			;;
 		"xubuntu" )
 			sudo apt install -y gmountiso;
@@ -2225,6 +2262,7 @@ menuRun() {
       111   #: Kernel upgrade
       112   #: Repositories update
       113   #: Repositories upgrade
+      114   #: Repository Key Check
       121   #: Install additional basic utilties and applications
       122   #: Install my selection of Universe applications
       125   #: Install and configure Flatpak
@@ -2338,6 +2376,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "111" ]]; then printf "%s%s111%s" "${rev}" "${bold}" "${normal}"; else printf "111"; fi; printf "  : Kernel upgrade.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "112" ]]; then printf "%s%s112%s" "${rev}" "${bold}" "${normal}"; else printf "112"; fi; printf "  : Repositories update.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "113" ]]; then printf "%s%s113%s" "${rev}" "${bold}" "${normal}"; else printf "113"; fi; printf "  : Repositories upgrade.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "114" ]]; then printf "%s%s114%s" "${rev}" "${bold}" "${normal}"; else printf "114"; fi; printf "  : Repository Key Check.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "121" ]]; then printf "%s%s121%s" "${rev}" "${bold}" "${normal}"; else printf "121"; fi; printf "  : Install the base utilites and applications.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "122" ]]; then printf "%s%s122%s" "${rev}" "${bold}" "${normal}"; else printf "122"; fi; printf "  : Install all my Universe application.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "125" ]]; then printf "%s%s125%s" "${rev}" "${bold}" "${normal}"; else printf "125"; fi; printf "  : Flatpak install and configure.\n"
@@ -2709,10 +2748,10 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "  : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "  : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf "  : Create test data directories on data drive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "192" ]]; then printf "%s%s192%s" "${rev}" "${bold}" "${normal}"; else printf "192"; fi; printf "  : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf " : Create test data directories on data drive.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "192" ]]; then printf "%s%s192%s" "${rev}" "${bold}" "${normal}"; else printf "192"; fi; printf " : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -2888,6 +2927,7 @@ runSelection() {
     111 ) asking kernelUprade "do a Kernel Upgrade" "Kernel Upgrade Complete." ;;
     112 ) asking repoUpdate "do a Repository Update" "Repository Update Complete." ;;
     113 ) asking repoUpgrade "do a Repository Upgrade" "Repository Upgrade Complete." ;;
+    114 ) asking ppaKeyCheck "do a Repository Key Check" "Repository Key Check Complete." ;;
     121 ) asking installBaseApps "Install the base utilities and applications" "Base Utilities and applications install complete." ;;
     122 ) asking installUniverseApps "Install all my Universe applications" "Universe applications install complete." ;;
     125 ) asking flatpakInstall "Install Flatpak and configure Flatpak Repos" "Flatpak Install and Flatpak Repos Complete." ;;
@@ -3134,7 +3174,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3146,7 +3186,7 @@ mainMenu() {
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(112 113)
+        menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated installation for a Laptop\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
@@ -3159,7 +3199,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 521 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3171,7 +3211,7 @@ mainMenu() {
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(112 113)
+        menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated installation for a Workstation\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
@@ -3196,7 +3236,7 @@ mainMenu() {
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(112 113)
+        menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated install for a virtual machine\n"
           menuRun "AutoRun" "${menuSelectionsInput[@]}"
@@ -3209,7 +3249,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 521 541 523 524 513 514 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 541 523 524 513 514 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3221,7 +3261,7 @@ mainMenu() {
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
         esac
-        menuSelectionsInput+=(112 113)
+        menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
           println_info "Automated Test install all apps on a VirtualBox VM\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
