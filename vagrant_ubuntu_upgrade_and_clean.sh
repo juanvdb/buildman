@@ -19,7 +19,7 @@ echo -en "\e[7;40;93m VBoxGuestAdditions                                   \e[0m
 sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
 
 echo -en "\e[7;40;93m rsync                                                \e[0m\n"
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/data/Backups/vagrantcache/$(lsb_release -cs)/apt/archives/
+rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/
 
 echo -en "\e[7;40;93m clean                                                \e[0m\n"
 sudo apt -y clean
@@ -28,6 +28,7 @@ echo -en "\e[7;40;93m Start EMPTY                                          \e[0m
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 echo -en "\e[7;40;93m Remove EMPTY                                         \e[0m\n"
 sudo rm -f /EMPTY
+echo -en "\e[7;40;92m Ready to shutdown vagrant machine and rebuild image. \e[0m\n"
 
 # Shutdown the machine
 # sudo shutdown -h now
