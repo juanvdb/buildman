@@ -1597,15 +1597,15 @@ stacerInstall() {
   log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
   println_blue "Stacer Linux System Optimizer and Monitoring Application Install"
   sudo add-apt-repository -y ppa:oguzhaninan/stacer
-  if [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+  if [[ "$distReleaseName" =~ ^("$betaReleaseName")$ ]]; then
     log_warning "No new repo, revert the Stacer apt sources."
     println_red "No new repo, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   elif [[ $noCurrentReleaseRepo == 1 ]]; then
     log_warning "No new repo, revert the Stacer apt sources."
     println_red "No new repo, revert the Stacer apt sources."
-    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    changeAptSource "/etc/apt/sources.list.d/oguzhaninan-ubuntu-stacer-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
     repoUpdate
   elif [[ $betaAns == 1 ]]; then
     log_warning "Beta Code, revert the Stacer apt sources."
@@ -1956,18 +1956,19 @@ flatpakInstall() {
   # Flatpak Install and Setup
   log_info "Flatpak Install and Setup"
   println_blue "Flatpak Install and Setup"
-  sudo add-apt-repository -y ppa:alexlarsson/flatpak
-  if [[ $betaAns == 1 ]]; then
-    log_warning "Beta Code, revert the Flatpak apt sources."
-    println_red "Beta Code, revert the Flatpak apt sources."
-    changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
-    repoUpdate
-  elif [[ $noCurrentReleaseRepo == 1 ]]; then
-    log_warning "No new repo, revert the Flatpak apt sources."
-    println_red "No new repo, revert the Flatpak apt sources."
-    changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
-    repoUpdate
-  fi
+  # Use Flatpak from the Universe Repo and not from the latest PPA
+  # sudo add-apt-repository -y ppa:alexlarsson/flatpak
+  # if [[ $betaAns == 1 ]]; then
+  #   log_warning "Beta Code, revert the Flatpak apt sources."
+  #   println_red "Beta Code, revert the Flatpak apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+  #   repoUpdate
+  # elif [[ $noCurrentReleaseRepo == 1 ]]; then
+  #   log_warning "No new repo, revert the Flatpak apt sources."
+  #   println_red "No new repo, revert the Flatpak apt sources."
+  #   changeAptSource "/etc/apt/sources.list.d/alexlarsson-ubuntu-flatpak-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+  #   repoUpdate
+  # fi
   sudo apt install -y flatpak
   sudo apt install -y gnome-software-plugin-flatpak
   sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
