@@ -924,7 +924,7 @@ gitInstall() {
     fi
   else
     wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-    sudo apt install "$HOMEDIR/tmp/gitkraken-amd64.deb"
+    sudo apt install -y "$HOMEDIR/tmp/gitkraken-amd64.deb"
   fi
 
   sudo apt install -yf
@@ -1091,7 +1091,21 @@ evolutionInstall () {
 mailspringInstall () {
   log_info "Install Mailspring desktop email client"
   println_blue "Install Mailspring desktop email client"
-  sudo snap install mailspring --classic
+  currentPath=$(pwd)
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install Mailspring from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install mailspring --classic
+    else
+      wget -P "$HOMEDIR/tmp" https://updates.getmailspring.com/download?platform=linuxDeb
+      sudo apt install -y "$HOMEDIR/tmp/mailspring.deb"
+    fi
+  else
+    wget -P "$HOMEDIR/tmp" -O mailspring.deb https://updates.getmailspring.com/download?platform=linuxDeb
+    sudo apt install -y "$HOMEDIR/tmp/mailspring.deb"
+  fi
+  sudo apt install -yf
+  cd "$currentPath" || return
 }
 
 # ############################################################################
