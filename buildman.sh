@@ -917,7 +917,7 @@ gitInstall() {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install Gitkraken from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install gitkraken
+      sudo snap install gitkraken --classic
     else
       wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
       sudo apt install -y "$HOMEDIR/tmp/gitkraken-amd64.deb"
@@ -1035,7 +1035,7 @@ postmanInstall() {
   # Postman
   println_blue "Postman"
   log_info "Postman"
-  sudo snap install postman
+  sudo snap install postman --classic
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1066,6 +1066,7 @@ fontsInstall () {
 operaInstall () {
   log_info "Install Opera browser"
   println_blue "Install Opera browser"
+  # sudo snap install opera --classic
   sudo snap install opera
 }
 
@@ -1592,6 +1593,15 @@ rEFIndInstall() {
 }
 
 # ############################################################################
+# rEFInd Boot Manager packages installation
+batteryManagerInstall() {
+  log_info "Battery Manager Appliction Install"
+  println_blue "Battery Manager Application Install"
+  sudo add-apt-repository ppa:slimbook/slimbook
+  sudo apt install -y slimbookbattery
+}
+
+# ############################################################################
 # Stacer Linux system info and cleaner packages installation
 stacerInstall() {
   log_info "Stacer Linux System Optimizer and Monitoring Appliction Install"
@@ -1623,7 +1633,7 @@ stacerInstall() {
 bitwardenInstall() {
   log_info "Bitwarden Password Manager Appliction Install"
   println_blue "Bitwarden Password Manager Application Install"
-  sudo snap install bitwarden
+  sudo snap install bitwarden --classic
 }
 
 # ############################################################################
@@ -1751,7 +1761,7 @@ anboxInstall() {
   sudo apt install -y anbox-modules-dkms
   sudo modprobe ashmem_linux
   sudo modprobe binder_linux
-  sudo snap install --devmode --beta anbox
+  sudo snap install --devmode --beta anbox --classic
   pressEnterToContinue 'Add "snap refresh --beta --devmode anbox" to bin/upgrade.sh for regular upgrades of Anbox'
 }
 
@@ -1815,7 +1825,7 @@ musicVideoAppsInstall() {
   log_info "Music and Video apps"
   println_blue "Music and Video apps"
   sudo apt install -y easytag
-  sudo snap install clementine
+  sudo snap install clementine --classic
   # sudo snap install vlc # default with ubuntu
 }
 
@@ -1871,7 +1881,7 @@ darktableInstall() {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install darktable
+      sudo snap install darktable --classic
     else
       read -rp "Do you want to install from the Darktable repo? (y/n)" answer
       if [[ $answer = "y|Y|1" ]]; then
@@ -2290,6 +2300,7 @@ menuRun() {
       271   #: Y-PPA Manager
       272   #: bootRepair
       281   #: rEFInd Boot Manager
+      282   #: Battery Manager
       291   #: Install extra fonts
 
             #: submenuInternet
@@ -2446,6 +2457,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "271" ]]; then printf "%s%s271%s" "${rev}" "${bold}" "${normal}"; else printf "271"; fi; printf "  : Y-PPA Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "272" ]]; then printf "%s%s272%s" "${rev}" "${bold}" "${normal}"; else printf "272"; fi; printf "  : Boot Repair Appliction.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "282" ]]; then printf "%s%s282%s" "${rev}" "${bold}" "${normal}"; else printf "282"; fi; printf "  : Battery Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "291" ]]; then printf "%s%s291%s" "${rev}" "${bold}" "${normal}"; else printf "291"; fi; printf "  : Install extra fonts.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
@@ -2954,6 +2966,7 @@ runSelection() {
     271 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
     272 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
     281 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
+    282 ) asking batteryManagerInstall "install Battery Manager" "Battery Manager install complete." ;;
     291 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
     311 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
     312 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
