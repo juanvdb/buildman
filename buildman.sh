@@ -50,9 +50,8 @@ buildmanVersion=V4.1.0
   debugLogFile="/tmp/buildman.log"
   errorLogFile="/tmp/buildman_error.log"
 
-  HOMEDIR=$HOME
-  mkdir -p "$HOMEDIR/tmp"
-  sudo chown "$USER":"$USER" "$HOMEDIR/tmp"
+  mkdir -p "$HOME/tmp"
+  sudo chown "$USER":"$USER" "$HOME/tmp"
 
   # black=$(tput setaf 0)
   red=$(tput setaf 1)
@@ -427,17 +426,17 @@ vmwareGuestSetup () {
   log_info "VMware setup with Open VM Tools and NFS file share to host"
   println_blue "VMware setup with Open VM Tools and NFS file share to host           "
   sudo apt install -y nfs-common ssh open-vm-tools open-vm-tools-desktop
-  mkdir -p "$HOMEDIR/hostfiles/home"
-  mkdir -p "$HOMEDIR/hostfiles/data"
-  LINE1="172.22.8.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
+  mkdir -p "$HOME/hostfiles/home"
+  mkdir -p "$HOME/hostfiles/data"
+  LINE1="172.22.8.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  LINE2="172.22.8.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
+  LINE2="172.22.8.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  LINE3="172.22.1.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
+  LINE3="172.22.1.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE3|h; \${x;s|$LINE3||;{g;t};a\\" -e "$LINE3" -e "}" /etc/fstab
-  LINE4="172.22.1.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
+  LINE4="172.22.1.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE4|h; \${x;s|$LINE4||;{g;t};a\\" -e "$LINE4" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" "$HOMEDIR/hostfiles"
+  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
 }
 
@@ -480,13 +479,13 @@ virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
   sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
-  mkdir -p "$HOMEDIR/hostfiles/home"
-  mkdir -p "$HOMEDIR/hostfiles/data"
-  LINE1="192.168.56.1:/home/juanb/      $HOMEDIR/hostfiles/home    nfs     rw,intr    0       0"
+  mkdir -p "$HOME/hostfiles/home"
+  mkdir -p "$HOME/hostfiles/data"
+  LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE1|h; \${x;s|$LINE1||;{g;t};a\\" -e "$LINE1" -e "}" /etc/fstab
-  LINE2="192.168.56.1:/data      $HOMEDIR/hostfiles/data    nfs     rw,intr    0       0"
+  LINE2="192.168.56.1:/data      $HOME/hostfiles/data    nfs     rw,intr    0       0"
   sudo sed -i -e "\|$LINE2|h; \${x;s|$LINE2||;{g;t};a\\" -e "$LINE2" -e "}" /etc/fstab
-  sudo chown -R "$USER":"$USER" "$HOMEDIR/hostfiles"
+  sudo chown -R "$USER":"$USER" "$HOME/hostfiles"
   # sudo mount -a
 }
 
@@ -499,27 +498,27 @@ virtualboxGuestSetup () {
 createTestDataDirs () {
   log_info "Create Test Data directories"
   currentPath=$(pwd)
-  cd "$HOMEDIR" || exit
+  cd "$HOME" || exit
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
     sudo chown -R "$USER:$USER" /data
-    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
-      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
+    if [ -d "$HOME/$sourceDataDirectory" ]; then
+      if [ -L "$HOME/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_info "Keep symlink $HOMEDIR/data"
-        # log_debug "Remove symlink $HOMEDIR/data"
-        # rm "$HOMEDIR/$sourceDataDirectory"
-        # ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+        log_info "Keep symlink $HOME/data"
+        # log_debug "Remove symlink $HOME/data"
+        # rm "$HOME/$sourceDataDirectory"
+        # ln -s "/data" "$HOME/$sourceDataDirectory"
       else
         # It's a directory!
-        # log_debug "Remove directory $HOMEDIR/data"
+        # log_debug "Remove directory $HOME/data"
         rm -R "${HOME}/${sourceDataDirectory}:?"
-        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+        ln -s "/data" "$HOME/$sourceDataDirectory"
       fi
     else
-      # log_debug "Link directory $HOMEDIR/data"
-      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+      # log_debug "Link directory $HOME/data"
+      ln -s "/data" "$HOME/$sourceDataDirectory"
     fi
 
     linkDataDirectories=(
@@ -577,27 +576,27 @@ createTestDataDirs () {
 dataDirLinksSetup () {
   log_info "Data Dir links"
 	currentPath=$(pwd)
-  cd "$HOMEDIR" || exit
+  cd "$HOME" || exit
 
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
-    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
-      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
+    if [ -d "$HOME/$sourceDataDirectory" ]; then
+      if [ -L "$HOME/$sourceDataDirectory" ]; then
         # It is a symlink!
-        log_debug "Keep symlink $HOMEDIR/data"
-        # log_warning "Remove symlink $HOMEDIR/data"
-        # rm "$HOMEDIR/$sourceDataDirectory"
-        # ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+        log_debug "Keep symlink $HOME/data"
+        # log_warning "Remove symlink $HOME/data"
+        # rm "$HOME/$sourceDataDirectory"
+        # ln -s "/data" "$HOME/$sourceDataDirectory"
       else
         # It's a directory!
-        log_debug "Remove directory $HOMEDIR/data"
+        log_debug "Remove directory $HOME/data"
         rm -R "${DATADIR}/${sourceDataDirectory}:?"
-        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+        ln -s "/data" "$HOME/$sourceDataDirectory"
       fi
     else
-      log_debug "Link directory $HOMEDIR/data"
-      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+      log_debug "Link directory $HOME/data"
+      ln -s "/data" "$HOME/$sourceDataDirectory"
     fi
 
     linkDataDirectories=(
@@ -628,38 +627,38 @@ dataDirLinksSetup () {
       # remove after testing
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
-      if [ -e "$HOMEDIR/$sourceLinkDirectory" ]; then
-        if [ -d "$HOMEDIR/$sourceLinkDirectory" ]; then
-          if [ -L "$HOMEDIR/$sourceLinkDirectory" ]; then
+      if [ -e "$HOME/$sourceLinkDirectory" ]; then
+        if [ -d "$HOME/$sourceLinkDirectory" ]; then
+          if [ -L "$HOME/$sourceLinkDirectory" ]; then
             # It is a symlink!
-            # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
-            # rm "$HOMEDIR/$sourceLinkDirectory"
-            ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
+            # rm "$HOME/$sourceLinkDirectory"
+            ln -sf "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
           else
             # It's a directory!
-            # log_debug "Remove directory $HOMEDIR/data"
-            rmdir "$HOMEDIR/$sourceLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            # log_debug "Remove directory $HOME/data"
+            rmdir "$HOME/$sourceLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
           fi
         else
-          rm "$HOMEDIR/$sourceLinkDirectory"
-          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          rm "$HOME/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
         fi
       else
-        # log_debug "$HOMEDIR/$sourceLinkDirectory does not exists and synlink will be made"
-        if [ -L "$HOMEDIR/$sourceLinkDirectory" ];  then
+        # log_debug "$HOME/$sourceLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOME/$sourceLinkDirectory" ];  then
           # It is a symlink!
-          # log_debug "Remove symlink $HOMEDIR/$sourceLinkDirectory"
-          # rm "$HOMEDIR/$sourceLinkDirectory"
-          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
+          # log_debug "Remove symlink $HOME/$sourceLinkDirectory"
+          # rm "$HOME/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
         else
-          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$sourceLinkDirectory"
         fi
-        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$sourceLinkDirectory"
       fi
     done
 
@@ -679,37 +678,37 @@ dataDirLinksSetup () {
       # mkdir -p "/data/$sourceLinkDirectory"
       # up to here
       # log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
-      if [ -e "$HOMEDIR/$targetLinkDirectory" ]; then
-        if [ -d "$HOMEDIR/$targetLinkDirectory" ]; then
-          if [ -L "$HOMEDIR/$targetLinkDirectory" ]; then
+      if [ -e "$HOME/$targetLinkDirectory" ]; then
+        if [ -d "$HOME/$targetLinkDirectory" ]; then
+          if [ -L "$HOME/$targetLinkDirectory" ]; then
             # It is a symlink!
-            # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
-            rm "$HOMEDIR/$targetLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Remove symlink $HOME/$targetLinkDirectory"
+            rm "$HOME/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
           else
             # It's a directory!
-            # log_debug "Remove directory $HOMEDIR/data"
-            rmdir "$HOMEDIR/$targetLinkDirectory"
-            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
-            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Remove directory $HOME/data"
+            rmdir "$HOME/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
           fi
         else
-          rm "$HOMEDIR/$targetLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          rm "$HOME/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
         fi
       else
-        # log_debug "$HOMEDIR/$targetLinkDirectory does not exists and synlink will be made"
-        if [ -L "$HOMEDIR/$targetLinkDirectory" ];  then
+        # log_debug "$HOME/$targetLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOME/$targetLinkDirectory" ];  then
           # It is a symlink!
-          # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
-          rm "$HOMEDIR/$targetLinkDirectory"
-          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
-          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
+          # log_debug "Remove symlink $HOME/$targetLinkDirectory"
+          rm "$HOME/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
         fi
-        ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
-        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
+        ln -s "/data/$sourceLinkDirectory" "$HOME/$targetLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
       fi
     done
 
@@ -717,14 +716,14 @@ dataDirLinksSetup () {
   #   if [[ "$noPrompt" -eq 0 ]]; then
   #     read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
   #     if [[ $qfirefox = [Yy1] ]]; then
-  #       sourceLinkDirectory="$HOMEDIR/.mozilla"
+  #       sourceLinkDirectory="$HOME/.mozilla"
   #       if [ -d "$sourceLinkDirectory" ]; then
   #         rm -R "$sourceLinkDirectory"
   #         ln -s /data/.mozilla "$sourceLinkDirectory"
   #       fi
   #     fi
   #   else
-  #     sourceLinkDirectory"$HOMEDIR/.mozilla"
+  #     sourceLinkDirectory"$HOME/.mozilla"
   #     if [ -d "$sourceLinkDirectory" ]; then
   #       rm -R "$sourceLinkDirectory"
   #       ln -s /data/.mozilla "$sourceLinkDirectory"
@@ -773,14 +772,14 @@ displayLinkInstallApp () {
   println_blue "display Link Install App                                             "
 	sudo apt install -y libegl1-mesa-drivers xserver-xorg-video-all xserver-xorg-input-all dkms libwayland-egl1-mesa
 
-  cd "$HOMEDIR/tmp" || return
-	wget -r -t 10 --output-document=displaylink.zip  http://www.displaylink.com/downloads/file?id=1304
-  mkdir -p "$HOMEDIR/tmp/displaylink"
-  unzip displaylink.zip -d "$HOMEDIR/tmp/displaylink/"
-  chmod +x "$HOMEDIR/tmp/displaylink/displaylink-driver-5.1.run"
-  sudo "$HOMEDIR/tmp/displaylink/displaylink-driver-5.1.run"
+  cd "$HOME/tmp" || return
+	wget -r -t 10 --output-document="$HOME/tmp/displaylink.zip"  http://www.displaylink.com/downloads/file?id=1304
+  mkdir -p "$HOME/tmp/displaylink"
+  unzip $HOME/tmp/displaylink.zip -d "$HOME/tmp/displaylink/"
+  chmod +x "$HOME/tmp/displaylink/displaylink-driver-5.1.run"
+  sudo "$HOME/tmp/displaylink/displaylink-driver-5.1.run"
 
-  sudo chown -R "$USER":"$USER" "$HOMEDIR/tmp/displaylink/"
+  sudo chown -R "$USER":"$USER" "$HOME/tmp/displaylink/"
   cd "$currentPath" || return
   sudo apt install -yf
 }
@@ -917,14 +916,14 @@ gitInstall() {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install Gitkraken from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install gitkraken --classic
+      sudo snap install --classic gitkraken
     else
-      wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-      sudo apt install -y "$HOMEDIR/tmp/gitkraken-amd64.deb"
+      wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+      sudo apt install -y "$HOME/tmp/gitkraken-amd64.deb"
     fi
   else
-    wget -P "$HOMEDIR/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
-    sudo apt install -y "$HOMEDIR/tmp/gitkraken-amd64.deb"
+    wget -P "$HOME/tmp" https://release.gitkraken.com/linux/gitkraken-amd64.deb
+    sudo apt install -y "$HOME/tmp/gitkraken-amd64.deb"
   fi
 
   sudo apt install -yf
@@ -937,11 +936,11 @@ bashdbInstall() {
   currentPath=$(pwd)
   log_info "Bash Debugger 4.4-1.0.1 install"
   println_banner_yellow "Bash Debugger 4.4-1.0.1 install                                       "
-  cd "$HOMEDIR/tmp" || die "Path $HOMEDIR/tmp does not exist."
+  cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
   curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  tar -xzf "$HOMEDIR/tmp/bashdb.tar.gz"
-  cd "$HOMEDIR/tmp/bashdb-4.4-1.0.1" || die "Path bashdb-4.4-1.0.1 does not exist"
+  tar -xzf "$HOME/tmp/bashdb.tar.gz"
+  cd "$HOME/tmp/bashdb-4.4-1.0.1" || die "Path bashdb-4.4-1.0.1 does not exist"
   ./configure
   make
   sudo make install
@@ -959,14 +958,13 @@ atomInstall() {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install AtomEditor from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install atom --classic
+      sudo snap install --classic atom
       sudo apt install -yf shellcheck hunspell hunspell-af hunspell-en-gb
     else
       sudo apt install -y curl
       curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
       sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
       repoUpdate
-      # sudo snap install atom --classic
       sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
     fi
   else
@@ -974,7 +972,6 @@ atomInstall() {
     curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
     sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
     repoUpdate
-    # sudo snap install atom --classic
     sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
   fi
   cd "$currentPath" || return
@@ -986,7 +983,7 @@ bracketsInstall() {
   # Brackets
   println_blue "Brackets"
   log_info "Brackets"
-  sudo snap install brackets --classic
+  sudo snap install --classic brackets
 }
 
 
@@ -1011,7 +1008,7 @@ vscodeInstall() {
 pycharmInstall() {
   println_blue "Pycharm"
   log_info "Pycharm"
-  sudo snap install pycharm-community --classic
+  sudo snap install --classic pycharm-community
 }
 
 # ############################################################################
@@ -1035,7 +1032,7 @@ postmanInstall() {
   # Postman
   println_blue "Postman"
   log_info "Postman"
-  sudo snap install postman --classic
+  sudo snap install --classic postman
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1066,8 +1063,7 @@ fontsInstall () {
 operaInstall () {
   log_info "Install Opera browser"
   println_blue "Install Opera browser"
-  # sudo snap install opera --classic
-  sudo snap install opera
+  sudo snap install --classic opera
 }
 
 # ############################################################################
@@ -1095,14 +1091,14 @@ mailspringInstall () {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install Mailspring from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install mailspring --classic
+      sudo snap install --classic mailspring
     else
-      wget -P "$HOMEDIR/tmp" https://updates.getmailspring.com/download?platform=linuxDeb
-      sudo apt install -y "$HOMEDIR/tmp/mailspring.deb"
+      wget -P "$HOME/tmp" https://updates.getmailspring.com/download?platform=linuxDeb
+      sudo apt install -y "$HOME/tmp/mailspring.deb"
     fi
   else
-    wget -P "$HOMEDIR/tmp" -O mailspring.deb https://updates.getmailspring.com/download?platform=linuxDeb
-    sudo apt install -y "$HOMEDIR/tmp/mailspring.deb"
+    wget -P "$HOME/tmp" -O mailspring.deb https://updates.getmailspring.com/download?platform=linuxDeb
+    sudo apt install -y "$HOME/tmp/mailspring.deb"
   fi
   sudo apt install -yf
   cd "$currentPath" || return
@@ -1121,7 +1117,7 @@ windsInstall () {
 skypeInstall () {
   log_info "Install Skype"
   println_blue "Install Skype"
-  sudo snap install skype --classic
+  sudo snap install --classic skype
 }
 
 # ############################################################################
@@ -1146,7 +1142,7 @@ insyncInstall () {
 doublecmdInstall () {
   log_info "Install Doublecmd"
   println_blue "Install Doublecmd"
-  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOMEDIR/tmp/Release.key" | sudo apt-key add -
+  # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
     if [[ $answer = "y|Y|1" ]]; then
@@ -1576,7 +1572,8 @@ etcherInstall () {
     read -rp "Do you want to install from the repo(default) or AppImage? (repo/appimage)" answer
   fi
   if [[ $answer = "appimage" ]]; then
-    curl -s https://github.com/resin-io/etcher/releases/latest | grep "etcher-electron-*-x86_64.AppImage" | cut -d '"' -f 4   | wget -qi -
+    curl -s https://github.com/resin-io/etcher/releases/latest | grep "balenaEtcher-*-x64.AppImage
+" | cut -d '"' -f 4   | wget -qi -
   else
     echo "deb https://deb.etcher.io stable etcher" | sudo tee /etc/apt/sources.list.d/balena-etcher.list
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 379CE192D401AB61
@@ -1647,7 +1644,7 @@ stacerInstall() {
 bitwardenInstall() {
   log_info "Bitwarden Password Manager Appliction Install"
   println_blue "Bitwarden Password Manager Application Install"
-  sudo snap install bitwarden --classic
+  sudo snap install --classic bitwarden
 }
 
 # ############################################################################
@@ -1685,7 +1682,7 @@ latteDockInstall() {
   # sudo add-apt-repository -y ppa:rikmills/latte-dock
   # sudo apt install cmake extra-cmake-modules qtdeclarative5-dev libqt5x11extras5-dev libkf5iconthemes-dev libkf5plasma-dev libkf5windowsystem-dev libkf5declarative-dev libkf5xmlgui-dev libkf5activities-dev build-essential libxcb-util-dev libkf5wayland-dev git gettext libkf5archive-dev libkf5notifications-dev libxcb-util0-dev libsm-dev libkf5crash-dev libkf5newstuff-dev
   sudo apt install -y latte-dock
-  kwriteconfig5 --file "$HOMEDIR/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
+  kwriteconfig5 --file "$HOME/.config/kwinrc" --group ModifierOnlyShortcuts --key Meta "org.kde.lattedock,/Latte,org.kde.LatteDock,activateLauncherMenu"
   qdbus org.kde.KWin /KWin reconfigure
 }
 
@@ -1775,7 +1772,7 @@ anboxInstall() {
   sudo apt install -y anbox-modules-dkms
   sudo modprobe ashmem_linux
   sudo modprobe binder_linux
-  sudo snap install --devmode --beta anbox --classic
+  sudo snap install --devmode --beta anbox
   pressEnterToContinue 'Add "snap refresh --beta --devmode anbox" to bin/upgrade.sh for regular upgrades of Anbox'
 }
 
@@ -1809,7 +1806,7 @@ ambianceRadianceThemeInstall() {
 inkscapeInstall() {
   log_info "Inkscape Install"
   println_blue "Inkscape Install"
-  sudo snap install inkscape --classic
+  sudo snap install --classic inkscape
 }
 
 # ############################################################################
@@ -1823,10 +1820,10 @@ imageEditingAppsInstall() {
       sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
       sudo apt install -y gimp
     else
-      sudo snap install gimp --classic
+      sudo snap install --classic gimp
     fi
   else
-    sudo snap install gimp --classic
+    sudo snap install --classic gimp
   fi
 
   # sudo apt install -y dia gimp gimp-plugin-registry gimp-ufraw;
@@ -1839,7 +1836,7 @@ musicVideoAppsInstall() {
   log_info "Music and Video apps"
   println_blue "Music and Video apps"
   sudo apt install -y easytag
-  sudo snap install clementine --classic
+  sudo snap install --classic clementine
   # sudo snap install vlc # default with ubuntu
 }
 
@@ -1848,7 +1845,7 @@ musicVideoAppsInstall() {
 spotifyInstall () {
   log_info "Install Spotify"
   println_blue "Install Spotify"
-  sudo snap install spotify
+  sudo snap install --classic spotify
 }
 
 # ############################################################################
@@ -1870,7 +1867,7 @@ kodiInstall () {
 google-play-music-desktop-playerInstall () {
   log_info "Install Google Play Music Desktop Player"
   println_blue "Install Google Play Music Desktop Player"
-  sudo snap install google-play-music-desktop-player
+  sudo snap install --classic google-play-music-desktop-player
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -1931,8 +1928,8 @@ rapidPhotoDownloaderInstall() {
   # Rapid Photo downloader
   log_info "Rapid Photo downloader"
   println_blue "Rapid Photo downloader"
-  wget -P "$HOMEDIR/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
-  cd "$HOMEDIR/tmp" || return
+  wget -P "$HOME/tmp" https://launchpad.net/rapid/pyqt/0.9.4/+download/install.py
+  cd "$HOME/tmp" || return
   python3 install.py
   cd "$currentPath" || return
 }
