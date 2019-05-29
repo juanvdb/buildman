@@ -448,7 +448,7 @@ virtualboxHostInstall () {
 
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the VirtualBox repo? (y/n))" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       # Uncomment to add repository and get latest releases
       wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
       wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
@@ -742,25 +742,25 @@ dataDirLinksSetup () {
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
   println_blue "ownCloud Install                                                     "
-
+  set -x
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the ownCloud repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
-      if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
-        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseName.list"
+    if [[ $answer = [yY1] ]]; then
+      if [[ $noCurrentReleaseRepo == 1 ]]; then
+        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$previousStableReleaseVer/Release.key" | sudo apt-key add -
+        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$previousStableReleaseName.list"
       elif [[ $betaAns == 1 ]]; then
         wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$stableReleaseVer/Release.key" | sudo apt-key add -
         echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$stableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$stableReleaseName.list"
       else
-        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$previousStableReleaseVer/Release.key" | sudo apt-key add -
-        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$previousStableReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$previousStableReleaseName.list"
+        wget -q -O - "https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_$distReleaseVer/Release.key" | sudo apt-key add -
+        echo "deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/ownCloudClient-$distReleaseName.list"
       fi
       repoUpdate
     fi
   fi
   sudo apt install -yf owncloud-client
-  # sudo apt install -yf
+  xet +x
 }
 
 # ############################################################################
@@ -1145,7 +1145,7 @@ doublecmdInstall () {
   # wget -nv https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_18.04/Release.key -O "$HOME/tmp/Release.key" | sudo apt-key add -
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
         wget -q "https://download.opensuse.org/repositories/home:Alexx2000/xUbuntu_$distReleaseVer/Release.key" -O- | sudo apt-key add -
         echo "deb http://download.opensuse.org/repositories/home:/Alexx2000/xUbuntu_$distReleaseVer/ /" | sudo tee "/etc/apt/sources.list.d/Alexx2000-$distReleaseName.list"
@@ -1220,7 +1220,7 @@ dockerInstall () {
 	sudo apt purge -y lxc-docker docker-engine docker.io
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
       if [[ $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
@@ -1308,7 +1308,7 @@ rubyRepo () {
   println_blue "Ruby Repo"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Ruby repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo apt-add-repository -y ppa:brightbox/ruby-ng
       if [[ $noCurrentReleaseRepo == 1 ]]; then
         log_warning "No new repo, revert the Ruby Repo apt sources."
@@ -1338,13 +1338,13 @@ vagrantInstall () {
   println_blue "Vagrant Applications Install                                               "
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install the Ruby repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       rubyRepo
     fi
   fi
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Vagrant repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:tiagohillebrandt/vagrant
       if [[ $betaAns == 1 ]]; then
         log_warning "Beta Code, revert the Vagrant apt sources."
@@ -1488,7 +1488,7 @@ grubCustomizerInstall() {
   println_blue "Grub Customizer Application Install"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Grub Customizer repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:danielrichter2007/grub-customizer
       if [[ $betaAns == 1 ]]; then
         log_warning "Beta Distribution, downgrade Grub Customizer apt sources."
@@ -1507,7 +1507,7 @@ varietyInstall() {
   println_blue "Variety Application Install"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Variety repo? This will enable Variety Slideshow.(y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:peterlevi/ppa
       # sudo add-apt-repository -y ppa:variety/daily
 
@@ -1595,7 +1595,7 @@ rEFIndInstall() {
   println_blue "rEFInd Boot Manager Application Install"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the rEFInd repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo apt-add-repository -y ppa:rodsmith/refind
     fi
   fi
@@ -1694,7 +1694,7 @@ librecadInstall() {
 
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the LibreCAD Daily Dev repo? (y/n))" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       # sudo add-apt-repository -y ppa:librecad-dev/librecad-stable
       sudo add-apt-repository -y ppa:librecad-dev/librecad-daily
       if [[ $betaAns == 1 ]]; then
@@ -1816,7 +1816,7 @@ imageEditingAppsInstall() {
   println_blue "Imaging Editing Applications"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Gimp repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
       sudo apt install -y gimp
     else
@@ -1855,7 +1855,7 @@ kodiInstall () {
   println_blue "Install Kodi media center"
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the Kodi repo? (y/n)" answer
-    if [[ $answer = "y|Y|1" ]]; then
+    if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:team-xbmc/ppa
     fi
   fi
@@ -1895,7 +1895,7 @@ darktableInstall() {
       sudo snap install darktable --classic
     else
       read -rp "Do you want to install from the Darktable repo? (y/n)" answer
-      if [[ $answer = "y|Y|1" ]]; then
+      if [[ $answer = [yY1] ]]; then
         sudo add-apt-repository -y ppa:pmjdebruijn/darktable-release
         if [[ $betaAns == 1 ]]; then
           log_warning "Beta Code, revert the Darktable apt sources."
