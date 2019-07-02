@@ -2,7 +2,7 @@
 
 # DateVer 2019/05/01
 # Buildman
-buildmanVersion=V4.1.0
+buildmanVersion=V4.2.0
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -742,7 +742,7 @@ dataDirLinksSetup () {
 ownCloudClientInstallApp () {
   log_info "ownCloud Install"
   println_blue "ownCloud Install                                                     "
-  set -x
+
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install from the ownCloud repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
@@ -760,7 +760,6 @@ ownCloudClientInstallApp () {
     fi
   fi
   sudo apt install -yf owncloud-client
-  xet +x
 }
 
 # ############################################################################
@@ -795,7 +794,7 @@ laptopDisplayDrivers () {
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
-# O                   Window Managers Backports                              O
+# O                   Window Managers and Backports                          O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 
 # ############################################################################
@@ -998,9 +997,27 @@ eclipseInstall() {
 # ############################################################################
 # Visual Studio Code Install
 vscodeInstall() {
-  println_blue "Visual Studio"
-  log_info "Visual Studio"
-  sudo snap install --classic vscode
+  println_blue "Visual Studio Code"
+  log_info "Visual Studio Code"
+  currentPath=$(pwd)
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install Visual Studio Code from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install --classic vscode
+    else
+      sudo apt install -y curl
+      curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+      sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
+      sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+      sudo apt install apt-transport-https
+      repoUpdate
+      sudo apt install code
+    fi
+    sudo snap install --classic vscode
+  else
+
+  fi
+  cd "$currentPath" || return
 }
 
 # ############################################################################
@@ -1010,6 +1027,15 @@ pycharmInstall() {
   log_info "Pycharm"
   sudo snap install --classic pycharm-community
 }
+
+# ############################################################################
+# Intellij Idea Community Install
+intellij-idea-communityInstall() {
+  println_blue "Intellij Idea Community"
+  log_info "Intellij Idea Community"
+  sudo snap install intellij-idea-community --classic
+}
+
 
 # ############################################################################
 # LightTable packages installation
@@ -1109,7 +1135,7 @@ mailspringInstall () {
 windsInstall () {
   log_info "Install Winds RSS Reader and Podcast application"
   println_blue "Install Winds RSS Reader and Podcast application"
-  sudo snap install winds
+  sudo snap install --classic winds
 }
 
 # ############################################################################
@@ -1806,7 +1832,8 @@ ambianceRadianceThemeInstall() {
 inkscapeInstall() {
   log_info "Inkscape Install"
   println_blue "Inkscape Install"
-  sudo snap install --classic inkscape
+  # sudo snap install --classic inkscape
+  sudo apt install -y inkscape
 }
 
 # ############################################################################
@@ -1818,12 +1845,18 @@ imageEditingAppsInstall() {
     read -rp "Do you want to install from the Gimp repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:otto-kesselgulasch/gimp
-      sudo apt install -y gimp
-    else
+    fi
+  fi
+
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install Gimp from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
       sudo snap install --classic gimp
+    else
+      sudo apt install -y gimp
     fi
   else
-    sudo snap install --classic gimp
+    sudo apt install -y gimp
   fi
 
   # sudo apt install -y dia gimp gimp-plugin-registry gimp-ufraw;
@@ -1836,7 +1869,17 @@ musicVideoAppsInstall() {
   log_info "Music and Video apps"
   println_blue "Music and Video apps"
   sudo apt install -y easytag
-  sudo snap install --classic clementine
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install Clementine from the repo(default) or Snap? (repo/snap)" answer
+    if [[ $answer = "snap" ]]; then
+      sudo snap install --classic clementine
+    else
+      sudo apt install -y clementine
+    fi
+  else
+    sudo apt install -y clementine
+  fi
+
   # sudo snap install vlc # default with ubuntu
 }
 
@@ -2292,8 +2335,15 @@ menuRun() {
       141   #: Install KDE Desktop from backports
       142   #: Upgrae KDE to Beta KDE on backports
       143   #: KDE Desktop settings
+      #: kde-plasma-desktop
       151   #: Install Gnome Desktop from backports
       152   #: Gnome Settings
+      #: sudo apt install gnome-session / sudo update-alternatives --config gdm3.css
+      #: ubuntu-desktop
+      #: ubuntu-desktop-minimal
+      #: ubuntu-gnome-desktop
+      #: ubuntu-budgie-desktop
+      #: ubuntustudio-installer
       161   #: ownCloudClient
       162   #: Dropbox
       163   #: inSync for GoogleDrive
@@ -2310,6 +2360,7 @@ menuRun() {
       261   #: UNetbootin
       271   #: Y-PPA Manager
       272   #: bootRepair
+      #: tasksel
       281   #: rEFInd Boot Manager
       282   #: Battery Manager
       291   #: Install extra fonts
@@ -2339,6 +2390,7 @@ menuRun() {
       522   #: PyCharm
       523   #: Eclipse IDE
       524   #: Visual Studio Code
+      525   #: Intellij Idea Community
       531   #: Postman
       541   #: AsciiDoc
       551   #: Oracle Java Latest
@@ -2587,6 +2639,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "522" ]]; then printf "%s%s522%s" "${rev}" "${bold}" "${normal}"; else printf "522"; fi; printf "  : PyCharm IDE.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Eclipse IDE.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Visual Studio Code.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "525" ]]; then printf "%s%s525%s" "${rev}" "${bold}" "${normal}"; else printf "525"; fi; printf "  : Intellij Idea Community.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "551" ]]; then printf "%s%s551%s" "${rev}" "${bold}" "${normal}"; else printf "551"; fi; printf "  : Oracle Java Latest.\n"
@@ -2999,6 +3052,7 @@ runSelection() {
     522 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
     523 ) asking eclipseInstall "Install Eclipse IDE" "Eclipse IDE install complete." ;;
     524 ) asking vscodeInstall "Install Visual Studio Code" "Visual Studio Code install complete." ;;
+    525 ) asking intelij-idea-communityInstall "Install Intellij Idea Community" "Intellij Idea Community install complete." ;;
     531 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
     541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
     551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
@@ -3274,7 +3328,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 341 331 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 231 511 512 541 541 523 524 513 514 531 591 552 551 611 621 622 631 641 711 713 712 721 651 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 511 512 541 541 513 591 552 551 611 621 631 641 721 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
