@@ -1015,7 +1015,7 @@ vscodeInstall() {
     fi
     sudo snap install --classic vscode
   else
-
+    sudo snap install --classic vscode
   fi
   cd "$currentPath" || return
 }
