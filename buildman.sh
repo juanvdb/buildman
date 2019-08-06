@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/05/01
+# DateVer 2019/08/06
 # Buildman
-buildmanVersion=V4.2.0
+buildmanVersion=V4.2.1
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -1082,6 +1082,15 @@ fontsInstall () {
   log_info "Install Fonts"
   println_blue "Install Fonts"
   sudo apt install -y cabextract fonts-3270 fonts-breip fonts-dejavu fonts-dejavu-core fonts-dejavu-extra fonts-dkg-handwriting fonts-dustin fonts-firacode fonts-georgewilliams fonts-hack fonts-hack-otf fonts-hack-ttf fonts-hack-web fonts-inconsolata fonts-isabella t1-xfree86-nonfree ttf-aenigma ttf-bitstream-vera ttf-dejavu ttf-dejavu-extra ttf-mscorefonts-installer ttf-sjfonts ttf-staypuft ttf-summersby ttf-xfree86-nonfree ;
+}
+
+# ############################################################################
+# Cheat command line cheatsheet installation
+cliCheatsheetInstall() {
+  # Brackets
+  println_blue "Cheat the cheatsheet for the commandline"
+  log_info "Cheat the cheatsheet for the commandline"
+  sudo snap install cheat
 }
 
 # ############################################################################
@@ -2364,6 +2373,7 @@ menuRun() {
       281   #: rEFInd Boot Manager
       282   #: Battery Manager
       291   #: Install extra fonts
+      292   #: Install cheat the cheatsheet for the commandline
 
             #: submenuInternet
       311   #: Google Chrome browser
@@ -2522,6 +2532,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "282" ]]; then printf "%s%s282%s" "${rev}" "${bold}" "${normal}"; else printf "282"; fi; printf "  : Battery Manager.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "291" ]]; then printf "%s%s291%s" "${rev}" "${bold}" "${normal}"; else printf "291"; fi; printf "  : Install extra fonts.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "292" ]]; then printf "%s%s292%s" "${rev}" "${bold}" "${normal}"; else printf "292"; fi; printf "  : Install cheat the cheatsheet for the commandline.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -3032,6 +3043,7 @@ runSelection() {
     281 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
     282 ) asking batteryManagerInstall "install Battery Manager" "Battery Manager install complete." ;;
     291 ) asking fontsInstall "install extra fonts" "Extra fonts install complete." ;;
+    292 ) asking cliCheatsheetInstall "install cheat the command line cheatsheet" "Cheat command line cheatsheet install complete." ;;
     311 ) asking googleChromeInstall "Install Google Chrome browser" "Google Chrome browser install complete." ;;
     312 ) asking operaInstall "install Opera browser" "Opera browser install complete." ;;
     321 ) asking thunderbirdInstall  "install Thunderbird email client" "Thunderbird email client install complete." ;;
