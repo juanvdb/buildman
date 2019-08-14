@@ -47,11 +47,11 @@ buildmanVersion=V4.2.1
   distReleaseVer=$(lsb_release -sr)
   distReleaseName=$(lsb_release -sc)
   noPrompt=0
-  debugLogFile="/tmp/buildman.log"
-  errorLogFile="/tmp/buildman_error.log"
 
   mkdir -p "$HOME/tmp"
   sudo chown "$USER":"$USER" "$HOME/tmp"
+  debugLogFile="$HOME/tmp/buildman.log"
+  errorLogFile="$HOME/tmp/buildman_error.log"
 
   # black=$(tput setaf 0)
   red=$(tput setaf 1)
@@ -2061,9 +2061,13 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-gnome vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-11-jdk openjdk-11-jre dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-14-jdk openjdk-14-jre openjdk-14-doc dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
 
+  # Add
   # openjdk-12-jdk openjdk-12-jre
+
+  # Removed for 19.10
+  # vim-gnome
 
 	# desktop specific applications
 	case $desktopEnvironment in
@@ -2120,19 +2124,19 @@ installUniverseApps () {
 
 
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
   fi
-  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco|eoan)$ ]]; then
    sudo apt install -yf shutter
   fi
 	# desktop specific applications
 	case $desktopEnvironment in
 		"kde" )
-			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras amarok kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins kcron amarok-doc libqt4-sql-psql libqt4-sql-sqlite moodbar libterm-readline-gnu-perl libterm-readline-perl-perl djvulibre-bin finger hspell sg3-utils;
+			sudo apt install -y kubuntu-restricted-addons kubuntu-restricted-extras kdf k4dirstat filelight kde-config-cron kdesdk-dolphin-plugins libqt4-sql-psql libqt4-sql-sqlite libterm-readline-gnu-perl libterm-readline-perl-perl djvulibre-bin finger hspell sg3-utils;
       latteDockInstall
       # Old packages:
-      # ufw-kde
+      # ufw-kde amarok amarok-doc moodbar kcron
 			;;
 		"gnome" )
 			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
@@ -2171,7 +2175,8 @@ setUbuntuVersionParameters() {
            that are known for not having beta or early releases:
       Key  : Stable Release
       -----: ---------------------------------------
-      c    : 19.04 Disco Dingo
+      e    : 19.10 Eoan Ermine
+      d    : 19.04 Disco Dingo
       c    : 18.10 Cosmic Cuttlefish
       b    : 18.04 Bionic Beaver
       a    : 17.10 Artful Aardvark
@@ -2198,12 +2203,20 @@ setUbuntuVersionParameters() {
       read -rp "Enter your choice : " stablechoice
       printf "\n"
       case $stablechoice in
-        d)
-          stableReleaseName="cosmic"
+        e)
+          stableReleaseName="disco"
           stableReleaseVer="18.10"
-          betaReleaseName="disco"
-          betaReleaseVer="19.04"
-          previousStableReleaseName="bionic"
+          betaReleaseName="eoan"
+          betaReleaseVer="19.10"
+          previousStableReleaseName="cosmic"
+          validchoice=1
+        ;;
+        d)
+          stableReleaseName="disco"
+          stableReleaseVer="19.04"
+          betaReleaseName="eoan"
+          betaReleaseVer="19.10"
+          previousStableReleaseName="cosmic"
           validchoice=1
         ;;
         c)
@@ -2479,9 +2492,10 @@ menuRun() {
     printf "     c    : Applications Menu.\n"
     printf "     d    : Development Apps and IDEs Menu.\n"
     printf "     e    : Photography and Imaging Menu.\n"
-    printf "     f    : Virtualization Applictions Menu.\n"
-    printf "     g    : Other (Hardware Drivers, ).\n"
-    printf "     h    : Buildman Settings, Utilities and tests.\n"
+    printf "     f    : Multimedia, Video and Audio Menu.\n"
+    printf "     g    : Virtualization Applictions Menu.\n"
+    printf "     h    : Other (Hardware Drivers, ).\n"
+    printf "     i    : Buildman Settings, Utilities and tests.\n"
     printf "     x    : Clear selections.\n"
     printf "\n"
     printf "\n"
@@ -2954,7 +2968,7 @@ menuRun() {
           done
           choiceOpt=NULL
         ;;
-        e )
+        f )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuMedia "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
@@ -2966,7 +2980,7 @@ menuRun() {
           done
           choiceOpt=NULL
         ;;
-        f )
+        g )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuVirtualization "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
@@ -2978,7 +2992,7 @@ menuRun() {
           done
           choiceOpt=NULL
         ;;
-        g )
+        h )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuOther "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
@@ -2990,7 +3004,7 @@ menuRun() {
           done
           choiceOpt=NULL
         ;;
-        h )
+        i )
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuSettings "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
