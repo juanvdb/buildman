@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/08/06
+# DateVer 2019/08/19
 # Buildman
-buildmanVersion=V4.2.1
+buildmanVersion=V4.3
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -885,6 +885,16 @@ kdeBackportsApps () {
   repoUpdate
   repoUpgrade
   sudo apt full-upgrade -y;
+}
+
+# ############################################################################
+# kde5Settings
+kde5Settings () {
+  log_info "Change KDE5 Desktop settings"
+  println_blue "Change KDE5 Desktop settings                                               "
+  kwriteconfig5 --file ~/.config/kwinrc --group org.kde.kdecoration2 --key ButtonsOnLeft "XIAS"
+  kwriteconfig5 --file ~/.config/kwinrc --group org.kde.kdecoration2 --key ButtonsOnRight "H"
+  qdbus org.kde.KWin /KWin reconfigure
 }
 
 
@@ -2481,6 +2491,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "131" ]]; then printf "%s%s131%s" "${rev}" "${bold}" "${normal}"; else printf "131"; fi; printf "  : Setup the home directories to link to the data disk directories.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "141" ]]; then printf "%s%s141%s" "${rev}" "${bold}" "${normal}"; else printf "141"; fi; printf "  : Install KDE Desktop from backports.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "142" ]]; then printf "%s%s142%s" "${rev}" "${bold}" "${normal}"; else printf "142"; fi; printf "  : Upgrade KDE to Beta KDE on backports.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "143" ]]; then printf "%s%s143%s" "${rev}" "${bold}" "${normal}"; else printf "143"; fi; printf "  : Change KDE desktop settings.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "151" ]]; then printf "%s%s151%s" "${rev}" "${bold}" "${normal}"; else printf "151"; fi; printf "  : Install Gnome Desktop from backports.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "152" ]]; then printf "%s%s152%s" "${rev}" "${bold}" "${normal}"; else printf "152"; fi; printf "  : Change Gnome desktop settings.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "161" ]]; then printf "%s%s161%s" "${rev}" "${bold}" "${normal}"; else printf "161"; fi; printf "  : ownCloudClient.\n"
@@ -3037,6 +3048,7 @@ runSelection() {
     191 ) asking createTestDataDirs "Create test data directories on data drive." "Test data directories on data drive created." ;;
     141 ) asking kdeBackportsApps "Install KDE Desktop from backports" "Installation of the KDE Backport Desktop complete." ;;
     142 ) asking kdeBetaBackportsRepo "Upgrae KDE repo to Beta KDE Repo on backports" "Upgrae of the KDE Beta repo complete." ;;
+    143 ) asking kde5Settings "run KDE Desktop settings" "KDE Desktop Settings done." ;;
     151 ) asking gnome3Backports "Install Gnome Desktop from backports" "Gnome Desktop install from backports complete." ;;
     152 ) asking gnome3Settings "run Gnome settings" "Gnome Settings done." ;;
     161 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
@@ -3072,7 +3084,7 @@ runSelection() {
     461 ) asking librecadInstall "instal LibreCAD" "LibreCAD install complete." ;;
     511 ) asking devAppsInstall "install Development Apps and IDEs" "Development Apps and IDEs install complete." ;;
     512 ) asking gitInstall "install Git" "Git install complete." ;;
-    514 ) asking atomInstall "Install Atom Editor" "Atom Editor install complete." ;;
+    513 ) asking atomInstall "Install Atom Editor" "Atom Editor install complete." ;;
     514 ) asking bracketsInstall "Install Brackets Editor" "Brackets Editor install complete." ;;
     521 ) asking bashdbInstall "install Bashdb" "Bashdb install complete." ;;
     522 ) asking pycharmInstall "Install PyCharm" "PyCharm install complete." ;;
@@ -3285,7 +3297,7 @@ mainMenu() {
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 143 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3310,7 +3322,7 @@ mainMenu() {
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 143 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3335,7 +3347,7 @@ mainMenu() {
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(141 211 621)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 143 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3360,7 +3372,7 @@ mainMenu() {
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
           ;;
           kde )
-            menuSelectionsInput+=(141 142 211 621)  #: Install KDE Desktop from backports #: Digikam
+            menuSelectionsInput+=(141 142 143 211 621)  #: Install KDE Desktop from backports #: Digikam
           ;;
           ubuntu )
             # menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
