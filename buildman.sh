@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/08/19
+# DateVer 2019/08/22
 # Buildman
-buildmanVersion=V4.3
+buildmanVersion=V4.4
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -29,7 +29,6 @@ buildmanVersion=V4.3
 # ############################################################################
 # ==> set global Variables
 
-# Ready for Bionic
 # Global Variables
 {
   betaReleaseName="eoan"
@@ -940,6 +939,15 @@ gitInstall() {
 }
 
 # ############################################################################
+# Git Config with my details
+gitConfig (){
+  read -rp "Please enter your Git user name?" git_userName
+  read -rp "Please enter your Git user email address?" git_user_email
+
+  git config --global user.email "$git_user_email"
+  git config --global user.name "$git_userName"
+}
+# ############################################################################
 # Bashdb packages installation
 bashdbInstall() {
   currentPath=$(pwd)
@@ -1492,7 +1500,27 @@ yppaManagerInstall() {
 }
 
 # ############################################################################
-# Oracle Java  Installer from WebUpd8 packages installation
+# OpenJDK Versions installation
+openJDK8Install() {
+  log_info "OpenJDK 8 Installation"
+  println_blue "OpenJDK 8 Installation"
+  sudo apt install -y openjdk-8-jdk openjdk-8-jre openjdk-8-doc
+}
+
+openJDK11Install() {
+  log_info "OpenJDK 11 Installation"
+  println_blue "OpenJDK 11 Installation"
+  sudo apt install -y openjdk-11-jdk openjdk-11-jre openjdk-11-doc
+}
+
+openJDKLatestInstall() {
+  log_info "OpenJDK Latest Installation"
+  println_blue "OpenJDK Latest Installation"
+  sudo apt install -y openjdk-14-jdk openjdk-14-jre openjdk-14-doc
+}
+
+# ############################################################################
+# Oracle Java Installer from WebUpd8 packages installation
 oracleJava8Install() {
   log_info "Oracle Java8 Installer from WebUpd8"
   println_blue "Oracle Java8 Installer from WebUpd8"
@@ -1512,6 +1540,26 @@ oracleJava8Install() {
   sudo apt install -y oracle-java8-installer
 }
 
+oracleJava11Install() {
+  log_info "Oracle Java11 Installer from WebUpd8"
+  println_blue "Oracle Java11 Installer from WebUpd8"
+  sudo add-apt-repository -y ppa:webupd8team/java
+  if [[ $betaAns == 1 ]]; then
+    log_warning "Beta Code, revert the Oracle Java 11 apt sources."
+    println_red "Beta Code, revert the Oracle Java 11 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+    repoUpdate
+  elif [[ $noCurrentReleaseRepo == 1 ]]; then
+    log_warning "No new repo, revert the Oracle Java 11 apt sources."
+    println_red "No new repo, revert the Oracle Java 11 apt sources."
+    changeAptSource "/etc/apt/sources.list.d/webupd8team-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
+    repoUpdate
+
+  fi
+  sudo apt install -y oracle-java11-installer
+  sudo apt install -y oracle-java11-set-default
+}
+
 
 oracleJavaLatestInstall() {
   log_info "Oracle Java Latest Installer from WebUpd8"
@@ -1522,8 +1570,17 @@ oracleJavaLatestInstall() {
   #   # println_red "Repos not available as yet, downgrade Oracle Java Installer apt sources."
   #   changeAptSource "/etc/apt/sources.list.d/linuxuprising-ubuntu-java-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
   # fi
-  sudo apt install -y oracle-java11-installer
-  sudo apt install -y oracle-java11-set-default
+  sudo apt install -y oracle-java12-installer
+  sudo apt install -y oracle-java12-set-default
+}
+
+
+# ############################################################################
+# Set Java Version
+setJavaVersion(){
+    log_info "Set Java Version"
+    println_blue "Set Java Version"
+    sudo update-alternatives --config java
 }
 
 # ############################################################################
@@ -2071,10 +2128,10 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-8-jdk openjdk-8-jre openjdk-14-jdk openjdk-14-jre openjdk-14-doc dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-11-jdk openjdk-11-jre openjdk-11-doc dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
 
   # Add
-  # openjdk-12-jdk openjdk-12-jre
+  # openjdk-11-jdk openjdk-11-jre
 
   # Removed for 19.10
   # vim-gnome
@@ -2426,10 +2483,15 @@ menuRun() {
       525   #: Intellij Idea Community
       531   #: Postman
       541   #: AsciiDoc
-      551   #: Oracle Java Latest
-      552   #: Oracle Java 8
-      553   #: Oracle Java 9
-      591   #: Add Ruby Repositories
+      581   #: OpenJDK Latest
+      582   #: OpenJDK 8
+      583   #: OpenJDK 11
+      585   #: Oracle Java Latest
+      586   #: Oracle Java 8
+      587   #: Oracle Java 11
+      588   #: Set Java Version
+      591   #: Git Config with my details
+      595   #: Add Ruby Repositories
 
             #: submenuPhoto
       611   #: Photography Apps
@@ -2678,10 +2740,15 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "525" ]]; then printf "%s%s525%s" "${rev}" "${bold}" "${normal}"; else printf "525"; fi; printf "  : Intellij Idea Community.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "551" ]]; then printf "%s%s551%s" "${rev}" "${bold}" "${normal}"; else printf "551"; fi; printf "  : Oracle Java Latest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "552" ]]; then printf "%s%s552%s" "${rev}" "${bold}" "${normal}"; else printf "552"; fi; printf "  : Oracle Java 8.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "553" ]]; then printf "%s%s553%s" "${rev}" "${bold}" "${normal}"; else printf "553"; fi; printf "  : Oracle Java 9.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "591" ]]; then printf "%s%s591%s" "${rev}" "${bold}" "${normal}"; else printf "591"; fi; printf "  : Ruby Repo.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "585" ]]; then printf "%s%s581%s" "${rev}" "${bold}" "${normal}"; else printf "581"; fi; printf "  : OpenJDK Latest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "581" ]]; then printf "%s%s582%s" "${rev}" "${bold}" "${normal}"; else printf "582"; fi; printf "  : OpenJDK 8.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "582" ]]; then printf "%s%s583%s" "${rev}" "${bold}" "${normal}"; else printf "583"; fi; printf "  : OpenJDK 11.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "583" ]]; then printf "%s%s585%s" "${rev}" "${bold}" "${normal}"; else printf "585"; fi; printf "  : Oracle Java Latest.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "586" ]]; then printf "%s%s586%s" "${rev}" "${bold}" "${normal}"; else printf "586"; fi; printf "  : Oracle Java 8.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "587" ]]; then printf "%s%s587%s" "${rev}" "${bold}" "${normal}"; else printf "587"; fi; printf "  : Oracle Java 11.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "588" ]]; then printf "%s%s588%s" "${rev}" "${bold}" "${normal}"; else printf "588"; fi; printf "  : Set Java Version.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "590" ]]; then printf "%s%s590%s" "${rev}" "${bold}" "${normal}"; else printf "590"; fi; printf "  : Git Config with my details.\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "595" ]]; then printf "%s%s595%s" "${rev}" "${bold}" "${normal}"; else printf "595"; fi; printf "  : Ruby Repo.\n"
     printf "\n"
     printf "    0/q  : Return to Selection menu\n\n"
 
@@ -3093,10 +3160,15 @@ runSelection() {
     525 ) asking intelij-idea-communityInstall "Install Intellij Idea Community" "Intellij Idea Community install complete." ;;
     531 ) asking postmanInstall "Install Postman" "Postman install complete." ;;
     541 ) asking asciiDocInstall "install AsciiDoc" "AsciiDoc install complete." ;;
-    551 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
-    552 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
-    553 ) asking oracleJava9Install "Install Oracle Java 9" "Oracle Java 9 install complete." ;;
-    591 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
+    581 ) asking openJDKLatestInstall "Install OpenJDK Latest" "OpenJDK Latest install complete." ;;
+    582 ) asking openJDK8Install "Install OpenJDK 8" "OpenJDK 8 install complete." ;;
+    583 ) asking openJDK11Install "Install OpenJDK 11" "OpenJDK 11 install complete." ;;
+    585 ) asking oracleJavaLatestInstall "Install Oracle Java Latest" "Oracle Java Latest install complete." ;;
+    586 ) asking oracleJava8Install "Install Oracle Java 8" "Oracle Java 8 install complete." ;;
+    587 ) asking oracleJava11Install "Install Oracle Java 11" "Oracle Java 11 install complete." ;;
+    588 ) asking setJavaVersion "Set Java Version" "Set Java Version complete." ;;
+    590 ) asking gitConfig "Git Config with my details." "Git Config with my details complete." ;;
+    595 ) asking rubyRepo "add the Ruby Repositories" "Ruby Repositories added." ;;
     611 ) asking photoAppsInstall "install Photography Apps" "Photography Apps install complete." ;;
     621 ) asking digikamInstall "install Digikam" "DigiKam install complete." ;;
     622 ) asking darktableInstall "install Darktable" "Darktable install complete." ;;
@@ -3366,7 +3438,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 511 512 541 541 513 591 552 551 611 621 631 641 721 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 511 512 541 541 513 595 586 585 611 621 631 641 721 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
