@@ -1005,7 +1005,7 @@ bracketsInstall() {
 
 
 # ############################################################################
-# Visual Studio Code Install
+# Eclipse Install
 eclipseInstall() {
   println_blue "Eclipse"
   log_info "Eclipse"
@@ -1031,7 +1031,6 @@ vscodeInstall() {
       repoUpdate
       sudo apt install code
     fi
-    sudo snap install --classic vscode
   else
     sudo snap install --classic vscode
   fi
@@ -1572,6 +1571,15 @@ oracleJavaLatestInstall() {
   # fi
   sudo apt install -y oracle-java12-installer
   sudo apt install -y oracle-java12-set-default
+  sudo update-alternatives --config java
+  # Add JAVA_HOME to .bash_profile
+  if [[ !-f $HOME/.bash_profile ]]; then
+    touch $HOME/.bash_profile
+    chmod +x $HOME/.bash_profile
+  fi
+  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/java-12-oracle"' $HOME/.bash_profile
+  source /etc/environment
+  echo $JAVA_HOME
 }
 
 
@@ -2128,13 +2136,25 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs openjdk-11-jdk openjdk-11-jre openjdk-11-doc dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
 
   # Add
   # openjdk-11-jdk openjdk-11-jre
 
   # Removed for 19.10
   # vim-gnome
+
+  # Add JAVA_HOME to .bash_profile
+  # Add JAVA_HOME to .bash_profile
+  if [[ !-f $HOME/.bash_profile ]]; then
+    touch $HOME/.bash_profile
+    chmod +x $HOME/.bash_profile
+  fi
+  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/default-java"' $HOME/.bash_profile
+  # sed -i -e "export JAVA_HOME="$(jrunscript -e 'java.lang.System.out.println(java.lang.System.getProperty("java.home"));')"" $HOME/.bash_profile
+  source /etc/environment
+  echo $JAVA_HOME
+
 
 	# desktop specific applications
 	case $desktopEnvironment in
