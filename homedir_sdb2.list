@@ -1,0 +1,126 @@
+.adobe
+.ansible -> /data/dotfiles/home/.ansible
+.aqbanking
+.atom -> /data/.atom
+.bash_aliases -> /data/dotfiles/home/.bash_aliases
+.bashdb_hist
+.bash_eternal_history
+.bash_history -> /data/dotfiles/home/.bash_history
+bash_history_2019-02-23.txt
+bash_history_2019-02-23-working.txt
+.bash_logout
+.bash_profile -> /data/dotfiles/home/.bash_profile
+.bashrc -> /data/dotfiles/home/.bashrc
+bin -> /data/bin
+.bundle -> /data/dotfiles/home/.bundle
+.cache
+.config -> /data/dotfiles/home/.config
+.cxoffice -> /data/.cxoffice
+data -> /data
+.dbus
+Desktop
+devlab -> /data/ownCloud/Development
+.docker -> /data/dotfiles/home/.docker
+Documents -> /data/Documents
+Downloads -> /data/Downloads
+.dropbox -> /data/dotfiles/home/.dropbox
+Dropbox -> /data/Dropbox
+.dropbox-dist
+.easy-ebook-viewer.conf -> /data/dotfiles/home/.easy-ebook-viewer.conf
+.eclipse -> /data/dotfiles/home/.eclipse
+eclipse -> /data/dotfiles/home/eclipse
+.face -> /data/dotfiles/home/.face
+.face.icon -> .face
+.FBReader
+.fonts.conf
+.gconf -> /data/dotfiles/home/.gconf
+.gem -> /data/dotfiles/home/.gem
+.gimp-2.8 -> /data/dotfiles/home/.gimp-2.8
+.gitconfig -> /data/dotfiles/home/.gitconfig
+.gitignore -> /data/dotfiles/home/.gitignore
+.gitkraken -> /data/dotfiles/home/.gitkraken
+.gnome -> /data/dotfiles/home/.gnome
+.gnome2 -> /data/dotfiles/home/.gnome2
+.gnupg -> /data/dotfiles/home/.gnupg
+GoogleDrive -> /data/GoogleDrive
+GPGKey.bin -> /data/dotfiles/home/GPGKey.bin
+GPGKey.txt -> /data/dotfiles/home/GPGKey.txt
+.gphoto -> /data/dotfiles/home/.gphoto
+.groovy -> /data/dotfiles/home/.groovy
+.gtk-bookmarks -> /data/dotfiles/home/.gtk-bookmarks
+.gtkrc-2.0 -> /data/dotfiles/home/.gtkrc-2.0
+.guard_history
+history_old.txt
+.java -> /data/dotfiles/home/.java
+juan@breggen.net
+.kchmviewer
+.kde -> /data/dotfiles/home/.kde
+.kodi
+kodi_crashlog-20181227_160800.log
+.kube -> /data/dotfiles/home/.kube
+.lastpass -> /data/dotfiles/home/.lastpass
+.lesshst
+.local -> /data/dotfiles/home/.local
+.m2 -> /data/dotfiles/home/.m2
+.macromedia
+.mime.types -> /data/dotfiles/home/.mime.types
+.minishift -> /data/dotfiles/home/.minishift
+.mozilla -> /data/.mozilla
+Music -> /data/Music
+mymount
+.mysql_history
+.netrc -> /data/dotfiles/home/.netrc
+.npm
+.nv
+.nylas -> /data/.nylas
+.oc -> /data/dotfiles/home/.oc
+openshift.local.clusterup
+ownCloud -> /data/ownCloud
+PDF
+Pictures -> /data/Pictures
+.pki -> /data/dotfiles/home/.pki
+.profile -> /data/dotfiles/home/.profile
+Public
+.python-eggs -> /data/dotfiles/home/.python-eggs
+Release.key
+.remmina -> /data/dotfiles/home/.remmina
+.rnd
+.rpmdb
+.rss-reader
+.rsync-incremental-backup
+.rvm -> /data/dotfiles/home/.rvm
+.rvmrc -> /data/dotfiles/home/.rvmrc
+.shutter -> /data/dotfiles/home/.shutter
+snap
+Software -> /data/Software
+SpiderOak Hive
+.ssh -> /data/dotfiles/home/.ssh
+.sudo_as_admin_successful
+.swt
+temp
+Templates
+.thumbnails
+.thunderbird -> /data/.thunderbird
+tmp
+.tooling
+.twistlock
+vagrant -> /data/vagrant/vagrant
+.vagrant.d -> /data/vagrant/.vagrant.d
+.var -> /data/dotfiles/home/.var
+Videos -> /data/Videos
+.vim -> /data/dotfiles/home/.vim
+.viminfo
+.vimrc -> /data/dotfiles/home/.vimrc
+.vimrc.after -> /data/dotfiles/home/.vimrc.after
+VirtualMachines -> /data/VirtualMachines
+.vmware -> /data/dotfiles/home/.vmware
+.webex -> /data/dotfiles/home/.webex
+.wget-hsts
+.workrave -> /data/dotfiles/home/.workrave
+.Xauthority
+.xdman
+xl-licenses -> /data/dotfiles/home/xl-licenses
+.xournal
+.xsession-errors
+.zenmap
+.zoom
