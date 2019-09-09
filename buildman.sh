@@ -574,9 +574,8 @@ createTestDataDirs () {
 # Links directories to data disk if exists
 dataDirLinksSetup () {
   log_info "Data Dir links"
-	currentPath=$(pwd)
+  currentPath=$(pwd)
   cd "$HOME" || exit
-
 
   if [ -d "/data" ]; then
     sourceDataDirectory="data"
@@ -710,24 +709,6 @@ dataDirLinksSetup () {
         # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOME/$targetLinkDirectory"
       fi
     done
-
-  #   # For Firefox only
-  #   if [[ "$noPrompt" -eq 0 ]]; then
-  #     read -rp "Do you want to link to Data's Firefox (y/n): " qfirefox
-  #     if [[ $qfirefox = [Yy1] ]]; then
-  #       sourceLinkDirectory="$HOME/.mozilla"
-  #       if [ -d "$sourceLinkDirectory" ]; then
-  #         rm -R "$sourceLinkDirectory"
-  #         ln -s /data/.mozilla "$sourceLinkDirectory"
-  #       fi
-  #     fi
-  #   else
-  #     sourceLinkDirectory"$HOME/.mozilla"
-  #     if [ -d "$sourceLinkDirectory" ]; then
-  #       rm -R "$sourceLinkDirectory"
-  #       ln -s /data/.mozilla "$sourceLinkDirectory"
-  #     fi
-  #   fi
   fi
   cd "$currentPath" || exit
 }
@@ -951,6 +932,7 @@ gitConfig (){
 # Bashdb packages installation
 bashdbInstall() {
   currentPath=$(pwd)
+  # case versions, if eoan then https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.0/bashdb-5.0-1.1.0.tar.bz2/download
   log_info "Bash Debugger 4.4-1.0.1 install"
   println_banner_yellow "Bash Debugger 4.4-1.0.1 install                                       "
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
@@ -976,22 +958,23 @@ atomInstall() {
     read -rp "Do you want to install AtomEditor from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
       sudo snap install --classic atom
-      sudo apt install -yf shellcheck hunspell hunspell-af hunspell-en-gb
+      sudo apt install -yf shellcheck devscripts hunspell hunspell-af hunspell-en-gb
     else
       sudo apt install -y curl
       curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
       sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
       repoUpdate
-      sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+      sudo apt install -yf atom shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
     fi
   else
     sudo apt install -y curl
     curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
     sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
     repoUpdate
-    sudo apt install -yf atom shellcheck hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+    sudo apt install -yf atom shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
   fi
   cd "$currentPath" || return
+  # apm install linter
 }
 
 # ############################################################################
@@ -1573,7 +1556,7 @@ oracleJavaLatestInstall() {
   sudo apt install -y oracle-java12-set-default
   sudo update-alternatives --config java
   # Add JAVA_HOME to .bash_profile
-  if [[ !-f $HOME/.bash_profile ]]; then
+  if [[ ! -f $HOME/.bash_profile ]]; then
     touch $HOME/.bash_profile
     chmod +x $HOME/.bash_profile
   fi
@@ -2146,7 +2129,7 @@ installBaseApps () {
 
   # Add JAVA_HOME to .bash_profile
   # Add JAVA_HOME to .bash_profile
-  if [[ !-f $HOME/.bash_profile ]]; then
+  if [[ ! -f $HOME/.bash_profile ]]; then
     touch $HOME/.bash_profile
     chmod +x $HOME/.bash_profile
   fi
@@ -2408,7 +2391,7 @@ setUbuntuVersionParameters() {
           stableReleaseVer="10.04"
           validchoice=1
         ;;
-        quit|q|0)
+        quit|0)
           validchoice=1
         ;;
         * )
