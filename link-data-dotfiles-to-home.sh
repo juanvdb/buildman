@@ -1,34 +1,43 @@
-#! /bin/bash
-# Version 3.2
+$HOMEDIR#! /bin/bash
+# Version 3.3
 
 # Remove existing files.
 
 MOUNTDIR=$1
-HOMEDIR="$MOUNTDIR/home/$USER"
+# HOMEDIR="$MOUNTDIR/home/$USER"
+HOMEDIR="/media/juan/homePartition/juan"
+# ETCDIR="$MOUNTDIR/etc"
+ETCDIR="/media/juan/Kubuntu2-1910/etc/"
 dotFilesParentDir="/data/dotfiles/home"
 etcFilesParentDir="/data/dotfiles/etc"
-ETCDIR="$MOUNTDIR/etc"
 
 INTERACTIVE_MODE="on"
 scriptDebugToStdout="on"
 scriptDebugToFile="on"
-debugLogFile="$MOUNTDIR/tmp/linkdotfiles.log"
-errorLogFile="$MOUNTDIR/tmp/linkdotfileserror.log"
+debugLogFile="$HOMEDIR/tmp/linkdotfiles.log"
+errorLogFile="$HOMEDIR/tmp/linkdotfileserror.log"
 
 dotFilesList=(
 ".ansible"
+".aqbanking"
+".atom"
 ".bash_aliases"
 ".bash_history"
+".bash_eternal_history"
 ".bash_profile"
 ".bashrc"
 ".bundle"
 ".config"
+".cxoffice"
+".docker"
 ".dropbox"
 ".dropbox-dist"
 ".easy-ebook-viewer.conf"
 "eclipse"
 ".eclipse"
 ".face"
+".FBReader"
+".fonts.conf"
 ".gconf"
 ".gem"
 ".gimp-2.8"
@@ -45,7 +54,9 @@ dotFilesList=(
 ".gtk-bookmarks"
 ".gtkrc-2.0"
 ".java"
+".kchmviewer"
 ".kde"
+".kodi"
 ".kube"
 ".lastpass"
 ".lesshst"
@@ -53,16 +64,25 @@ dotFilesList=(
 ".m2"
 ".mime.types"
 ".minishift"
+".mozilla"
 ".netrc"
+".npm"
 ".oc"
+"openshift.local.clusterup"
 ".pki"
 ".profile"
 ".python-eggs"
+".rss-reader"
+".rsync-incremental-backup"
 ".rvm"
 ".rvmrc"
 ".remmina"
 ".ssh"
 ".shutter"
+".swt"
+".thunderbird"
+".tooling"
+".twistlock"
 ".var"
 ".vim"
 ".viminfo"
@@ -71,7 +91,32 @@ dotFilesList=(
 ".vmware"
 ".webex"
 ".workrave"
+".xdman"
 "xl-licenses"
+".xournal"
+".zenmap"
+".zoom"
+)
+
+linkDataDirectories=(
+"bin"
+"Documents"
+"Downloads"
+"Dropbox"
+"GoogleDrive"
+"Music"
+"ownCloud"
+"Pictures"
+# "SpiderOak Hive"
+"Software"
+"Videos"
+"VirtualMachines"
+)
+
+# Link DataDirectories from sub dirs to specified home dir
+linkDataSubDirectories=(
+"vagrant/vagrant" "vagrant"
+"vagrant/.vagrant.d" ".vagrant.d"
 )
 
 etcFilesList=(
@@ -252,6 +297,126 @@ linkDataDir() {
     fi
 }
 
+# ############################################################################
+# Links directories to data disk if exists
+dataDirLinksSetup () {
+  log_info "Data Dir links"
+  currentPath=$(pwd)
+  cd "$HOMEDIR" || exit
+
+  if [ -d "/data" ]; then
+    sourceDataDirectory="data"
+    if [ -d "$HOMEDIR/$sourceDataDirectory" ]; then
+      if [ -L "$HOMEDIR/$sourceDataDirectory" ]; then
+        # It is a symlink!
+        log_debug "Keep symlink $HOMEDIR/data"
+        # log_warning "Remove symlink $HOMEDIR/data"
+        # rm "$HOMEDIR/$sourceDataDirectory"
+        # ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+      else
+        # It's a directory!
+        log_debug "Remove directory $HOMEDIR/data"
+        rm -R "${DATADIR}/${sourceDataDirectory}:?"
+        ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+      fi
+    else
+      log_debug "Link directory $HOMEDIR/data"
+      ln -s "/data" "$HOMEDIR/$sourceDataDirectory"
+    fi
+
+    log_info "linkDataDirectories ${linkDataDirectories[*]}"
+
+    for sourceLinkDirectory in "${linkDataDirectories[@]}"; do
+      log_debug "Link directory = $sourceLinkDirectory"
+      # remove after testing
+      # mkdir -p "/data/$sourceLinkDirectory"
+      # up to here
+      if [ -e "$HOMEDIR/$sourceLinkDirectory" ]; then
+        log_debug "$HOMEDIR/$sourceLinkDirectory exists will be removed and symlink will be made"
+        if [ -d "$HOMEDIR/$sourceLinkDirectory" ]; then
+          if [ -L "$HOMEDIR/$sourceLinkDirectory" ]; then
+            # It is a symlink!
+            log_debug "It is a symlink, remove symlink $HOMEDIR/$sourceLinkDirectory"
+            rm "$HOMEDIR/$sourceLinkDirectory"
+            ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            log_debug "Create new symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          else
+            # It's a directory!
+            log_debug "It is a directory, remove directory $HOMEDIR/$sourceLinkDirectory"
+            rmdir "$HOMEDIR/$sourceLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+            log_debug "Create new symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          fi
+        else
+          log_debug "It is a file, remove file $HOMEDIR/$sourceLinkDirectory"
+          rm "$HOMEDIR/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+        fi
+      else
+        log_debug "$HOMEDIR/$sourceLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOMEDIR/$sourceLinkDirectory" ];  then
+          # It is a symlink!
+          log_debug "Found a symlynk and remove symlink $HOMEDIR/$sourceLinkDirectory"
+          rm "$HOMEDIR/$sourceLinkDirectory"
+          ln -sf "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
+        else
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$sourceLinkDirectory"
+          log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$sourceLinkDirectory"
+        fi
+      fi
+    done
+
+    log_info "linkDataDirectories ${linkDataSubDirectories[*]}"
+    count=$(((${#linkDataSubDirectories[@]}+1)/2))
+
+    for (( i = 0; i <= count; i+=2 )); do
+      sourceLinkDirectory=${linkDataSubDirectories[i]}
+      targetLinkDirectory=${linkDataSubDirectories[i+1]}
+      # remove after testing
+      # mkdir -p "/data/$sourceLinkDirectory"
+      # up to here
+      # log_debug "sourceLinkDirectoryLink directory = $sourceLinkDirectory; targetLinkDirectory = $targetLinkDirectory"
+      if [ -e "$HOMEDIR/$targetLinkDirectory" ]; then
+        if [ -d "$HOMEDIR/$targetLinkDirectory" ]; then
+          if [ -L "$HOMEDIR/$targetLinkDirectory" ]; then
+            # It is a symlink!
+            # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
+            rm "$HOMEDIR/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          else
+            # It's a directory!
+            # log_debug "Remove directory $HOMEDIR/data"
+            rmdir "$HOMEDIR/$targetLinkDirectory"
+            ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+            # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          fi
+        else
+          rm "$HOMEDIR/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+        fi
+      else
+        # log_debug "$HOMEDIR/$targetLinkDirectory does not exists and synlink will be made"
+        if [ -L "$HOMEDIR/$targetLinkDirectory" ];  then
+          # It is a symlink!
+          # log_debug "Remove symlink $HOMEDIR/$targetLinkDirectory"
+          rm "$HOMEDIR/$targetLinkDirectory"
+          ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+          # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
+        fi
+        ln -s "/data/$sourceLinkDirectory" "$HOMEDIR/$targetLinkDirectory"
+        # log_debug "Create symlink directory ln -s /data/$sourceLinkDirectory $HOMEDIR/$targetLinkDirectory"
+      fi
+    done
+
+  fi
+  cd "$currentPath" || exit
+}
+
+
 linkDotFiles() {
   log_info "Link dotfiles to $dotFilesParentDir"
   currentPath=$(pwd)
@@ -388,12 +553,13 @@ linkGrubDefault() {
 }
 
 # Main
-checkParameters "$1"
+# checkParameters "$1"
 initialiseLogs
-linkDataDir
-linkGrubDefault
-linkDotFiles
-linkEtcFiles
+dataDirLinksSetup
+# linkDataDir
+# linkDotFiles
+# linkEtcFiles
+# linkGrubDefault
 
 cd "$currentPath" || exit
 exit
