@@ -1,4 +1,4 @@
-$HOMEDIR#! /bin/bash
+#! /bin/bash
 # Version 3.3
 
 # Remove existing files.
