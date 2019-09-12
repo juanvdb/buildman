@@ -5,7 +5,7 @@ sudo apt update
 echo -en "\e[7;40;93m dpkg fix broken                                      \e[0m\n"
 sudo dpkg --configure -a
 echo -en "\e[7;40;93m apt fix broken                                       \e[0m\n"
-sudo apt --fix-broken install
+sudo apt -y --fix-broken install
 echo -en "\e[7;40;93m upgrade                                              \e[0m\n"
 sudo apt -y upgrade
 echo -en "\e[7;40;93m dist upgrade                                         \e[0m\n"
