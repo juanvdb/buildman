@@ -325,7 +325,7 @@ ppaKeyCheck () {
   println_banner_yellow "Repositories Key Check and Update                                    "
 
   for APT in `find /etc/apt/ -name *.list`; do
-      grep -o "^deb http://ppa.launchpad.net/[a-z0-9\-]\+/[a-z0-9\-]\+" $APT | while read ENTRY ; do
+      grep -o "^deb http://ppa.launchpad.net/[a-z0-9\-]\+/[a-z0-9\-]\+" "$APT" | while read ENTRY ; do
           # work out the referenced user and their ppa
           USER=`echo $ENTRY | cut -d/ -f4`
           PPA=`echo $ENTRY | cut -d/ -f5`
@@ -336,13 +336,13 @@ ppaKeyCheck () {
           fi
           # scrape the ppa page to get the keyid
           KEYID=`wget -q --no-check-certificate https://launchpad.net/~$USER/+archive/$PPA -O- | grep -o "1024R/[A-Z0-9]\+" | cut -d/ -f2`
-          sudo apt-key adv --list-keys $KEYID >/dev/null 2>&1
+          sudo apt-key adv --list-keys "$KEYID" >/dev/null 2>&1
           if [ $? != 0 ]
           then
-              echo Grabbing key $KEYID for archive $PPA by ~$USER
-              sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com $KEYID
+              echo "Grabbing key $KEYID for archive $PPA by ~$USER"
+              sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com "$KEYID"
           else
-              echo Already have key $KEYID for archive $PPA by ~$USER
+              echo "Already have key $KEYID for archive $PPA by ~$USER"
           fi
       done
   done
@@ -754,7 +754,7 @@ displayLinkInstallApp () {
   cd "$HOME/tmp" || return
 	wget -r -t 10 --output-document="$HOME/tmp/displaylink.zip"  http://www.displaylink.com/downloads/file?id=1304
   mkdir -p "$HOME/tmp/displaylink"
-  unzip $HOME/tmp/displaylink.zip -d "$HOME/tmp/displaylink/"
+  unzip "$HOME/tmp/displaylink.zip" -d "$HOME/tmp/displaylink/"
   chmod +x "$HOME/tmp/displaylink/displaylink-driver-5.1.run"
   sudo "$HOME/tmp/displaylink/displaylink-driver-5.1.run"
 
@@ -1603,13 +1603,13 @@ oracleJavaLatestInstall() {
   sudo apt install -y oracle-java12-set-default
   sudo update-alternatives --config java
   # Add JAVA_HOME to .bash_profile
-  if [[ ! -f $HOME/.bash_profile ]]; then
-    touch $HOME/.bash_profile
-    chmod +x $HOME/.bash_profile
+  if [[ ! -f "$HOME/.bash_profil"e ]]; then
+    touch "$HOME/.bash_profile"
+    chmod +x "$HOME/.bash_profile"
   fi
-  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/java-12-oracle"' $HOME/.bash_profile
+  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/java-12-oracle"' "$HOME/.bash_profile"
   source /etc/environment
-  echo $JAVA_HOME
+  echo "$JAVA_HOME"
 }
 
 
@@ -2179,7 +2179,7 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make zsync
 
   # Add
   # openjdk-11-jdk openjdk-11-jre
@@ -2469,7 +2469,7 @@ menuRun() {
   local choiceOpt
   local typeOfRun=$1
   shift
-  local menuSelections=($@)
+  local menuSelections=("$@")
 
   selectionMenu(){
 
