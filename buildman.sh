@@ -2,7 +2,7 @@
 
 # DateVer 2019/08/22
 # Buildman
-buildmanVersion=V4.4
+buildmanVersion=V4.5
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -88,21 +88,21 @@ switchPrintln="on"
 if [[ $scriptDebugToFile == "on" ]]; then
   if [[ -e $debugLogFile ]]; then
     # >$debugLogFile
-    echo -en "\n \033[1;31m   ##############################################################\n\033[0m
-    \n
-    \033[1;31m START OF NEW RUN\n\033[0m
-    \n
-    \033[1;31m###############################################################\n\033[0m\n" >>"$debugLogFile"
+    echo -en "\\n \033[1;31m   ##############################################################\\n\033[0m
+    \\n
+    \033[1;31m START OF NEW RUN\\n\033[0m
+    \\n
+    \033[1;31m###############################################################\\n\033[0m\\n" >>"$debugLogFile"
   else
     touch "$debugLogFile"
   fi
   if [[ -e $errorLogFile ]]; then
-    echo -en "\n \033[1;31m##############################################################\n\033[0m
-    \n
-    \033[1;31m START OF NEW RUN\n\033[0m
-    \n
-    \033[1;31m###############################################################\n\033[0m\n" >>"$errorLogFile"
-    echo -en "\n" >>"$errorLogFile"
+    echo -en "\\n \033[1;31m##############################################################\\n\033[0m
+    \\n
+    \033[1;31m START OF NEW RUN\\n\033[0m
+    \\n
+    \033[1;31m###############################################################\\n\033[0m\\n" >>"$errorLogFile"
+    echo -en "\\n" >>"$errorLogFile"
   else
     touch "$errorLogFile"
   fi
@@ -113,16 +113,16 @@ fi
 debug () {
   #[[ $script_debug = 1 ]] && "$@" || :
 
-  #printf "DEBUG: %s\n" "$1"
+  #printf "DEBUG: %s\\n" "$1"
   if [[ $scriptDebugToStdout == "on" ]]
   then
-    printf "DEBUG: %q\n" "$@"
+    printf "DEBUG: %q\\n" "$@"
   fi
   if [[ $scriptDebugToFile == "on" ]]
   then
-    printf "DEBUG: %q\n" "$@" >>"$debugLogFile" 2>>"$errorLogFile"
+    printf "DEBUG: %q\\n" "$@" >>"$debugLogFile" 2>>"$errorLogFile"
   fi
-  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\n" "$@" >>$debugLogFile 2>>$errorLogFile || :
+  # [[ $script_debug = 1 ]] && printf "DEBUG: %q\\n" "$@" >>$debugLogFile 2>>$errorLogFile || :
   #log "$@" >>$debugLogFile 2>>$errorLogFile
 }
 
@@ -1132,8 +1132,9 @@ mailspringInstall () {
       sudo apt install -y "$HOME/tmp/mailspring.deb"
     fi
   else
-    wget -P "$HOME/tmp" -O mailspring.deb https://updates.getmailspring.com/download?platform=linuxDeb
-    sudo apt install -y "$HOME/tmp/mailspring.deb"
+    sudo snap install --classic mailspring
+    # wget -P "$HOME/tmp" -O mailspring.deb https://updates.getmailspring.com/download?platform=linuxDeb
+    # sudo apt install -y "$HOME/tmp/mailspring.deb"
   fi
   sudo apt install -yf
   cd "$currentPath" || return
@@ -1146,6 +1147,13 @@ windsInstall () {
   println_blue "Install Winds RSS Reader and Podcast application"
   sudo snap install --classic winds
 }
+# ############################################################################
+# Install Tusk Evernote app
+tuskInstall () {
+  log_info "Install Tusk Evernote application"
+  println_blue "Install Tusk Evernote application"
+  sudo snap install --classic tusk
+}
 
 # ############################################################################
 # Install Skype
@@ -1154,6 +1162,45 @@ skypeInstall () {
   println_blue "Install Skype"
   sudo snap install --classic skype
 }
+
+# ############################################################################
+# Install Slack
+slackInstall () {
+  log_info "Install Slack"
+  println_blue "Install Slack"
+  sudo snap install --classic slack
+}
+
+# ############################################################################
+# Install Xtreme Download Manager
+xdmanInstall () {
+  log_info "Install Xtreme Download Manager media center"
+  println_blue "Install Xtreme Download Manager media center"
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Kodi repo? (y/n)" answer
+    if [[ $answer = [yY1] ]]; then
+      sudo add-apt-repository -y ppa:team-xbmc/ppa
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the Xtreme Download Manager apt sources."
+        println_red "Beta Code, revert the Xtreme Download Manager apt sources."
+        changeAptSource "/etc/apt/sources.list.d/noobslab-ubuntu-apps-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the Xtreme Download Manager apt sources."
+        println_red "No new repo, revert the Xtreme Download Manager apt sources."
+        changeAptSource "/etc/apt/sources.list.d/noobslab-ubuntu-apps-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+        log_warning "No new repo, revert the Xtreme Download Manager apt sources."
+        println_red "No new repo, revert the Xtreme Download Manager apt sources."
+        changeAptSource "/etc/apt/sources.list.d/noobslab-ubuntu-apps-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      fi
+    fi
+  fi
+  sudo apt install -y xdman
+}
+
 
 # ############################################################################
 # Install inSync for GoogleDrive
@@ -1312,8 +1359,8 @@ dockerInstall () {
 	# Create docker group and add juanb
   sudo groupadd docker
 	sudo usermod -aG docker "$USER"
-	printf "Logout and login for the user to be added to the group\n"
-	printf "\nGo to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\n\n"
+	printf "Logout and login for the user to be added to the group\\n"
+	printf "\\nGo to https://docs.docker.com/engine/installation/ubuntulinux/ for DNS and Firewall setup\\n\\n"
   pressEnterToContinue
 
   sudo ufw allow 2375/tcp
@@ -1825,7 +1872,7 @@ calibreInstall() {
   # sudo -v && wget --no-check-certificate -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
 
   # Github download, above is recommended
-  # sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+  # sudo -v && wget --no-check-certificate -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\\n'); exec(sys.stdin.read()); main()"
 }
 
 # ############################################################################
@@ -1877,8 +1924,6 @@ bleachbitInstall() {
 
   sudo apt install -y bleachbit
 }
-
-
 
 # ############################################################################
 # Ambiance and Radiance Theme Color packages installation
@@ -1967,6 +2012,22 @@ kodiInstall () {
     read -rp "Do you want to install from the Kodi repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
       sudo add-apt-repository -y ppa:team-xbmc/ppa
+      if [[ $betaAns == 1 ]]; then
+        log_warning "Beta Code, revert the Kodi apt sources."
+        println_red "Beta Code, revert the Kodi apt sources."
+        changeAptSource "/etc/apt/sources.list.d/team-xbmc-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ $noCurrentReleaseRepo == 1 ]]; then
+        log_warning "No new repo, revert the Kodi apt sources."
+        println_red "No new repo, revert the Kodi apt sources."
+        changeAptSource "/etc/apt/sources.list.d/team-xbmc-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      elif [[ "$distReleaseName" =~ ^("$stableReleaseName"|"$betaReleaseName")$ ]]; then
+        log_warning "No new repo, revert the Kodi apt sources."
+        println_red "No new repo, revert the Kodi apt sources."
+        changeAptSource "/etc/apt/sources.list.d/team-xbmc-ubuntu-ppa-$distReleaseName.list" "$distReleaseName" "$stableReleaseName"
+        repoUpdate
+      fi
     fi
   fi
   sudo apt install -y kodi
@@ -2031,7 +2092,6 @@ darktableInstall() {
   else
     sudo apt install -y darktable
   fi
-
 }
 
 rapidPhotoDownloaderInstall() {
@@ -2130,13 +2190,13 @@ installBaseApps () {
   # Add JAVA_HOME to .bash_profile
   # Add JAVA_HOME to .bash_profile
   if [[ ! -f $HOME/.bash_profile ]]; then
-    touch $HOME/.bash_profile
-    chmod +x $HOME/.bash_profile
+    touch "$HOME/.bash_profile"
+    chmod +x "$HOME/.bash_profile"
   fi
-  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/default-java"' $HOME/.bash_profile
+  sed -i -e 'export JAVA_HOME="/usr/lib/jvm/default-java"' "$HOME/.bash_profile"
   # sed -i -e "export JAVA_HOME="$(jrunscript -e 'java.lang.System.out.println(java.lang.System.getProperty("java.home"));')"" $HOME/.bash_profile
-  source /etc/environment
-  echo $JAVA_HOME
+  source "/etc/environment"
+  echo "$JAVA_HOME"
 
 
 	# desktop specific applications
@@ -2238,7 +2298,7 @@ setUbuntuVersionParameters() {
     validchoice=0
     until [[ $validchoice == 1 ]]; do
       clear
-      printf "\n\n\n"
+      printf "\\n\\n\\n"
       println_yellow "Running $desktopEnvironment $distReleaseName $distReleaseVer"
       printf "
       There are the following options for selecting a stable release for the repositories
@@ -2271,7 +2331,7 @@ setUbuntuVersionParameters() {
       "
 
       read -rp "Enter your choice : " stablechoice
-      printf "\n"
+      printf "\\n"
       case $stablechoice in
         e)
           stableReleaseName="disco"
@@ -2465,7 +2525,10 @@ menuRun() {
       323   #: Mailspring desktop email client
       324   #: Evolution email
       331   #: Skype
+      332   #: Slack
       341   #: Winds RSS Reader and Podcast application
+      342   #: Tusk Evernote application
+      351   #: Xtreme Download Manager
 
             #: submenuApps
       421   #: Favorite Book Reader
@@ -2531,419 +2594,423 @@ menuRun() {
     )
 
     clear
-    printf "\n\n"
+    printf "\\n\\n"
     case $typeOfRun in
     SelectThenAutoRun )
-      printf "  %s%sSelect items and then install the items without prompting.%s\n" "${rev}" "${bold}" "${normal}"
+      printf "  %s%sSelect items and then install the items without prompting.%s\\n" "${rev}" "${bold}" "${normal}"
     ;;
     SelectThenStepRun )
-      printf "  %s%sSelect items and then install the items each with a prompt.%s\n" "${rev}" "${bold}"  "${normal}"
+      printf "  %s%sSelect items and then install the items each with a prompt.%s\\n" "${rev}" "${bold}"  "${normal}"
     ;;
     SelectItem )
-      printf "  %s%sSelect items and for individual installation with prompt.%s\n" "${rev}" "${bold}" "${normal}"
+      printf "  %s%sSelect items and for individual installation with prompt.%s\\n" "${rev}" "${bold}" "${normal}"
     esac
     printf "
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "111" ]]; then printf "%s%s111%s" "${rev}" "${bold}" "${normal}"; else printf "111"; fi; printf "  : Kernel upgrade.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "112" ]]; then printf "%s%s112%s" "${rev}" "${bold}" "${normal}"; else printf "112"; fi; printf "  : Repositories update.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "113" ]]; then printf "%s%s113%s" "${rev}" "${bold}" "${normal}"; else printf "113"; fi; printf "  : Repositories upgrade.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "114" ]]; then printf "%s%s114%s" "${rev}" "${bold}" "${normal}"; else printf "114"; fi; printf "  : Repository Key Check.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "121" ]]; then printf "%s%s121%s" "${rev}" "${bold}" "${normal}"; else printf "121"; fi; printf "  : Install the base utilites and applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "122" ]]; then printf "%s%s122%s" "${rev}" "${bold}" "${normal}"; else printf "122"; fi; printf "  : Install all my Universe application.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "125" ]]; then printf "%s%s125%s" "${rev}" "${bold}" "${normal}"; else printf "125"; fi; printf "  : Flatpak install and configure.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "131" ]]; then printf "%s%s131%s" "${rev}" "${bold}" "${normal}"; else printf "131"; fi; printf "  : Setup the home directories to link to the data disk directories.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "141" ]]; then printf "%s%s141%s" "${rev}" "${bold}" "${normal}"; else printf "141"; fi; printf "  : Install KDE Desktop from backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "142" ]]; then printf "%s%s142%s" "${rev}" "${bold}" "${normal}"; else printf "142"; fi; printf "  : Upgrade KDE to Beta KDE on backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "143" ]]; then printf "%s%s143%s" "${rev}" "${bold}" "${normal}"; else printf "143"; fi; printf "  : Change KDE desktop settings.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "151" ]]; then printf "%s%s151%s" "${rev}" "${bold}" "${normal}"; else printf "151"; fi; printf "  : Install Gnome Desktop from backports.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "152" ]]; then printf "%s%s152%s" "${rev}" "${bold}" "${normal}"; else printf "152"; fi; printf "  : Change Gnome desktop settings.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "161" ]]; then printf "%s%s161%s" "${rev}" "${bold}" "${normal}"; else printf "161"; fi; printf "  : ownCloudClient.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "162" ]]; then printf "%s%s162%s" "${rev}" "${bold}" "${normal}"; else printf "162"; fi; printf "  : Dropbox.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "163" ]]; then printf "%s%s163%s" "${rev}" "${bold}" "${normal}"; else printf "163"; fi; printf "  : inSync for GoogleDrive.\n"
-    printf "\n"
-    printf "     a    : Utilities Menu.\n"
-    printf "     b    : Internet and eMail Menu.\n"
-    printf "     c    : Applications Menu.\n"
-    printf "     d    : Development Apps and IDEs Menu.\n"
-    printf "     e    : Photography and Imaging Menu.\n"
-    printf "     f    : Multimedia, Video and Audio Menu.\n"
-    printf "     g    : Virtualization Applictions Menu.\n"
-    printf "     h    : Other (Hardware Drivers, ).\n"
-    printf "     i    : Buildman Settings, Utilities and tests.\n"
-    printf "     x    : Clear selections.\n"
-    printf "\n"
-    printf "\n"
-    printf "     %s1   : RUN%s\n" "${bold}" "${normal}"
-    printf "\n"
-    printf "    0/q   : Return to main menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "111" ]]; then printf "%s%s111%s" "${rev}" "${bold}" "${normal}"; else printf "111"; fi; printf "  : Kernel upgrade.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "112" ]]; then printf "%s%s112%s" "${rev}" "${bold}" "${normal}"; else printf "112"; fi; printf "  : Repositories update.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "113" ]]; then printf "%s%s113%s" "${rev}" "${bold}" "${normal}"; else printf "113"; fi; printf "  : Repositories upgrade.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "114" ]]; then printf "%s%s114%s" "${rev}" "${bold}" "${normal}"; else printf "114"; fi; printf "  : Repository Key Check.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "121" ]]; then printf "%s%s121%s" "${rev}" "${bold}" "${normal}"; else printf "121"; fi; printf "  : Install the base utilites and applications.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "122" ]]; then printf "%s%s122%s" "${rev}" "${bold}" "${normal}"; else printf "122"; fi; printf "  : Install all my Universe application.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "125" ]]; then printf "%s%s125%s" "${rev}" "${bold}" "${normal}"; else printf "125"; fi; printf "  : Flatpak install and configure.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "131" ]]; then printf "%s%s131%s" "${rev}" "${bold}" "${normal}"; else printf "131"; fi; printf "  : Setup the home directories to link to the data disk directories.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "141" ]]; then printf "%s%s141%s" "${rev}" "${bold}" "${normal}"; else printf "141"; fi; printf "  : Install KDE Desktop from backports.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "142" ]]; then printf "%s%s142%s" "${rev}" "${bold}" "${normal}"; else printf "142"; fi; printf "  : Upgrade KDE to Beta KDE on backports.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "143" ]]; then printf "%s%s143%s" "${rev}" "${bold}" "${normal}"; else printf "143"; fi; printf "  : Change KDE desktop settings.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "151" ]]; then printf "%s%s151%s" "${rev}" "${bold}" "${normal}"; else printf "151"; fi; printf "  : Install Gnome Desktop from backports.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "152" ]]; then printf "%s%s152%s" "${rev}" "${bold}" "${normal}"; else printf "152"; fi; printf "  : Change Gnome desktop settings.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "161" ]]; then printf "%s%s161%s" "${rev}" "${bold}" "${normal}"; else printf "161"; fi; printf "  : ownCloudClient.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "162" ]]; then printf "%s%s162%s" "${rev}" "${bold}" "${normal}"; else printf "162"; fi; printf "  : Dropbox.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "163" ]]; then printf "%s%s163%s" "${rev}" "${bold}" "${normal}"; else printf "163"; fi; printf "  : inSync for GoogleDrive.\\n"
+    printf "\\n"
+    printf "     a    : Utilities Menu.\\n"
+    printf "     b    : Internet and eMail Menu.\\n"
+    printf "     c    : Applications Menu.\\n"
+    printf "     d    : Development Apps and IDEs Menu.\\n"
+    printf "     e    : Photography and Imaging Menu.\\n"
+    printf "     f    : Multimedia, Video and Audio Menu.\\n"
+    printf "     g    : Virtualization Applictions Menu.\\n"
+    printf "     h    : Other (Hardware Drivers, ).\\n"
+    printf "     i    : Buildman Settings, Utilities and tests.\\n"
+    printf "     x    : Clear selections.\\n"
+    printf "\\n"
+    printf "\\n"
+    printf "     %s1   : RUN%s\\n" "${bold}" "${normal}"
+    printf "\\n"
+    printf "     0/q   : Return to main menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuUtils(){
     clear
-    printf "\n\n"
-    printf "  %s%sUtilities%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sUtilities%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "211" ]]; then printf "%s%s211%s" "${rev}" "${bold}" "${normal}"; else printf "211"; fi; printf "  : Latte Dock.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "212" ]]; then printf "%s%s212%s" "${rev}" "${bold}" "${normal}"; else printf "212"; fi; printf "  : Doublecmd.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "213" ]]; then printf "%s%s213%s" "${rev}" "${bold}" "${normal}"; else printf "213"; fi; printf "  : FreeFileSync.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "221" ]]; then printf "%s%s221%s" "${rev}" "${bold}" "${normal}"; else printf "221"; fi; printf "  : Powerline.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "222" ]]; then printf "%s%s222%s" "${rev}" "${bold}" "${normal}"; else printf "222"; fi; printf "  : Bleachbit.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "261" ]]; then printf "%s%s261%s" "${rev}" "${bold}" "${normal}"; else printf "261"; fi; printf "  : UNetbootin ISO to USB Application.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "271" ]]; then printf "%s%s271%s" "${rev}" "${bold}" "${normal}"; else printf "271"; fi; printf "  : Y-PPA Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "272" ]]; then printf "%s%s272%s" "${rev}" "${bold}" "${normal}"; else printf "272"; fi; printf "  : Boot Repair Appliction.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "282" ]]; then printf "%s%s282%s" "${rev}" "${bold}" "${normal}"; else printf "282"; fi; printf "  : Battery Manager.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "291" ]]; then printf "%s%s291%s" "${rev}" "${bold}" "${normal}"; else printf "291"; fi; printf "  : Install extra fonts.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "292" ]]; then printf "%s%s292%s" "${rev}" "${bold}" "${normal}"; else printf "292"; fi; printf "  : Install cheat the cheatsheet for the commandline.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "211" ]]; then printf "%s%s211%s" "${rev}" "${bold}" "${normal}"; else printf "211"; fi; printf "  : Latte Dock.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "212" ]]; then printf "%s%s212%s" "${rev}" "${bold}" "${normal}"; else printf "212"; fi; printf "  : Doublecmd.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "213" ]]; then printf "%s%s213%s" "${rev}" "${bold}" "${normal}"; else printf "213"; fi; printf "  : FreeFileSync.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "221" ]]; then printf "%s%s221%s" "${rev}" "${bold}" "${normal}"; else printf "221"; fi; printf "  : Powerline.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "222" ]]; then printf "%s%s222%s" "${rev}" "${bold}" "${normal}"; else printf "222"; fi; printf "  : Bleachbit.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "261" ]]; then printf "%s%s261%s" "${rev}" "${bold}" "${normal}"; else printf "261"; fi; printf "  : UNetbootin ISO to USB Application.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "271" ]]; then printf "%s%s271%s" "${rev}" "${bold}" "${normal}"; else printf "271"; fi; printf "  : Y-PPA Manager.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "272" ]]; then printf "%s%s272%s" "${rev}" "${bold}" "${normal}"; else printf "272"; fi; printf "  : Boot Repair Appliction.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "282" ]]; then printf "%s%s282%s" "${rev}" "${bold}" "${normal}"; else printf "282"; fi; printf "  : Battery Manager.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "291" ]]; then printf "%s%s291%s" "${rev}" "${bold}" "${normal}"; else printf "291"; fi; printf "  : Install extra fonts.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "292" ]]; then printf "%s%s292%s" "${rev}" "${bold}" "${normal}"; else printf "292"; fi; printf "  : Install cheat the cheatsheet for the commandline.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuInternet(){
     clear
-    printf "\n\n"
-    printf "  %s%sInternet and eMail%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sInternet and eMail%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "311" ]]; then printf "%s%s311%s" "${rev}" "${bold}" "${normal}"; else printf "311"; fi; printf "  : Google Chrome browser.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "312" ]]; then printf "%s%s312%s" "${rev}" "${bold}" "${normal}"; else printf "312"; fi; printf "  : Opera Browser.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "321" ]]; then printf "%s%s321%s" "${rev}" "${bold}" "${normal}"; else printf "321"; fi; printf "  : Thunderbird email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "323" ]]; then printf "%s%s323%s" "${rev}" "${bold}" "${normal}"; else printf "323"; fi; printf "  : Mailspring desktop email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "324" ]]; then printf "%s%s324%s" "${rev}" "${bold}" "${normal}"; else printf "324"; fi; printf "  : Evolution email client.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "331" ]]; then printf "%s%s331%s" "${rev}" "${bold}" "${normal}"; else printf "331"; fi; printf "  : Skype.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "341" ]]; then printf "%s%s341%s" "${rev}" "${bold}" "${normal}"; else printf "341"; fi; printf "  : Winds RSS Reader and Podcast application.\n"
-
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "311" ]]; then printf "%s%s311%s" "${rev}" "${bold}" "${normal}"; else printf "311"; fi; printf "  : Google Chrome browser.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "312" ]]; then printf "%s%s312%s" "${rev}" "${bold}" "${normal}"; else printf "312"; fi; printf "  : Opera Browser.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "321" ]]; then printf "%s%s321%s" "${rev}" "${bold}" "${normal}"; else printf "321"; fi; printf "  : Thunderbird email client.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "323" ]]; then printf "%s%s323%s" "${rev}" "${bold}" "${normal}"; else printf "323"; fi; printf "  : Mailspring desktop email client.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "324" ]]; then printf "%s%s324%s" "${rev}" "${bold}" "${normal}"; else printf "324"; fi; printf "  : Evolution email client.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "331" ]]; then printf "%s%s331%s" "${rev}" "${bold}" "${normal}"; else printf "331"; fi; printf "  : Skype.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "332" ]]; then printf "%s%s332%s" "${rev}" "${bold}" "${normal}"; else printf "332"; fi; printf "  : Slack.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "341" ]]; then printf "%s%s341%s" "${rev}" "${bold}" "${normal}"; else printf "341"; fi; printf "  : Winds RSS Reader and Podcast application.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "342" ]]; then printf "%s%s342%s" "${rev}" "${bold}" "${normal}"; else printf "342"; fi; printf "  : Tusk Evernote application.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "351" ]]; then printf "%s%s351%s" "${rev}" "${bold}" "${normal}"; else printf "351"; fi; printf "  : Xtreme Download Manager application.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuApps(){
     clear
-    printf "\n\n"
-    printf "  %s%sApplications%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sApplications%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "421" ]]; then printf "%s%s421%s" "${rev}" "${bold}" "${normal}"; else printf "421"; fi; printf "  : Favorite Book Reader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "441" ]]; then printf "%s%s441%s" "${rev}" "${bold}" "${normal}"; else printf "441"; fi; printf "  : Calibre.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "442" ]]; then printf "%s%s442%s" "${rev}" "${bold}" "${normal}"; else printf "442"; fi; printf "  : KMyMoney.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "451" ]]; then printf "%s%s451%s" "${rev}" "${bold}" "${normal}"; else printf "451"; fi; printf "  : Anbox.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "461" ]]; then printf "%s%s461%s" "${rev}" "${bold}" "${normal}"; else printf "461"; fi; printf "  : LibreCAD.\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "421" ]]; then printf "%s%s421%s" "${rev}" "${bold}" "${normal}"; else printf "421"; fi; printf "  : Favorite Book Reader.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "441" ]]; then printf "%s%s441%s" "${rev}" "${bold}" "${normal}"; else printf "441"; fi; printf "  : Calibre.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "442" ]]; then printf "%s%s442%s" "${rev}" "${bold}" "${normal}"; else printf "442"; fi; printf "  : KMyMoney.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "451" ]]; then printf "%s%s451%s" "${rev}" "${bold}" "${normal}"; else printf "451"; fi; printf "  : Anbox.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "461" ]]; then printf "%s%s461%s" "${rev}" "${bold}" "${normal}"; else printf "461"; fi; printf "  : LibreCAD.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuDev(){
     clear
-    printf "\n\n"
-    printf "  %s%sDevelopment applications and IDEs%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sDevelopment applications and IDEs%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "511" ]]; then printf "%s%s511%s" "${rev}" "${bold}" "${normal}"; else printf "511"; fi; printf "  : Install Development Apps and IDEs.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "512" ]]; then printf "%s%s512%s" "${rev}" "${bold}" "${normal}"; else printf "512"; fi; printf "  : Git.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "513" ]]; then printf "%s%s513%s" "${rev}" "${bold}" "${normal}"; else printf "513"; fi; printf "  : Atom Editor.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "514" ]]; then printf "%s%s514%s" "${rev}" "${bold}" "${normal}"; else printf "514"; fi; printf "  : Brackets Editor.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "521" ]]; then printf "%s%s521%s" "${rev}" "${bold}" "${normal}"; else printf "521"; fi; printf "  : Bashdb.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "522" ]]; then printf "%s%s522%s" "${rev}" "${bold}" "${normal}"; else printf "522"; fi; printf "  : PyCharm IDE.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Eclipse IDE.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Visual Studio Code.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "525" ]]; then printf "%s%s525%s" "${rev}" "${bold}" "${normal}"; else printf "525"; fi; printf "  : Intellij Idea Community.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "585" ]]; then printf "%s%s581%s" "${rev}" "${bold}" "${normal}"; else printf "581"; fi; printf "  : OpenJDK Latest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "581" ]]; then printf "%s%s582%s" "${rev}" "${bold}" "${normal}"; else printf "582"; fi; printf "  : OpenJDK 8.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "582" ]]; then printf "%s%s583%s" "${rev}" "${bold}" "${normal}"; else printf "583"; fi; printf "  : OpenJDK 11.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "583" ]]; then printf "%s%s585%s" "${rev}" "${bold}" "${normal}"; else printf "585"; fi; printf "  : Oracle Java Latest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "586" ]]; then printf "%s%s586%s" "${rev}" "${bold}" "${normal}"; else printf "586"; fi; printf "  : Oracle Java 8.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "587" ]]; then printf "%s%s587%s" "${rev}" "${bold}" "${normal}"; else printf "587"; fi; printf "  : Oracle Java 11.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "588" ]]; then printf "%s%s588%s" "${rev}" "${bold}" "${normal}"; else printf "588"; fi; printf "  : Set Java Version.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "590" ]]; then printf "%s%s590%s" "${rev}" "${bold}" "${normal}"; else printf "590"; fi; printf "  : Git Config with my details.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "595" ]]; then printf "%s%s595%s" "${rev}" "${bold}" "${normal}"; else printf "595"; fi; printf "  : Ruby Repo.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "511" ]]; then printf "%s%s511%s" "${rev}" "${bold}" "${normal}"; else printf "511"; fi; printf "  : Install Development Apps and IDEs.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "512" ]]; then printf "%s%s512%s" "${rev}" "${bold}" "${normal}"; else printf "512"; fi; printf "  : Git.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "513" ]]; then printf "%s%s513%s" "${rev}" "${bold}" "${normal}"; else printf "513"; fi; printf "  : Atom Editor.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "514" ]]; then printf "%s%s514%s" "${rev}" "${bold}" "${normal}"; else printf "514"; fi; printf "  : Brackets Editor.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "521" ]]; then printf "%s%s521%s" "${rev}" "${bold}" "${normal}"; else printf "521"; fi; printf "  : Bashdb.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "522" ]]; then printf "%s%s522%s" "${rev}" "${bold}" "${normal}"; else printf "522"; fi; printf "  : PyCharm IDE.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "523" ]]; then printf "%s%s523%s" "${rev}" "${bold}" "${normal}"; else printf "523"; fi; printf "  : Eclipse IDE.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "524" ]]; then printf "%s%s524%s" "${rev}" "${bold}" "${normal}"; else printf "524"; fi; printf "  : Visual Studio Code.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "525" ]]; then printf "%s%s525%s" "${rev}" "${bold}" "${normal}"; else printf "525"; fi; printf "  : Intellij Idea Community.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "531" ]]; then printf "%s%s531%s" "${rev}" "${bold}" "${normal}"; else printf "531"; fi; printf "  : Postman.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "541" ]]; then printf "%s%s541%s" "${rev}" "${bold}" "${normal}"; else printf "541"; fi; printf "  : AsciiDoc.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "585" ]]; then printf "%s%s581%s" "${rev}" "${bold}" "${normal}"; else printf "581"; fi; printf "  : OpenJDK Latest.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "581" ]]; then printf "%s%s582%s" "${rev}" "${bold}" "${normal}"; else printf "582"; fi; printf "  : OpenJDK 8.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "582" ]]; then printf "%s%s583%s" "${rev}" "${bold}" "${normal}"; else printf "583"; fi; printf "  : OpenJDK 11.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "583" ]]; then printf "%s%s585%s" "${rev}" "${bold}" "${normal}"; else printf "585"; fi; printf "  : Oracle Java Latest.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "586" ]]; then printf "%s%s586%s" "${rev}" "${bold}" "${normal}"; else printf "586"; fi; printf "  : Oracle Java 8.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "587" ]]; then printf "%s%s587%s" "${rev}" "${bold}" "${normal}"; else printf "587"; fi; printf "  : Oracle Java 11.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "588" ]]; then printf "%s%s588%s" "${rev}" "${bold}" "${normal}"; else printf "588"; fi; printf "  : Set Java Version.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "590" ]]; then printf "%s%s590%s" "${rev}" "${bold}" "${normal}"; else printf "590"; fi; printf "  : Git Config with my details.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "595" ]]; then printf "%s%s595%s" "${rev}" "${bold}" "${normal}"; else printf "595"; fi; printf "  : Ruby Repo.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuPhoto(){
     clear
-    printf "\n\n"
-    printf "  %s%sPhoto and Imaging Applications%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sPhoto and Imaging Applications%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "611" ]]; then printf "%s%s611%s" "${rev}" "${bold}" "${normal}"; else printf "611"; fi; printf "  : Photography Apps.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "612" ]]; then printf "%s%s612%s" "${rev}" "${bold}" "${normal}"; else printf "612"; fi; printf "  : Variety.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "621" ]]; then printf "%s%s621%s" "${rev}" "${bold}" "${normal}"; else printf "621"; fi; printf "  : Digikam.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "622" ]]; then printf "%s%s622%s" "${rev}" "${bold}" "${normal}"; else printf "622"; fi; printf "  : Darktable.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "631" ]]; then printf "%s%s631%s" "${rev}" "${bold}" "${normal}"; else printf "631"; fi; printf "  : RapidPhotoDownloader.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "641" ]]; then printf "%s%s641%s" "${rev}" "${bold}" "${normal}"; else printf "641"; fi; printf "  : Image Editing Applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "651" ]]; then printf "%s%s651%s" "${rev}" "${bold}" "${normal}"; else printf "651"; fi; printf "  : Inkscape.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "611" ]]; then printf "%s%s611%s" "${rev}" "${bold}" "${normal}"; else printf "611"; fi; printf "  : Photography Apps.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "612" ]]; then printf "%s%s612%s" "${rev}" "${bold}" "${normal}"; else printf "612"; fi; printf "  : Variety.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "621" ]]; then printf "%s%s621%s" "${rev}" "${bold}" "${normal}"; else printf "621"; fi; printf "  : Digikam.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "622" ]]; then printf "%s%s622%s" "${rev}" "${bold}" "${normal}"; else printf "622"; fi; printf "  : Darktable.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "631" ]]; then printf "%s%s631%s" "${rev}" "${bold}" "${normal}"; else printf "631"; fi; printf "  : RapidPhotoDownloader.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "641" ]]; then printf "%s%s641%s" "${rev}" "${bold}" "${normal}"; else printf "641"; fi; printf "  : Image Editing Applications.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "651" ]]; then printf "%s%s651%s" "${rev}" "${bold}" "${normal}"; else printf "651"; fi; printf "  : Inkscape.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuMedia(){
     clear
-    printf "\n\n"
-    printf "  %s%sAudio, Video and Media Applications%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sAudio, Video and Media Applications%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "711" ]]; then printf "%s%s711%s" "${rev}" "${bold}" "${normal}"; else printf "711"; fi; printf "  : Music and Video Applications.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "713" ]]; then printf "%s%s713%s" "${rev}" "${bold}" "${normal}"; else printf "713"; fi; printf "  : Spotify.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : Google Play Music Desktop Player.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "721" ]]; then printf "%s%s721%s" "${rev}" "${bold}" "${normal}"; else printf "721"; fi; printf "  : Kodi media center.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "711" ]]; then printf "%s%s711%s" "${rev}" "${bold}" "${normal}"; else printf "711"; fi; printf "  : Music and Video Applications.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "713" ]]; then printf "%s%s713%s" "${rev}" "${bold}" "${normal}"; else printf "713"; fi; printf "  : Spotify.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : Google Play Music Desktop Player.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "721" ]]; then printf "%s%s721%s" "${rev}" "${bold}" "${normal}"; else printf "721"; fi; printf "  : Kodi media center.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuVirtualization(){
     clear
-    printf "\n\n"
-    printf "  %s%Virtualization%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%Virtualization%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "811" ]]; then printf "%s%s811%s" "${rev}" "${bold}" "${normal}"; else printf "811"; fi; printf "  : Docker.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "821" ]]; then printf "%s%s821%s" "${rev}" "${bold}" "${normal}"; else printf "821"; fi; printf "  : Setup for a VirtualBox guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "822" ]]; then printf "%s%s822%s" "${rev}" "${bold}" "${normal}"; else printf "822"; fi; printf "  : VirtualBox Host.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "831" ]]; then printf "%s%s831%s" "${rev}" "${bold}" "${normal}"; else printf "831"; fi; printf "  : Setup for a Vmware guest.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "851" ]]; then printf "%s%s851%s" "${rev}" "${bold}" "${normal}"; else printf "851"; fi; printf "  : Vagrant.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "881" ]]; then printf "%s%s881%s" "${rev}" "${bold}" "${normal}"; else printf "881"; fi; printf "  : KVM.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "811" ]]; then printf "%s%s811%s" "${rev}" "${bold}" "${normal}"; else printf "811"; fi; printf "  : Docker.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "821" ]]; then printf "%s%s821%s" "${rev}" "${bold}" "${normal}"; else printf "821"; fi; printf "  : Setup for a VirtualBox guest.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "822" ]]; then printf "%s%s822%s" "${rev}" "${bold}" "${normal}"; else printf "822"; fi; printf "  : VirtualBox Host.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "831" ]]; then printf "%s%s831%s" "${rev}" "${bold}" "${normal}"; else printf "831"; fi; printf "  : Setup for a Vmware guest.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "851" ]]; then printf "%s%s851%s" "${rev}" "${bold}" "${normal}"; else printf "851"; fi; printf "  : Vagrant.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "881" ]]; then printf "%s%s881%s" "${rev}" "${bold}" "${normal}"; else printf "881"; fi; printf "  : KVM.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuOther(){
     clear
-    printf "\n\n"
-    printf "  %s%Hardware Drivers%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%Hardware Drivers%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "911" ]]; then printf "%s%s911%s" "${rev}" "${bold}" "${normal}"; else printf "911"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "921" ]]; then printf "%s%s921%s" "${rev}" "${bold}" "${normal}"; else printf "921"; fi; printf "  : DisplayLink.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "911" ]]; then printf "%s%s911%s" "${rev}" "${bold}" "${normal}"; else printf "911"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "921" ]]; then printf "%s%s921%s" "${rev}" "${bold}" "${normal}"; else printf "921"; fi; printf "  : DisplayLink.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
   submenuSettings(){
     clear
-    printf "\n\n"
-    printf "  %s%sBuildman Settings%s\n\n" "${bold}" "${rev}" "${normal}"
+    printf "\\n\\n"
+    printf "  %s%sBuildman Settings%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
-        printf "  Select items and then install the items without prompting.\n"
+        printf "  Select items and then install the items without prompting.\\n"
       ;;
       SelectThenStepRun )
-        printf "  Select items and then install the items each with a prompt.\n"
+        printf "  Select items and then install the items each with a prompt.\\n"
       ;;
       SelectItem )
-        printf "  Select items and for individual installation with prompt.\n"
+        printf "  Select items and for individual installation with prompt.\\n"
       ;;
     esac
     printf "
 
     There are the following options for this script
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf " : Create test data directories on data drive.\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "192" ]]; then printf "%s%s192%s" "${rev}" "${bold}" "${normal}"; else printf "192"; fi; printf " : Set options for an Ubuntu Beta install with PPA references to a previous version.\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "2" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "${rev}" "${bold}" "${normal}"; else printf "%s%sON%s" "${rev}" "$bold" "$normal"; fi; printf ". Select 2 to toggle so that questions is "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "3" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : noCurrentReleaseRepo is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%sON%s" "${rev}" "${bold}" "${normal}"; else printf "%sOFF%s" "$bold" "$normal"; fi; printf ". Select 3 to toggle noCurrentReleaseRepo to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
+    printf "     ";if [[ "${menuSelections[*]}" =~ "191" ]]; then printf "%s%s191%s" "${rev}" "${bold}" "${normal}"; else printf "191"; fi; printf " : Create test data directories on data drive.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "192" ]]; then printf "%s%s192%s" "${rev}" "${bold}" "${normal}"; else printf "192"; fi; printf " : Set options for an Ubuntu Beta install with PPA references to a previous version.\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     if [[ ! $1 = "SelectItem" ]]; then
       printf "Current Selection is: "
       for i in "${menuSelections[@]}"; do
         printf "%s, " "${i}"
       done
-      printf "\n\n"
+      printf "\\n\\n"
     fi
   }
 
@@ -2972,7 +3039,7 @@ menuRun() {
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
     selectionMenu "$typeOfRun"
     read -rp "Enter your choice : " choiceOpt
-    printf "\n"
+    printf "\\n"
     if ((1<choiceOpt && choiceOpt<=999))
     then
       howToRun "$choiceOpt" "$typeOfRun"
@@ -2993,7 +3060,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuUtils "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((200<=choiceOpt && choiceOpt<=299))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3005,7 +3072,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuInternet "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((300<=choiceOpt && choiceOpt<=399))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3017,7 +3084,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuApps "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((400<=choiceOpt && choiceOpt<=499))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3029,7 +3096,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuDev "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((500<=choiceOpt && choiceOpt<=599))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3041,7 +3108,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuPhoto "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((600<=choiceOpt && choiceOpt<=699))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3053,7 +3120,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuMedia "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((700<=choiceOpt && choiceOpt<=799))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3065,7 +3132,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuVirtualization "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((800<=choiceOpt && choiceOpt<=899))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3077,7 +3144,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuOther "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((911<=choiceOpt && choiceOpt<=999))
             then
               howToRun "$choiceOpt" "$typeOfRun"
@@ -3089,7 +3156,7 @@ menuRun() {
           until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
             submenuSettings "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
-            printf "\n"
+            printf "\\n"
             if ((2<=choiceOpt && choiceOpt<=199)); then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -3146,7 +3213,10 @@ runSelection() {
     323 ) asking mailspringInstall  "install Mailspring desktop email client" "Mailspring desktop email client install complete." ;;
     324 ) asking evolutionInstall  "install Evolution email client" "Evolution email client install complete." ;;
     331 ) asking skypeInstall  "install Skype" "Skype install complete." ;;
+    332 ) asking slackInstall  "install Slack" "Slack install complete." ;;
     341 ) asking windsInstall  "install Winds RSS Reader and Podcast application" "Winds RSS Reader and Podcast application install complete." ;;
+    342 ) asking tuskInstall  "install Tusk Evernote application" "Tusk Evernote application install complete." ;;
+    351 ) asking xdmanInstall  "install Xtreme Download Manager application" "Xtreme Download Manager application install complete." ;;
     421 ) asking fbReaderInstall "install Favorite Book Reader" "Favorite Book Reader install complete." ;;
     441 ) asking calibreInstall "install Calibre" "Calibre install complete." ;;
     442 ) asking kMyMoneyInstall "install KMyMoney" "KMyMoney install complete." ;;
@@ -3194,23 +3264,23 @@ runSelection() {
     2)
       if [[ $noPrompt = 0 ]]; then
         noPrompt=1
-        println_blue "Questions asked is OFF.\n No questions will be asked."
-        log_debug "Questions asked is OFF.\n No questions will be asked."
+        println_blue "Questions asked is OFF.\\n No questions will be asked."
+        log_debug "Questions asked is OFF.\\n No questions will be asked."
       else
         noPrompt=0
-        println_blue "Questions asked is ON.\n All questions will be asked."
-        log_debug "Questions asked is ON.\n All questions will be asked."
+        println_blue "Questions asked is ON.\\n All questions will be asked."
+        log_debug "Questions asked is ON.\\n All questions will be asked."
       fi
     ;;
     3)
       if [[ $noCurrentReleaseRepo = 0 ]]; then
         noCurrentReleaseRepo=1
-        println_blue "noCurrentReleaseRepo ON.\n The repos will be installed against ${previousStableReleaseName}."
-        log_debug "noCurrentReleaseRepo ON.\n The repos will be installed against ${previousStableReleaseName}."
+        println_blue "noCurrentReleaseRepo ON.\\n The repos will be installed against ${previousStableReleaseName}."
+        log_debug "noCurrentReleaseRepo ON.\\n The repos will be installed against ${previousStableReleaseName}."
       else
         noCurrentReleaseRepo=0
-        println_blue "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
-        log_debug "noCurrentReleaseRepo OFF.\n The repos will be installed against ${distReleaseName}."
+        println_blue "noCurrentReleaseRepo OFF.\\n The repos will be installed against ${distReleaseName}."
+        log_debug "noCurrentReleaseRepo OFF.\\n The repos will be installed against ${distReleaseName}."
       fi
     ;;
   esac
@@ -3219,22 +3289,22 @@ runSelection() {
 selectDesktopEnvironment(){
   clear
   until [[ $choiceOpt =~ ^(0|q|Q|quit)$ ]]; do
-    printf "\n\n"
-    printf "  Desktop Environment is: %s%s%s%s\n\n" "${bold}" "${yellow}" "${desktopEnvironment}" "${normal}"
+    printf "\\n\\n"
+    printf "  Desktop Environment is: %s%s%s%s\\n\\n" "${bold}" "${yellow}" "${desktopEnvironment}" "${normal}"
     printf "
     There are the following desktop environment options
     TASK : DESCRIPTION
-    -----: ---------------------------------------\n"
-    printf "     ";if [[ "${desktopEnvironment}" =~ "gnome" ]]; then printf "%s%s1%s" "${rev}" "${bold}" "${normal}"; else printf "1"; fi; printf "   : Set desktop environment as gnome.\n"
-    printf "     ";if [[ "${desktopEnvironment}" =~ "kde" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Set desktop environment as KDE.\n"
-    printf "     ";if [[ "${desktopEnvironment}" =~ "ubuntu" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Set desktop environment as Ubuntu Unity.\n"
-    printf "     ";if [[ "${desktopEnvironment}" =~ "xubuntu" ]]; then printf "%s%s4%s" "${rev}" "${bold}" "${normal}"; else printf "4"; fi; printf "   : Set desktop environment as XFCE (Xubuntu).\n"
-    printf "     ";if [[ "${desktopEnvironment}" =~ "lubuntu" ]]; then printf "%s%s5%s" "${rev}" "${bold}" "${normal}"; else printf "5"; fi; printf "   : Set desktop environment as LXDE (Lubuntu).\n"
-    printf "\n"
-    printf "    0/q  : Return to Selection menu\n\n"
+    -----: ---------------------------------------\\n"
+    printf "     ";if [[ "${desktopEnvironment}" =~ "gnome" ]]; then printf "%s%s1%s" "${rev}" "${bold}" "${normal}"; else printf "1"; fi; printf "   : Set desktop environment as gnome.\\n"
+    printf "     ";if [[ "${desktopEnvironment}" =~ "kde" ]]; then printf "%s%s2%s" "${rev}" "${bold}" "${normal}"; else printf "2"; fi; printf "   : Set desktop environment as KDE.\\n"
+    printf "     ";if [[ "${desktopEnvironment}" =~ "ubuntu" ]]; then printf "%s%s3%s" "${rev}" "${bold}" "${normal}"; else printf "3"; fi; printf "   : Set desktop environment as Ubuntu Unity.\\n"
+    printf "     ";if [[ "${desktopEnvironment}" =~ "xubuntu" ]]; then printf "%s%s4%s" "${rev}" "${bold}" "${normal}"; else printf "4"; fi; printf "   : Set desktop environment as XFCE (Xubuntu).\\n"
+    printf "     ";if [[ "${desktopEnvironment}" =~ "lubuntu" ]]; then printf "%s%s5%s" "${rev}" "${bold}" "${normal}"; else printf "5"; fi; printf "   : Set desktop environment as LXDE (Lubuntu).\\n"
+    printf "\\n"
+    printf "     0/q  : Return to Selection menu\\n\\n"
 
     read -rp "Enter your choice : " choiceOpt
-    printf "\n"
+    printf "\\n"
     if ((1<=choiceOpt && choiceOpt<=5))
     then
       case $choiceOpt in
@@ -3257,7 +3327,7 @@ selectDesktopEnvironment(){
       clear
     else
       clear
-      println_red "\nPlease enter a valid choice from 1-5.\n"
+      println_red "\\nPlease enter a valid choice from 1-5.\\n"
     fi
   done
   choiceOpt=NULL
@@ -3270,27 +3340,27 @@ mainMenu() {
 
   until [[ "$choiceMain" =~ ^(0|q|Q|quit)$ ]]; do
     clear
-    println_info "\n"
+    println_info "\\n"
     println_info "BuildMan                                                    "
     println_info "====================================================================="
 
-    # printf \n    MESSAGE : In case of options, one value is displayed as the default value.\n"
-    # printf "    Do erase it to use other value.\n"
+    # printf \\n    MESSAGE : In case of options, one value is displayed as the default value.\\n"
+    # printf "    Do erase it to use other value.\\n"
 
-    printf "\n    BuildMan %s\n" $buildmanVersion
-    printf "\n    This script is documented in README.md file.\n"
-    printf "\n    Running: "
-    println_yellow "${distReleaseName} ${distReleaseVer} ${desktopEnvironment}\n"
-    printf "\n    There are the following options for this script\n"
-    printf "\n    TASK :     DESCRIPTION\n\n"
-    printf "    1    : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "$bold" "$green" "$normal"; else printf "%s%s%sON%s" "$rev" "$bold" "$red" "$normal"; fi; printf ".\n"
-    printf "            Select 1 to toggle so that questions are "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "    2    : Change to older Release Repositories is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\n"
-    printf "            Select 2 to toggle older Release Repositories to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\n"
-    printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\n";
-    printf "    4    : Identified Desktop is %s%s%s%s. Select 4 to change.\n" "${yellow}" "${bold}" "$desktopEnvironment" "${normal}"
-    printf "    5    : Add user %s%s%s to sudoers.\n\n" "$bold" "$USER" "$normal"
+    printf "\\n    BuildMan %s\\n" $buildmanVersion
+    printf "\\n    This script is documented in README.md file.\\n"
+    printf "\\n    Running: "
+    println_yellow "${distReleaseName} ${distReleaseVer} ${desktopEnvironment}\\n"
+    printf "\\n    There are the following options for this script\\n"
+    printf "\\n    TASK :     DESCRIPTION\\n\\n"
+    printf "    1    : Questions asked is "; if [[ "$noPrompt" = 1 ]]; then printf "%s%sOFF%s" "$bold" "$green" "$normal"; else printf "%s%s%sON%s" "$rev" "$bold" "$red" "$normal"; fi; printf ".\\n"
+    printf "            Select 1 to toggle so that questions are "; if [[ "$noPrompt" = 1 ]]; then printf "%sASKED%s" "${bold}" "${normal}"; else printf "%sNOT ASKED%s" "${bold}" "${normal}"; fi; printf ".\\n";
+    printf "    2    : Change to older Release Repositories is "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\\n"
+    printf "            Select 2 to toggle older Release Repositories to "; if [[ "$noCurrentReleaseRepo" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
+    printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\\n"
+    printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
+    printf "    4    : Identified Desktop is %s%s%s%s. Select 4 to change.\\n" "${yellow}" "${bold}" "$desktopEnvironment" "${normal}"
+    printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
     printf "    6    : Select the applications and then run uninterupted.
     7    : Select the applications and then run each item individually
     8    : Install applications from the menu one by one.
@@ -3304,10 +3374,10 @@ mainMenu() {
     0/q  : Quit this program
 
     "
-    printf "Enter your system password if asked...\n\n"
+    printf "Enter your system password if asked...\\n\\n"
 
     read -rp "Enter your choice : " choiceMain
-    printf "\n"
+    printf "\\n"
 
     # if [[ $choiceMain == 'q' ]]; then
     # 	exit 0
@@ -3319,34 +3389,34 @@ mainMenu() {
       1)
         if [[ $noPrompt = 0 ]]; then
           noPrompt=1
-          println_blue "Questions asked is OFF.\n No questions will be asked."
-          log_debug "Questions asked is OFF.\n No questions will be asked."
+          println_blue "Questions asked is OFF.\\n No questions will be asked."
+          log_debug "Questions asked is OFF.\\n No questions will be asked."
         else
           noPrompt=0
-          println_blue "Questions asked is ON.\n All questions will be asked."
-          log_debug "Questions asked is ON.\n All questions will be asked."
+          println_blue "Questions asked is ON.\\n All questions will be asked."
+          log_debug "Questions asked is ON.\\n All questions will be asked."
         fi
       ;;
       2)
         if [[ $noCurrentReleaseRepo = 0 ]]; then
           noCurrentReleaseRepo=1
-          println_blue "Using older repositories ON.\n The repos will be installed against ${previousStableReleaseName}."
-          log_debug "Using older repositories ON.\n The repos will be installed against ${previousStableReleaseName}."
+          println_blue "Using older repositories ON.\\n The repos will be installed against ${previousStableReleaseName}."
+          log_debug "Using older repositories ON.\\n The repos will be installed against ${previousStableReleaseName}."
         else
           noCurrentReleaseRepo=0
-          println_blue "Using older repositories OFF.\n The repos will be installed against ${distReleaseName}."
-          log_debug "Using older repositories OFF.\n The repos will be installed against ${distReleaseName}."
+          println_blue "Using older repositories OFF.\\n The repos will be installed against ${distReleaseName}."
+          log_debug "Using older repositories OFF.\\n The repos will be installed against ${distReleaseName}."
         fi
       ;;
       3)
         if [[ $betaAns = 0 ]]; then
           betaAns=1
-          println_blue "Beta release is ON.\n The repos will be installed against ${stableReleaseName}."
-          log_debug "Beta release is ON.\n The repos will be installed against ${stableReleaseName}."
+          println_blue "Beta release is ON.\\n The repos will be installed against ${stableReleaseName}."
+          log_debug "Beta release is ON.\\n The repos will be installed against ${stableReleaseName}."
         else
           betaAns=0
-          println_blue "Beta release is OFF.\n The repos will be installed against ${distReleaseName}."
-          log_debug "Beta release is OFF.\n The repos will be installed against ${distReleaseName}."
+          println_blue "Beta release is OFF.\\n The repos will be installed against ${distReleaseName}."
+          log_debug "Beta release is OFF.\\n The repos will be installed against ${distReleaseName}."
         fi
       ;;
       4 )
@@ -3380,11 +3450,11 @@ mainMenu() {
         esac
         menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
-          println_info "Automated installation for a Laptop\n"
+          println_info "Automated installation for a Laptop\\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
           pressEnterToContinue "Automated installation for a Laptop completed successfully."
         else
-          println_info "Step install for a Laptop\n"
+          println_info "Step install for a Laptop\\n"
           menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
           pressEnterToContinue "Automated installation for a Laptop completed successfully."
         fi
@@ -3405,11 +3475,11 @@ mainMenu() {
         esac
         menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
-          println_info "Automated installation for a Workstation\n"
+          println_info "Automated installation for a Workstation\\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
           pressEnterToContinue "Automated installation for a Workstation completed successfully."
         else
-          println_info "Step select installation for a Workstation.\n"
+          println_info "Step select installation for a Workstation.\\n"
           menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
           pressEnterToContinue "Step select installation for a Workstation completed successfully."
         fi
@@ -3430,11 +3500,11 @@ mainMenu() {
         esac
         menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
-          println_info "Automated install for a virtual machine\n"
+          println_info "Automated install for a virtual machine\\n"
           menuRun "AutoRun" "${menuSelectionsInput[@]}"
           println_info "Virtual machine automated install completed."
         else
-          println_info "Step install for a virtual machine\n"
+          println_info "Step install for a virtual machine\\n"
           menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
           println_info "Virtual machine step install completed."
         fi
@@ -3455,11 +3525,11 @@ mainMenu() {
         esac
         menuSelectionsInput+=(114 112 113)
         if [[ $noPrompt = 1 ]]; then
-          println_info "Automated Test install all apps on a VirtualBox VM\n"
+          println_info "Automated Test install all apps on a VirtualBox VM\\n"
           menuRun "SelectThenAutoRun" "${menuSelectionsInput[@]}"
           println_info "All apps on VirtualBox automated install completed."
         else
-          println_info "Step Test install all apps on a VirtualBox VM\n"
+          println_info "Step Test install all apps on a VirtualBox VM\\n"
           menuRun "SelectThenStepRun" "${menuSelectionsInput[@]}"
           println_info "All apps on VirtualBox stepped install completed."
         fi
@@ -3500,7 +3570,7 @@ fi
   log_warning "ltsReleaseName=$ltsReleaseName"
   log_warning "betaReleaseName=$betaReleaseName"
   log_warning "betaAns=$betaAns"
-  log_info "\nStart of BuildMan"
+  log_info "\\nStart of BuildMan"
   log_info "===================================================================="
   # println_yellow "desktopEnvironment=$desktopEnvironment"
   # println_yellow "distReleaseVer=$distReleaseVer"
@@ -3521,8 +3591,8 @@ mainMenu
   log_info "===================================================================="
 }
 
-printf "\n\nJob done!\n"
-printf "Thanks for using. :-)\n"
+printf "\\n\\nJob done!\\n"
+printf "Thanks for using. :-)\\n"
 # ############################################################################
 # set debugging off
 # set -xv
