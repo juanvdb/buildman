@@ -764,7 +764,17 @@ displayLinkInstallApp () {
 }
 
 # ############################################################################
-# XPS Display Drivers inatallations
+# OpenVPN installation
+openvpnInstall () {
+  log_info "Install OpenVPN"
+  println_blue "Install OpenVPN                                                      "
+  sudo apt install -y openvpn network-manager-openvpn ca-certificates
+  sudo service network-manager restart
+  "$HOME/bin/nordvpnUpdate.sh"
+}
+
+# ############################################################################
+# XPS Display Drivers installations
 laptopDisplayDrivers () {
   log_info "Install XPS Display Drivers"
   println_blue "Install XPS Display Drivers                                          "
@@ -933,13 +943,13 @@ gitConfig (){
 bashdbInstall() {
   currentPath=$(pwd)
   # case versions, if eoan then https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.0/bashdb-5.0-1.1.0.tar.bz2/download
-  log_info "Bash Debugger 4.4-1.0.1 install"
-  println_banner_yellow "Bash Debugger 4.4-1.0.1 install                                       "
+  log_info "Bash Debugger 5.0-1.1.0 install"
+  println_banner_yellow "Bash Debugger 5.0-1.1.0 install                                       "
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  curl -# -o bashdb.tar.gz https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  tar -xzf "$HOME/tmp/bashdb.tar.gz"
-  cd "$HOME/tmp/bashdb-4.4-1.0.1" || die "Path bashdb-4.4-1.0.1 does not exist"
+  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.1/bashdb-5.0-1.1.0.tar.bz2/download
+  tar -xjf "$HOME/tmp/bashdb.tar.bz2"
+  cd "$HOME/tmp/bashdb-5.0-1.1.0" || die "Path bashdb-5.0-1.1.0 does not exist"
   ./configure
   make
   sudo make install
@@ -2509,7 +2519,7 @@ menuRun() {
       231   #: Bitwarden Password Manager
       241   #: Stacer Linux system info and cleaner
       251   #: Etcher USB Loader
-      261   #: UNetbootin
+      252   #: UNetbootin
       271   #: Y-PPA Manager
       272   #: bootRepair
       #: tasksel
@@ -2583,8 +2593,9 @@ menuRun() {
       881   #: KVM
 
             #: submenuOther
-      911   #: Laptop Display Drivers for Intel en Nvidia
-      921   #: DisplayLink
+      911   #: OpenVPN install
+      921   #: Laptop Display Drivers for Intel en Nvidia
+      923   #: DisplayLink
 
             #: submenuSettings
       2     #: Toggle No Questions asked
@@ -2679,7 +2690,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "231" ]]; then printf "%s%s231%s" "${rev}" "${bold}" "${normal}"; else printf "231"; fi; printf "  : Bitwarden Password Manager.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "241" ]]; then printf "%s%s241%s" "${rev}" "${bold}" "${normal}"; else printf "241"; fi; printf "  : Stacer Linux System Optimizer and Monitoring.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "251" ]]; then printf "%s%s251%s" "${rev}" "${bold}" "${normal}"; else printf "251"; fi; printf "  : Etcher USB loader.\\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "261" ]]; then printf "%s%s261%s" "${rev}" "${bold}" "${normal}"; else printf "261"; fi; printf "  : UNetbootin ISO to USB Application.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "252" ]]; then printf "%s%s252%s" "${rev}" "${bold}" "${normal}"; else printf "252"; fi; printf "  : UNetbootin ISO to USB Application.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "271" ]]; then printf "%s%s271%s" "${rev}" "${bold}" "${normal}"; else printf "271"; fi; printf "  : Y-PPA Manager.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "272" ]]; then printf "%s%s272%s" "${rev}" "${bold}" "${normal}"; else printf "272"; fi; printf "  : Boot Repair Appliction.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "281" ]]; then printf "%s%s281%s" "${rev}" "${bold}" "${normal}"; else printf "281"; fi; printf "  : rEFInd Boot Manager.\\n"
@@ -2964,8 +2975,9 @@ menuRun() {
     There are the following options for this script
     TASK : DESCRIPTION
     -----: ---------------------------------------\\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "911" ]]; then printf "%s%s911%s" "${rev}" "${bold}" "${normal}"; else printf "911"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "921" ]]; then printf "%s%s921%s" "${rev}" "${bold}" "${normal}"; else printf "921"; fi; printf "  : DisplayLink.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "911" ]]; then printf "%s%s911%s" "${rev}" "${bold}" "${normal}"; else printf "911"; fi; printf "  : OpenVPN Install.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "921" ]]; then printf "%s%s921%s" "${rev}" "${bold}" "${normal}"; else printf "921"; fi; printf "  : Laptop Display Drivers for Intel en Nvidia.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "923" ]]; then printf "%s%s923%s" "${rev}" "${bold}" "${normal}"; else printf "923"; fi; printf "  : DisplayLink.\\n"
     printf "\\n"
     printf "     0/q  : Return to Selection menu\\n\\n"
 
@@ -3145,7 +3157,7 @@ menuRun() {
             submenuOther "$typeOfRun"
             read -rp "Enter your choice : " choiceOpt
             printf "\\n"
-            if ((911<=choiceOpt && choiceOpt<=999))
+            if ((900<=choiceOpt && choiceOpt<=999))
             then
               howToRun "$choiceOpt" "$typeOfRun"
             fi
@@ -3200,7 +3212,7 @@ runSelection() {
     231 ) asking bitwardenInstall "install Bitwarden Password Manager" "Bitwarden Password Manager install complete." ;;
     241 ) asking stacerInstall "install Stacer Linux System Optimizer and Monitoring" "Stacer Linux System Optimizer and Monitoring install complete." ;;
     251 ) asking etcherInstall "install Etcher USB Loader" "Etcher USB Loader install complete." ;;
-    261 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
+    252 ) asking unetbootinInstall "install UNetbootin" "UNetbootin install complete." ;;
     271 ) asking yppaManagerInstall "install Y-PPA Manager" "Y-PPA Manager install complete." ;;
     272 ) asking bootRepairInstall "install Boot Repair" "Boot Repair install complete." ;;
     281 ) asking rEFIndInstall "install rEFInd Boot Manager" "rEFInd Boot Manager install complete." ;;
@@ -3259,8 +3271,9 @@ runSelection() {
     831 ) asking vmwareGuestSetup "Setup for a Vmware guest" "Vmware Guest setup complete." ;;
     851 ) asking vagrantInstall "install Vagrant" "Vagrant install complete." ;;
     881 ) asking kvmInstall "install KVM" "KVM install complete." ;;
-    911 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
-    921 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
+    911 ) asking openvpnInstall "install OpenVPN" "OpenVPN install complete." ;;
+    921 ) asking laptopDisplayDrivers "Laptop Display Drivers for Intel en Nvidia" "Laptop Display Drivers for Intel en Nvidia install complete." ;;
+    923 ) asking displayLinkInstallApp "install DisplayLink" "DisplayLink install complete." ;;
     2)
       if [[ $noPrompt = 0 ]]; then
         noPrompt=1
@@ -3436,7 +3449,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3461,7 +3474,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 261 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3511,7 +3524,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 261 251 241 511 512 541 541 513 595 586 585 611 621 631 641 721 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 252 251 241 511 512 541 541 513 595 586 585 611 621 631 641 721 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
