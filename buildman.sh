@@ -463,13 +463,9 @@ virtualboxHostInstall () {
         changeAptSource "/etc/apt/sources.list.d/virtualbox-$distReleaseName.list" "$distReleaseName" "$previousStableReleaseName"
       fi
       repoUpdate
-      sudo apt install -y virtualbox-6.0 dkms
-    else
-      sudo apt install -y virtualbox dkms
     fi
-  else
-    sudo apt install -y virtualbox dkms
   fi
+  sudo apt install -y virtualbox dkms virtualbox-ext-pack virtualbox-guest-additions-iso
 }
 
 # ############################################################################
@@ -1014,7 +1010,7 @@ vscodeInstall() {
   if [[ "$noPrompt" -eq 0 ]]; then
     read -rp "Do you want to install Visual Studio Code from the repo(default) or Snap? (repo/snap)" answer
     if [[ $answer = "snap" ]]; then
-      sudo snap install --classic vscode
+      sudo snap install --classic code
     else
       sudo apt install -y curl
       curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
@@ -1025,7 +1021,7 @@ vscodeInstall() {
       sudo apt install code
     fi
   else
-    sudo snap install --classic vscode
+    sudo snap install --classic code
   fi
   cd "$currentPath" || return
 }
@@ -1875,7 +1871,18 @@ calibreInstall() {
   log_info "Calibre"
   println_blue "Calibre"
 
-  sudo apt install -y calibre
+  if [[ "$noPrompt" -eq 0 ]]; then
+    read -rp "Do you want to install from the Calibre Download site? (y/n))" answer
+    if [[ $answer = [yY1] ]]; then
+        sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
+    else
+      sudo apt install -y calibre
+    fi
+  else
+    sudo apt install -y calibre
+  fi
+
+
 
   # sudo -v && wget -nv -O- https://download.calibre-ebook.com/linux-installer.sh | sudo sh /dev/stdin
   # Use the following f you get certificate issues
