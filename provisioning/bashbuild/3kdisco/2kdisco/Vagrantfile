@@ -36,9 +36,9 @@ Vagrant.configure("2") do |config|
   if Vagrant.has_plugin?("vagrant-vbguest")
     config.vbguest.auto_update = false
   end
+  config.vm.boot_timeout = 1000
 
   config.vm.box = "kdisco"
-  config.vm.boot_timeout = 1000
 
   # config.vm.network "private_network", ip: "172.28.128.201", virtualbox__intnet: true
   config.vm.network "private_network", ip: "172.28.128.111", auto_config: false
