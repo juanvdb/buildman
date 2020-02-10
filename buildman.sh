@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2019/08/22
+# DateVer 2020/02/10
 # Buildman
-buildmanVersion=V4.5
+buildmanVersion=V4.6.3
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,12 +31,12 @@ buildmanVersion=V4.5
 
 # Global Variables
 {
-  betaReleaseName="eoan"
-  betaReleaseVer="19.10"
-  stableReleaseName="disco"
-  stableReleaseVer="19.04"
-  previousStableReleaseName="cosmic"
-  previousStableReleaseVer="18.10"
+  betaReleaseName="focal"
+  betaReleaseVer="20.04"
+  stableReleaseName="eoan"
+  stableReleaseVer="19.10"
+  previousStableReleaseName="disco"
+  previousStableReleaseVer="19.04"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -2196,13 +2196,12 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld bzr htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make zsync
+	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make zsync
+  # Removed for 19.10+
+  sudo apt install bzr vim-gnome
 
   # Add
   # openjdk-11-jdk openjdk-11-jre
-
-  # Removed for 19.10
-  # vim-gnome
 
   # Add JAVA_HOME to .bash_profile
   # Add JAVA_HOME to .bash_profile
@@ -2286,7 +2285,8 @@ installUniverseApps () {
       # ufw-kde amarok amarok-doc moodbar kcron
 			;;
 		"gnome" )
-			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
+			sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste
+      sudo apt install -y ambiance-colors radiance-colors;
 			;;
 		"ubuntu" )
       sudo apt install -y gmountiso gnome-commander dconf-tools ubuntu-restricted-extras gthumb gnome-raw-thumbnailer conky nautilus-image-converter wallch alacarte gnome-shell-extensions-gpaste ambiance-colors radiance-colors;
@@ -2927,7 +2927,7 @@ menuRun() {
   submenuVirtualization(){
     clear
     printf "\\n\\n"
-    printf "  %s%Virtualization%s\\n\\n" "${bold}" "${rev}" "${normal}"
+    printf "  %s%sVirtualization%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
         printf "  Select items and then install the items without prompting.\\n"
@@ -2965,7 +2965,7 @@ menuRun() {
   submenuOther(){
     clear
     printf "\\n\\n"
-    printf "  %s%Hardware Drivers%s\\n\\n" "${bold}" "${rev}" "${normal}"
+    printf "  %s%sHardware Drivers%s\\n\\n" "${bold}" "${rev}" "${normal}"
     case $typeOfRun in
       SelectThenAutoRun )
         printf "  Select items and then install the items without prompting.\\n"
