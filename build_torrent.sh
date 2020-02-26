@@ -1,5 +1,6 @@
 #! /bin/bash
 
+sudo usermod -a -G vboxsf "$USER"
 ip a
 sudo apt install wget qbittorrent
 sudo wget -qnc https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb
