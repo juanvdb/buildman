@@ -4,3 +4,4 @@ buildman_debug.log
 buildmandebug.log
 provisioning/ansible/playbooks/*
 ytsuser.txt
+.vagrant/
