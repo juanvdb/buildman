@@ -2,6 +2,6 @@ buildman_error.log
 buildmanerror.log
 buildman_debug.log
 buildmandebug.log
-provisioning/ansible/playbooks/*
+#provisioning/ansible/playbooks/*
 ytsuser.txt
 .vagrant/
