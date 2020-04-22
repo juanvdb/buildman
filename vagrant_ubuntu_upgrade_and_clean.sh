@@ -18,8 +18,8 @@ sudo apt -y autoremove
 echo -en "\e[7;40;93m VBoxGuestAdditions                                   \e[0m\n"
 sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
 
-echo -en "\e[7;40;93m rsync                                                \e[0m\n"
-rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/
+# echo -en "\e[7;40;93m rsync                                                \e[0m\n"
+# rsync -avxP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/
 
 echo -en "\e[7;40;93m clean                                                \e[0m\n"
 sudo apt -y clean
