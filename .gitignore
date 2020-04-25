@@ -6,4 +6,4 @@ ytsuser.txt
 .vagrant/
 inventory/
 playbooks/*.retry
-
+torrent/
