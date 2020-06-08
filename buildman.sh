@@ -31,16 +31,16 @@ buildmanVersion=V4.6.3
 
 # Global Variables
 {
-  betaReleaseName="focal"
-  betaReleaseVer="20.04"
-  stableReleaseName="eoan"
-  stableReleaseVer="19.10"
-  previousStableReleaseName="disco"
-  previousStableReleaseVer="19.04"
+  betaReleaseName="groovy"
+  betaReleaseVer="20.10"
+  stableReleaseName="focal"
+  stableReleaseVer="20.04"
+  previousStableReleaseName="eoan"
+  previousStableReleaseVer="19.10"
   noCurrentReleaseRepo=0
   betaAns=0
 
-  ltsReleaseName="bionic"
+  ltsReleaseName="focal"
   desktopEnvironment=""
   kernelRelease=$(uname -r)
   distReleaseVer=$(lsb_release -sr)
@@ -48,7 +48,7 @@ buildmanVersion=V4.6.3
   noPrompt=0
 
   mkdir -p "$HOME/tmp"
-  sudo chown "$USER":"$USER" "$HOME/tmp"
+  sudo chown -R "$USER":"$USER" "$HOME/tmp"
   debugLogFile="$HOME/tmp/buildman.log"
   errorLogFile="$HOME/tmp/buildman_error.log"
 
@@ -63,7 +63,11 @@ buildmanVersion=V4.6.3
   normal=$(tput sgr0)
   bold=$(tput bold)
   rev=$(tput rev)
+
+  isVm=0
+  [[ $(sudo dmesg | grep "Hypervisor detected") ]] && isVm=1
 }
+
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 # O                          Debug                                           O
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -473,7 +477,7 @@ virtualboxHostInstall () {
 virtualboxGuestSetup () {
   log_info "VirtualBox setup NFS file share to hostfiles"
   println_blue "VirtualBox setup NFS file share to hostfiles                         "
-  sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+  sudo apt install -y nfs-common ssh virtualbox-guest-dkms virtualbox-guest-utils build-essential dkms vim openssh-server net-tools gcc make
   mkdir -p "$HOME/hostfiles/home"
   mkdir -p "$HOME/hostfiles/data"
   LINE1="192.168.56.1:/home/juanb/      $HOME/hostfiles/home    nfs     rw,intr    0       0"
@@ -2196,10 +2200,15 @@ installBaseApps () {
   log_info "Start installation of the base utilities and apps"
   println_banner_yellow "Start installation of the base utilities and apps                    "
 
-	sudo apt install -yf gparted nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make zsync
+	sudo apt install -yf nfs-kernel-server nfs-common samba ssh sshfs rar gawk vim vim-doc tree meld htop iptstate kerneltop vnstat nmon qpdfview terminator autofs default-jdk default-jdk-doc default-jdk-headless default-jre default-jre-headless dnsutils net-tools network-manager-openconnect network-manager-vpnc network-manager-ssh network-manager-vpnc network-manager-ssh network-manager-pptp openssl xdotool openconnect flatpak traceroute gcc make zsync
   # Removed for 19.10+
   sudo apt install bzr vim-gnome
 
+  if [[ isVm == 0 ]]; 
+  then
+    sudo apt install gparted 
+  fi
+  
   # Add
   # openjdk-11-jdk openjdk-11-jre
 
@@ -2262,13 +2271,20 @@ installUniverseApps () {
 
 	# general applications
   sudo apt install -yf
-	sudo apt install -yf synaptic aptitude mc filezilla remmina rdiff-backup luckybackup printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
+	sudo apt install -yf mc filezilla remmina printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
 
   # Older packages...
+  # synaptic aptitude keepassx 
   # Still active, but replaced with other apps
   # unetbootin = etcher
 
+  if [[ isVm == 0 ]]; 
+  then
+    sudo apt install -y rdiff-backup luckybackup
+  fi
+  
 
+  
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
