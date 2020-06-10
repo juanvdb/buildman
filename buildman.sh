@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2020/02/10
+# DateVer 2020/06/10
 # Buildman
-buildmanVersion=V4.6.3
+buildmanVersion=V4.6.4
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -943,13 +943,13 @@ gitConfig (){
 bashdbInstall() {
   currentPath=$(pwd)
   # case versions, if eoan then https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.0/bashdb-5.0-1.1.0.tar.bz2/download
-  log_info "Bash Debugger 5.0-1.1.0 install"
-  println_banner_yellow "Bash Debugger 5.0-1.1.0 install                                       "
+  log_info "Bash Debugger 5.0-1.1.2 install"
+  println_banner_yellow "Bash Debugger 5.0-1.1.2 install                                       "
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.1/bashdb-5.0-1.1.0.tar.bz2/download
+  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.2/bashdb-5.0-1.1.2.tar.bz2/download
   tar -xjf "$HOME/tmp/bashdb.tar.bz2"
-  cd "$HOME/tmp/bashdb-5.0-1.1.0" || die "Path bashdb-5.0-1.1.0 does not exist"
+  cd "$HOME/tmp/bashdb-5.0-1.1.2" || die "Path bashdb-5.0-1.1.2 does not exist"
   ./configure
   make
   sudo make install
@@ -2204,11 +2204,11 @@ installBaseApps () {
   # Removed for 19.10+
   sudo apt install bzr vim-gnome
 
-  if [[ isVm == 0 ]]; 
+  if [[ isVm == 0 ]];
   then
-    sudo apt install gparted 
+    sudo apt install gparted
   fi
-  
+
   # Add
   # openjdk-11-jdk openjdk-11-jre
 
@@ -2274,17 +2274,17 @@ installUniverseApps () {
 	sudo apt install -yf mc filezilla remmina printer-driver-cups-pdf keepassx flashplugin-installer ffmpeg keepnote workrave unison unison-gtk deluge-torrent liferea planner chromium-browser blender caffeine gufw cockpit thunderbird uget uget-integrator glance
 
   # Older packages...
-  # synaptic aptitude keepassx 
+  # synaptic aptitude keepassx
   # Still active, but replaced with other apps
   # unetbootin = etcher
 
-  if [[ isVm == 0 ]]; 
+  if [[ isVm == 0 ]];
   then
     sudo apt install -y rdiff-backup luckybackup
   fi
-  
 
-  
+
+
   # older packages that will not install on new releases
   if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
