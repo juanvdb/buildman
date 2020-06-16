@@ -11,5 +11,5 @@ UUID=593d3c07-50db-48d6-9d9c-7cff57a97eeb /               ext4    errors=remount
 UUID=4693f3a4-4d49-4859-b979-8420eb5d0385 /data           ext4    defaults        0       2
 # swap was on /dev/sda1 during installation
 UUID=6b380236-30e1-4852-af47-d7e48c3da647 none            swap    sw              0       0
-192.168.56.1:/home/juanb/      /home/***REMOVED***/vbhost/home    nfs     rw,intr    0       0
-192.168.56.1:/data      /home/***REMOVED***/vbhost/data    nfs     rw,intr    0       0
+192.168.56.1:/home/juanb/      /home/minzef/vbhost/home    nfs     rw,intr    0       0
+192.168.56.1:/data      /home/minzef/vbhost/data    nfs     rw,intr    0       0

@@ -3,7 +3,7 @@
   # connection: local
   gather_facts: no
   become: yes
-  # become_user: ***REMOVED***
+  # become_user: minzef
 
 
   tasks:
