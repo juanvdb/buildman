@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2020/06/10
+# DateVer 2020/06/17
 # Buildman
-buildmanVersion=V4.6.4
+buildmanVersion=V4.6.5
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -1080,11 +1080,14 @@ postmanInstall() {
 googleChromeInstall () {
   log_info "Google Chrome Install"
   println_blue "Google Chrome Install"
-  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-  echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
-  repoUpdate
-  sudo apt install -y google-chrome-stable
-}
+  # wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  # echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
+  # repoUpdate
+  # sudo apt install -y google-chrome-stable
+  wget -P "$HOME/tmp" -O google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  wget -P "$HOME/tmp" https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo dpkg -i "$HOME/tmp/google-chrome-stable_current_amd64.deb"
+ }
 
 # ############################################################################
 # Install Fonts
@@ -1392,6 +1395,17 @@ dropboxInstall () {
     fi
   fi
 }
+
+# ############################################################################
+# SpiderOak One Backup Install
+spiderOakOneInstall () {
+  log_info "SpiderOak One Backup Install"
+  println_blue "SpiderOak One Backup Install"
+  wget -P "$HOME/tmp" -O spideroak-one-backup.deb https://spideroak.com/release/spideroak/deb_x64
+  sudo dpkg -i "$HOME/tmp/spideroak-one-backup.deb"
+ }
+
+
 
 # ############################################################################
 # Ruby Repository directories to host
@@ -2532,6 +2546,7 @@ menuRun() {
       161   #: ownCloudClient
       162   #: Dropbox
       163   #: inSync for GoogleDrive
+      164   #: SpiderOak One Backup
 
             #: submenuUtils
       211   #: Latte Dock
@@ -2659,6 +2674,7 @@ menuRun() {
     printf "     ";if [[ "${menuSelections[*]}" =~ "161" ]]; then printf "%s%s161%s" "${rev}" "${bold}" "${normal}"; else printf "161"; fi; printf "  : ownCloudClient.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "162" ]]; then printf "%s%s162%s" "${rev}" "${bold}" "${normal}"; else printf "162"; fi; printf "  : Dropbox.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "163" ]]; then printf "%s%s163%s" "${rev}" "${bold}" "${normal}"; else printf "163"; fi; printf "  : inSync for GoogleDrive.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "164" ]]; then printf "%s%s164%s" "${rev}" "${bold}" "${normal}"; else printf "164"; fi; printf "  : SpiderOak One Backup.\\n"
     printf "\\n"
     printf "     a    : Utilities Menu.\\n"
     printf "     b    : Internet and eMail Menu.\\n"
@@ -3226,6 +3242,7 @@ runSelection() {
     161 ) asking ownCloudClientInstallApp "install ownCloud client" "ownCloud Client install complete." ;;
     162 ) asking dropboxInstall "install Dropbox"  "Dropbox install complete." ;;
     163 ) asking insyncInstall  "install inSync for GoogleDrive" "inSync for GoogleDrive install complete." ;;
+    164 ) asking spiderOakOneInstall  "install SpiderOak One Backup" "SpiderOak One Backup install complete." ;;
     192 ) asking setUbuntuVersionParameters "Set options for an Ubuntu Beta install with PPA references to another version." "Set Ubuntu Version Complete" ;;
     212 ) asking  doublecmdInstall "Install Doublecmd" "Doublecmd install complete." ;;
     211 ) asking latteDockInstall "Install Latte Dock" "Latte Dock install complete." ;;
@@ -3460,7 +3477,7 @@ mainMenu() {
         selectDesktopEnvironment
       ;;
       5 )
-        if [[ ! $(sudo grep $USER /etc/sudoers) ]]; then 
+        if [[ ! $(sudo grep $USER /etc/sudoers) ]]; then
             echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
         fi
       ;;
@@ -3475,7 +3492,7 @@ mainMenu() {
       ;;
       10 )
         # Install Laptop with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 164 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3500,7 +3517,7 @@ mainMenu() {
       ;;
       11 )
         # Install Workstation with pre-selected applications
-        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
+        menuSelectionsInput=(111 112 113 125 121 122 161 811 162 163 164 321 323 341 331 311 212 441 291 271 272 252 251 241 231 421 511 512 541 541 611 622 631 641 711 713 712 721 651 612 822 881 851)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
@@ -3550,7 +3567,7 @@ mainMenu() {
       ;;
       15 )
         # Run a VirtualBox full test run, all apps.
-        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 252 251 241 511 512 541 541 513 595 586 585 611 621 631 641 721 612 881 851 451)
+        menuSelectionsInput=(131 111 112 113 125 121 122 141 142 151 152 161 811 162 163 164 321 324 323 311 212 213 221 222 461 421 441 442 291 271 312 272 281 252 251 241 511 512 541 541 513 595 586 585 611 621 631 641 721 612 881 851 451)
         case $desktopEnvironment in
           gnome )
             menuSelectionsInput+=(151 152)    #: Install Gnome Desktop from backports #: Install Gnome Desktop from backports
