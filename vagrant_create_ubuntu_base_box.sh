@@ -41,7 +41,7 @@ sudo service ssh restart
 # sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
 
 echo -en "\e[7;40;37mInitial Install             \e[0m\n"
-sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms virtualbox-guest-dkms vim openssh-server ssh net-tools gcc make perl
+sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms virtualbox-guest-dkms vim openssh-server ssh net-tools gcc make perl git
 
 echo -en "\e[7;40;37mSet Vim editor              \e[0m\n"
 env EDITOR=vim
