@@ -8,7 +8,7 @@ to
 %wheel ALL=(ALL) NOPASSWD: ALL
 ?? vagrant ALL=(ALL) NOPASSWD:ALL
 
-sudo subscription-manager register --username juan.vanderbreggen --password d{0B6rar --auto-attach
+sudo subscription-manager register --username *** REMOVED *** --password *** REMOVED *** --auto-attach
 
 sudo yum -y update
 
