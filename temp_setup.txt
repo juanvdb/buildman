@@ -1,0 +1,84 @@
+sudo apt -y install ssh sshfs vim git
+
+dotfilesPath="$HOME/data/dotfiles/20.10/home"
+
+rm $HOME/
+ln -s $dotfilesPath/ $HOME/
+
+rm $HOME/.bash_aliases
+ln -s $dotfilesPath/bash_aliases $HOME/.bash_aliases
+rm $HOME/.bash_logout
+ln -s $dotfilesPath/bash_logout $HOME/.bash_logout
+rm $HOME/.bash_profile
+ln -s $dotfilesPath/bash_profile $HOME/.bash_profile
+rm $HOME/.bashrc
+ln -s $dotfilesPath/bashrc $HOME/.bashrc
+rm $HOME/.gitconfig
+ln -s $dotfilesPath/gitconfig $HOME/.gitconfig
+rm $HOME/.gitignore
+ln -s $dotfilesPath/gitignore $HOME/.gitignore
+rm $HOME/.gitkraken
+ln -s $dotfilesPath/gitkraken $HOME/.gitkraken
+rm $HOME/.gnupg
+ln -s $dotfilesPath/gnupg $HOME/.gnupg
+rm $HOME/GPGKey.bin
+ln -s $dotfilesPath/GPGKey.bin $HOME/GPGKey.bin
+rm $HOME/GPGKey.txt
+ln -s $dotfilesPath/GPGKey.txt $HOME/GPGKey.txt
+rm $HOME/.netrc
+ln -s $dotfilesPath/netrc $HOME/.netrc
+rm $HOME/.profile
+ln -s $dotfilesPath/profile $HOME/.profile
+rm $HOME/.remmina
+ln -s $dotfilesPath/remmina $HOME/.remmina
+rmdir $HOME/.ssh
+ln -s $dotfilesPath/ssh $HOME/ssh
+rm $HOME/.viminfo
+ln -s $dotfilesPath/viminfo $HOME/.viminfo
+
+# config/
+#ln -s $dotfilesPath/config/Atom $HOME/.config/Atom
+ln -s $dotfilesPath/config/calibre $HOME/.config/calibre
+ln -s $dotfilesPath/config/calibrerc $HOME/.config/calibrerc
+ln -s $dotfilesPath/config/Clementine $HOME/.config/Clementine
+ln -s $dotfilesPath/config/Code $HOME/.config/Code
+ln -s $dotfilesPath/config/darktable $HOME/.config/darktable
+ln -s $dotfilesPath/config/doublecmd $HOME/.config/doublecmd
+ln -s $dotfilesPath/config/easytag $HOME/.config/easytag
+ln -s $dotfilesPath/config/enchant $HOME/.config/enchant
+ln -s $dotfilesPath/config/filezilla $HOME/.config/filezilla
+ln -s $dotfilesPath/config/GitKraken $HOME/.config/GitKraken
+#ln -s $dotfilesPath/config/google-musicmanager $HOME/.config/google-musicmanager
+#ln -s "$dotfilesPath/config/Google Play Music Desktop Player" "$HOME/.config/Google Play Music Desktop Player"
+ln -s $dotfilesPath/config/htop $HOME/.config/htop
+ln -s $dotfilesPath/config/Insync $HOME/.config/Insync
+#ln -s $dotfilesPath/config/keepnote $HOME/.config/keepnote
+rm $HOME/.config/kglobalshortcutsrc
+ln -s $dotfilesPath/config/kglobalshortcutsrc $HOME/.config/kglobalshortcutsrc
+rm $HOME/.config/khotkeysrc
+ln -s $dotfilesPath/config/khotkeysrc $HOME/.config/khotkeysrc
+ln -s $dotfilesPath/config/latte $HOME/.config/latte
+ln -s $dotfilesPath/config/lattedockrc $HOME/.config/lattedockrc
+ln -s $dotfilesPath/config/liferea $HOME/.config/liferea
+ln -s $dotfilesPath/config/LightTable $HOME/.config/LightTable
+ln -s $dotfilesPath/config/liquidprompt $HOME/.config/liquidprompt
+ln -s $dotfilesPath/config/liquidpromptrc $HOME/.config/liquidpromptrc
+ln -s $dotfilesPath/config/nordvpn $HOME/.config/nordvpn
+ln -s $dotfilesPath/config/onedrive $HOME/.config/onedrive
+#ln -s $dotfilesPath/config/onedrive9thBit $HOME/.config/onedrive9thBit
+ln -s $dotfilesPath/config/ownCloud $HOME/.config/ownCloud
+ln -s $dotfilesPath/config/Postman $HOME/.config/Postman
+ln -s $dotfilesPath/config/powerline $HOME/.config/powerline
+ln -s $dotfilesPath/config/qBittorrent $HOME/.config/qBittorrent
+ln -s "$dotfilesPath/config/Rapid Photo Downloader" "$HOME/.config/Rapid Photo Downloader"
+ln -s $dotfilesPath/config/RawTherapee $HOME/.config/RawTherapee
+ln -s $dotfilesPath/config/remmina $HOME/.config/remmina
+ln -s $dotfilesPath/config/spotify $HOME/.config/spotify
+ln -s $dotfilesPath/config/terminator $HOME/.config/terminator
+ln -s $dotfilesPath/config/uGet $HOME/.config/uGet
+ln -s $dotfilesPath/config/variety $HOME/.config/variety
+#ln -s $dotfilesPath/config/WazApp $HOME/.config/WazApp
+#ln -s $dotfilesPath/config/Whatever $HOME/.config/Whatever
+
+ history -a
+ history -w
