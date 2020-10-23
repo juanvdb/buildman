@@ -2,7 +2,7 @@
 
 # DateVer 2020/02/10
 # Buildman
-buildmanVersion=V4.6.3
+buildmanVersion=V4.6.5
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,16 +31,16 @@ buildmanVersion=V4.6.3
 
 # Global Variables
 {
-  betaReleaseName="focal"
-  betaReleaseVer="20.04"
-  stableReleaseName="eoan"
-  stableReleaseVer="19.10"
-  previousStableReleaseName="disco"
-  previousStableReleaseVer="19.04"
+  betaReleaseName="halo"
+  betaReleaseVer="21.04"
+  stableReleaseName="groovy"
+  stableReleaseVer="20.10"
+  previousStableReleaseName="focal"
+  previousStableReleaseVer="20.04"
   noCurrentReleaseRepo=0
   betaAns=0
 
-  ltsReleaseName="bionic"
+  ltsReleaseName="focal"
   desktopEnvironment=""
   kernelRelease=$(uname -r)
   distReleaseVer=$(lsb_release -sr)
