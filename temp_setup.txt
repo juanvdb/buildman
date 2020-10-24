@@ -82,3 +82,8 @@ ln -s $dotfilesPath/config/variety $HOME/.config/variety
 
  history -a
  history -w
+
+terminator -p juan -l juan
+
+apm list --installed --bare > ~/data/dotfiles/atomPackage.list
+apm install --packages-file ~/data/dotfiles/atomPackage.list
