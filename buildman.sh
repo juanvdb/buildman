@@ -939,13 +939,13 @@ gitConfig (){
 bashdbInstall() {
   currentPath=$(pwd)
   # case versions, if eoan then https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.0/bashdb-5.0-1.1.0.tar.bz2/download
-  log_info "Bash Debugger 5.0-1.1.0 install"
-  println_banner_yellow "Bash Debugger 5.0-1.1.0 install                                       "
+  log_info "Bash Debugger 5.0-1.1.2 install"
+  println_banner_yellow "Bash Debugger 5.0-1.1.2 install                                       "
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.1/bashdb-5.0-1.1.0.tar.bz2/download
+  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.2/bashdb-5.0-1.1.2.tar.gz/download
   tar -xjf "$HOME/tmp/bashdb.tar.bz2"
-  cd "$HOME/tmp/bashdb-5.0-1.1.0" || die "Path bashdb-5.0-1.1.0 does not exist"
+  cd "$HOME/tmp/bashdb-5.0-1.1.2" || die "Path bashdb-5.0-1.1.2 does not exist"
   ./configure
   make
   sudo make install
@@ -970,7 +970,19 @@ atomInstall() {
       curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
       sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
       repoUpdate
-      sudo apt install -yf atom shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+      read -rp "Do you want to install AtomEditor current release, Beta or Nightly release (current/beta/nightly)? " answer
+      case answer in
+        beta)
+            sudo apt install -yf atom-beta
+        ;;
+        nightly)
+            sudo apt install -yf atom-nightly
+        ;;
+        *)
+            sudo apt install -yf atom
+        ;;    
+      esac  
+      sudo apt install -yf shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
     fi
   else
     sudo apt install -y curl
@@ -1214,11 +1226,11 @@ insyncInstall () {
   log_info "Install inSync for GoogleDrive"
   println_blue "Install inSync for GoogleDrive"
   if [[  $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-    echo "deb http://apt.insynchq.com/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$distReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$distReleaseName.list"
   elif [[ $betaAns == 1 ]]; then
-    echo "deb http://apt.insynchq.com/ubuntu $stableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$stableReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $stableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$stableReleaseName.list"
   else
-    echo "deb http://apt.insynchq.com/ubuntu $previousStableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$previousStableReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $previousStableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$previousStableReleaseName.list"
   fi
   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
   repoUpdate
