@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2020/02/10
+# DateVer 2020/12/01
 # Buildman
-buildmanVersion=V4.6.5
+buildmanVersion=V4.6.6
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,7 +31,7 @@ buildmanVersion=V4.6.5
 
 # Global Variables
 {
-  betaReleaseName="halo"
+  betaReleaseName="hirsute"
   betaReleaseVer="21.04"
   stableReleaseName="groovy"
   stableReleaseVer="20.10"
@@ -980,8 +980,8 @@ atomInstall() {
         ;;
         *)
             sudo apt install -yf atom
-        ;;    
-      esac  
+        ;;
+      esac
       sudo apt install -yf shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
     fi
   else
@@ -2194,8 +2194,8 @@ flatpakInstall() {
   sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
   sudo flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
   sudo flatpak install -y kdeapps org.kde.okular
-  sudo flatpak install -y flathub org.kde.Platform//5.9
-  sudo flatpak install -y flathub org.kde.Sdk//5.9
+  #sudo flatpak install -y flathub org.kde.Platform//5.15
+  #sudo flatpak install -y flathub org.kde.Sdk//5.15
   # Add support for Gnome in form of adwaita icons and adwaita-qt style
   sudo flatpak install -y kdeapps org.freedesktop.Platform.Icontheme.Adwaita
   sudo flatpak install -y kdeapps org.kde.KStyle.Adwaita
