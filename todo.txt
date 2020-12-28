@@ -1,0 +1,4 @@
+sort what you want to install on a VM and what on a physical in general and universe 
+check to install spideroak
+check how to include dot files or move them from somewhere
+build for elementary and zorin which are older releases that does not show kde or gnome

@@ -3,6 +3,9 @@
 echo -en "\e[7;40;37mSudo Password               \e[0m\n"
 echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
 
+echo -en "\e[7;40;37mAdd user to vboxusers       \e[0m\n"
+sudo usermod -a -G vboxusers $USER
+
 echo -en "\e[7;40;37mssh package install         \e[0m\n"
 sudo apt -y install ssh
 
@@ -12,13 +15,19 @@ echo -en "\e[7;40;37mAdd Host to /etc/hosts      \e[0m\n"
 sudo sed -i '$a 172.28.128.1 vbhost128' /etc/hosts
 sudo sed -i '$a 192.168.56.1 vbhost56' /etc/hosts
 
-echo -en "\e[7;40;37mAdd ssh keys                \e[0m\n"
-mkdir -p /home/vagrant/.ssh
-wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
-# Ensure we have the correct permissions set
-chmod 0700 /home/vagrant/.ssh
-chmod 0600 /home/vagrant/.ssh/authorized_keys
-chown -R vagrant /home/vagrant/.ssh
+if [[ $USER == "vagrant" ]]; then
+  echo -en "\e[7;40;37mAdd ssh keys                \e[0m\n"
+  mkdir -p /home/vagrant/.ssh
+  wget --no-check-certificate https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub -O /home/vagrant/.ssh/authorized_keys
+  # Ensure we have the correct permissions set
+  chmod 0700 /home/vagrant/.ssh
+  chmod 0600 /home/vagrant/.ssh/authorized_keys
+  chown -R vagrant /home/vagrant/.ssh
+
+  echo -en "\e[7;40;37mssh Copy ID to host         \e[0m\n"
+  read -rp "$1 Please enter juan@172.28.128.1 password to continue." password
+  echo "$password" | ssh-copy-id juan@172.28.128.1
+fi
 
 echo -en "\e[7;40;37mFix ssh credentials         \e[0m\n"
 # sudo vi /etc/ssh/sshd_config
@@ -28,15 +37,11 @@ sudo sed -i -e 's^#AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2
 sudo sed -i -e 's/#PermitEmptyPasswords no/PermitEmptyPasswords no/g' /etc/ssh/sshd_config
 sudo service ssh restart
 
-echo -en "\e[7;40;37mssh Copy ID to host         \e[0m\n"
-echo "b{TT3rgal" | ssh-copy-id juan@172.28.128.1
-# echo "b{TT3rgal" | sudo ssh-copy-id juan@172.28.128.1
-
-echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
-sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
+# echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
+# sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
 
 echo -en "\e[7;40;37mInitial Install             \e[0m\n"
-sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms vim openssh-server ssh net-tools gcc make
+sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms virtualbox-guest-dkms vim openssh-server ssh net-tools gcc make perl git
 
 echo -en "\e[7;40;37mSet Vim editor              \e[0m\n"
 env EDITOR=vim
