@@ -87,3 +87,5 @@ terminator -p juan -l juan
 
 apm list --installed --bare > ~/data/dotfiles/atomPackage.list
 apm install --packages-file ~/data/dotfiles/atomPackage.list
+
+crontab -e >> @reboot /data/bin/appendEternalHistory.sh 
