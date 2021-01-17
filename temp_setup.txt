@@ -1,11 +1,13 @@
 sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove && sudo apt -y clean
 
 sudo apt -y install ssh sshfs vim git
+ln -s /data $HOME/data
 
-dotfilesPath="$HOME/data/dotfiles/20.10/home"
+dotfilesPath="$HOME/data/dotfiles/k21.04/home"
 
-rm $HOME/
-ln -s $dotfilesPath/ $HOME/
+# Cut and paste lines below for the links
+# rm $HOME/?????
+# ln -s $dotfilesPath/????? $HOME/?????
 
 rm $HOME/.bash_aliases
 ln -s $dotfilesPath/bash_aliases $HOME/.bash_aliases
@@ -39,7 +41,7 @@ rm $HOME/.viminfo
 ln -s $dotfilesPath/viminfo $HOME/.viminfo
 
 # config/
-#ln -s $dotfilesPath/config/Atom $HOME/.config/Atom
+ln -s $dotfilesPath/config/Atom $HOME/.config/Atom
 ln -s $dotfilesPath/config/calibre $HOME/.config/calibre
 ln -s $dotfilesPath/config/calibrerc $HOME/.config/calibrerc
 ln -s $dotfilesPath/config/Clementine $HOME/.config/Clementine
@@ -78,7 +80,7 @@ ln -s $dotfilesPath/config/remmina $HOME/.config/remmina
 ln -s $dotfilesPath/config/spotify $HOME/.config/spotify
 ln -s $dotfilesPath/config/terminator $HOME/.config/terminator
 ln -s $dotfilesPath/config/uGet $HOME/.config/uGet
-ln -s $dotfilesPath/config/VirtaulBox $HOME/.config/VirtualBox
+ln -s $dotfilesPath/config/VirtualBox $HOME/.config/VirtualBox
 ln -s $dotfilesPath/config/variety $HOME/.config/variety
 #ln -s $dotfilesPath/config/WazApp $HOME/.config/WazApp
 #ln -s $dotfilesPath/config/Whatever $HOME/.config/Whatever
@@ -88,7 +90,8 @@ ln -s $dotfilesPath/config/variety $HOME/.config/variety
 
 terminator -p juan -l juan
 
-apm list --installed --bare > ~/data/dotfiles/atomPackage.list
+sudo snap install atom --classic
+#apm list --installed --bare > ~/data/dotfiles/atomPackage.list
 apm install --packages-file ~/data/dotfiles/atomPackage.list
 
 crontab -e >> @reboot /data/bin/appendEternalHistory.sh
