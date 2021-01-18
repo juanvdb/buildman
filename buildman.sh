@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2020/12/01
+# DateVer 2021/12/18
 # Buildman
-buildmanVersion=V4.6.6
+buildmanVersion=V4.6.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -2282,10 +2282,10 @@ installUniverseApps () {
 
 
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon|focal|groovy|hirsute)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
   fi
-  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco|eoan)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco|eoan|focal|groovy|hirsute)$ ]]; then
    sudo apt install -yf shutter
   fi
 	# desktop specific applications

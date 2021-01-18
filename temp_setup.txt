@@ -9,7 +9,7 @@ dotfilesPath="$HOME/data/dotfiles/k21.04/home"
 # rm $HOME/?????
 # ln -s $dotfilesPath/????? $HOME/?????
 
-rm $HOME/.bash_aliases
+if [ -f $HOME/.bash_aliases ]; then rm $HOME/.bash_aliases; fi;
 ln -s $dotfilesPath/bash_aliases $HOME/.bash_aliases
 rm $HOME/.bash_logout
 ln -s $dotfilesPath/bash_logout $HOME/.bash_logout
@@ -23,7 +23,7 @@ rm $HOME/.gitignore
 ln -s $dotfilesPath/gitignore $HOME/.gitignore
 rm $HOME/.gitkraken
 ln -s $dotfilesPath/gitkraken $HOME/.gitkraken
-rm $HOME/.gnupg
+if [ -d $HOME/.gnupg ]; then rm -r $HOME/.gnupg fi;
 ln -s $dotfilesPath/gnupg $HOME/.gnupg
 rm $HOME/GPGKey.bin
 ln -s $dotfilesPath/GPGKey.bin $HOME/GPGKey.bin
@@ -36,7 +36,7 @@ ln -s $dotfilesPath/profile $HOME/.profile
 rm $HOME/.remmina
 ln -s $dotfilesPath/remmina $HOME/.remmina
 rmdir $HOME/.ssh
-ln -s $dotfilesPath/ssh $HOME/ssh
+ln -s $dotfilesPath/ssh $HOME/.ssh
 rm $HOME/.viminfo
 ln -s $dotfilesPath/viminfo $HOME/.viminfo
 
