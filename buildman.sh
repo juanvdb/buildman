@@ -3392,7 +3392,11 @@ mainMenu() {
     printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\\n"
     printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
     printf "    4    : Identified Desktop is %s%s%s%s. Select 4 to change.\\n" "${yellow}" "${bold}" "$desktopEnvironment" "${normal}"
-    printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
+    if !  $(sudo -l &> /dev/null); then
+      printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
+    else
+      printf "\\n\\n"  
+    fi
     printf "    6    : Select the applications and then run uninterupted.
     7    : Select the applications and then run each item individually
     8    : Install applications from the menu one by one.
@@ -3455,7 +3459,9 @@ mainMenu() {
         selectDesktopEnvironment
       ;;
       5 )
-      echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+      if !  $(sudo -l &> /dev/null); then
+        echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+      fi
       ;;
       6 )
         menuRun "SelectThenAutoRun"
