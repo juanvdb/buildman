@@ -32,8 +32,8 @@ echo -en "\e[7;40;37mssh Copy ID to host         \e[0m\n"
 echo "b{TT3rgal" | ssh-copy-id juan@172.28.128.1
 # echo "b{TT3rgal" | sudo ssh-copy-id juan@172.28.128.1
 
-echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
-sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
+# echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
+# sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
 
 echo -en "\e[7;40;37mInitial Install             \e[0m\n"
 sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms vim openssh-server ssh net-tools gcc make
