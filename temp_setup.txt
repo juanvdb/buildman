@@ -38,7 +38,11 @@ ln -s $dotfilesPath/remmina $HOME/.remmina
 rmdir $HOME/.ssh
 ln -s $dotfilesPath/ssh $HOME/.ssh
 rm $HOME/.viminfo
+
 ln -s $dotfilesPath/viminfo $HOME/.viminfo
+
+ln -s /data/vagrant/vagrant.d ~/.vagrant.d
+
 
 # config/
 ln -s $dotfilesPath/config/Atom $HOME/.config/Atom
@@ -95,3 +99,7 @@ sudo snap install atom --classic
 apm install --packages-file ~/data/dotfiles/atomPackage.list
 
 crontab -e >> @reboot /data/bin/appendEternalHistory.sh
+
+Latte Dock = KDE, Virtual Desktop, Show Dekstop, Thunderbird, Mailspring, Franz, Firefox, Chrome, KeePassX, Bitwarden, Dolphin, Doublecmd, Terminator, Spotiy, Google Music Play, VirtualBox, Tusk, Slack, Atom, VisualCode, Clock
+
+New KDE Windows Settings = screen lock, power, zoom settings, hotspot corners, mouse settings, trackpad settings, virtual desktops
