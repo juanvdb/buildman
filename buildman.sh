@@ -1195,9 +1195,10 @@ xdmanInstall () {
   log_info "Install Xtreme Download Manager media center"
   println_blue "Install Xtreme Download Manager media center"
   if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the Kodi repo? (y/n)" answer
+    printf "Suggest that you install from the download tar.zx\\n"
+    read -rp "Do you want to install from the Xtreme Download Manager repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
-      sudo add-apt-repository -y ppa:team-xbmc/ppa
+      sudo add-apt-repository -y ppa:noobslab/apps
       if [[ $betaAns == 1 ]]; then
         log_warning "Beta Code, revert the Xtreme Download Manager apt sources."
         println_red "Beta Code, revert the Xtreme Download Manager apt sources."
@@ -1319,7 +1320,7 @@ dockerInstall () {
 	# Purge the old repo
 	sudo apt purge -y lxc-docker docker-engine docker.io
   if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
+    read -rp "Do you want to install from the Docker repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
       sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -3395,7 +3396,7 @@ mainMenu() {
     if !  $(sudo -l &> /dev/null); then
       printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
     else
-      printf "\\n\\n"  
+      printf "\\n\\n"
     fi
     printf "    6    : Select the applications and then run uninterupted.
     7    : Select the applications and then run each item individually
