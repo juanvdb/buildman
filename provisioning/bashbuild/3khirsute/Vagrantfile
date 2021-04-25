@@ -1,7 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/xVirtualMachines/VirtualBox/vagrant/khirsute')
+system ('VBoxManage setproperty machinefolder /home/juan/VirtualMachines/VirtualBox/vagrant/khirsute/')
 
 
 
@@ -52,8 +52,8 @@ Vagrant.configure("2") do |config|
 
   config.ssh.insert_key = false
   config.vm.synced_folder ".", "/vagrant", disabled: false
-  config.vm.synced_folder "../../../", "/srv/share/build", disabled: false, type: "nfs", nfs_version: 4, nfs_udp: false
-  config.vm.synced_folder "/home/juan/Downloads/", "/srv/share/downloads", disabled: false, type: "nfs", nfs_version: 4, nfs_udp: false
+  config.vm.synced_folder "../../../", "/srv/share/build", disabled: false, type: "nfs"
+  config.vm.synced_folder "/home/juan/Downloads/", "/srv/share/downloads", disabled: false, type: "nfs"
   # config.vm.synced_folder "/media/juan/xvms/Movies/", "/srv/share/movies", disabled: false, type: "nfs"
   #config.vm.synced_folder "/media/juan/xvms/cache/focal/apt/archives/", "/var/cache/apt/archives/", type: "rsync",
   #  rsync__exclude: ["partial/", "lock"],
