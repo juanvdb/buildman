@@ -40,6 +40,9 @@ sudo service ssh restart
 # echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
 # sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
 
+# echo -en "\e[7;40;37mRsync packages from host      \e[0m\n"
+# sudo rsync -axP --exclude="lock" --exclude="partial" juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/ /var/cache/apt/archives/
+
 echo -en "\e[7;40;37mInitial Install             \e[0m\n"
 sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms virtualbox-guest-dkms vim openssh-server ssh net-tools gcc make perl git
 
@@ -77,11 +80,11 @@ sudo apt -y autoremove
 echo -en "\e[7;40;37mUpdate VBox Additions      \e[0m\n"
 sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
 
-echo -en "\e[7;40;37mRsync packages to host      \e[0m\n"
-rsync -axP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/
-sudo apt -y clean
+# echo -en "\e[7;40;37mRsync packages to host      \e[0m\n"
+# rsync -axP --exclude="lock" --exclude="partial" /var/cache/apt/archives/ juan@172.28.128.1:/media/juan/xvms/cache/$(lsb_release -cs)/apt/archives/
 
 echo -en "\e[7;40;37mClean and Empty disk        \e[0m\n"
+sudo apt -y clean
 sudo dd if=/dev/zero of=/EMPTY bs=1M
 sudo rm -f /EMPTY
 

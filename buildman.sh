@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# DateVer 2020/06/17
+# DateVer 2021/12/18
 # Buildman
-buildmanVersion=V4.6.5
+buildmanVersion=V4.6.7
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,12 +31,12 @@ buildmanVersion=V4.6.5
 
 # Global Variables
 {
-  betaReleaseName="groovy"
-  betaReleaseVer="20.10"
-  stableReleaseName="focal"
-  stableReleaseVer="20.04"
-  previousStableReleaseName="eoan"
-  previousStableReleaseVer="19.10"
+  betaReleaseName="hirsute"
+  betaReleaseVer="21.04"
+  stableReleaseName="groovy"
+  stableReleaseVer="20.10"
+  previousStableReleaseName="focal"
+  previousStableReleaseVer="20.04"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -947,7 +947,7 @@ bashdbInstall() {
   println_banner_yellow "Bash Debugger 5.0-1.1.2 install                                       "
   cd "$HOME/tmp" || die "Path $HOME/tmp does not exist."
   # wget https://netix.dl.sourceforge.net/project/bashdb/bashdb/4.4-1.0.1/bashdb-4.4-1.0.1.tar.gz
-  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.2/bashdb-5.0-1.1.2.tar.bz2/download
+  curl -L -# -o bashdb.tar.bz2 https://sourceforge.net/projects/bashdb/files/bashdb/5.0-1.1.2/bashdb-5.0-1.1.2.tar.gz/download
   tar -xjf "$HOME/tmp/bashdb.tar.bz2"
   cd "$HOME/tmp/bashdb-5.0-1.1.2" || die "Path bashdb-5.0-1.1.2 does not exist"
   ./configure
@@ -974,7 +974,19 @@ atomInstall() {
       curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
       sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
       repoUpdate
-      sudo apt install -yf atom shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
+      read -rp "Do you want to install AtomEditor current release, Beta or Nightly release (current/beta/nightly)? " answer
+      case answer in
+        beta)
+            sudo apt install -yf atom-beta
+        ;;
+        nightly)
+            sudo apt install -yf atom-nightly
+        ;;
+        *)
+            sudo apt install -yf atom
+        ;;
+      esac
+      sudo apt install -yf shellcheck devscripts hunspell hunspell-af hunspell-en-us hunspell-en-za hunspell-en-gb
     fi
   else
     sudo apt install -y curl
@@ -1190,9 +1202,10 @@ xdmanInstall () {
   log_info "Install Xtreme Download Manager media center"
   println_blue "Install Xtreme Download Manager media center"
   if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the Kodi repo? (y/n)" answer
+    printf "Suggest that you install from the download tar.zx\\n"
+    read -rp "Do you want to install from the Xtreme Download Manager repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
-      sudo add-apt-repository -y ppa:team-xbmc/ppa
+      sudo add-apt-repository -y ppa:noobslab/apps
       if [[ $betaAns == 1 ]]; then
         log_warning "Beta Code, revert the Xtreme Download Manager apt sources."
         println_red "Beta Code, revert the Xtreme Download Manager apt sources."
@@ -1221,11 +1234,11 @@ insyncInstall () {
   log_info "Install inSync for GoogleDrive"
   println_blue "Install inSync for GoogleDrive"
   if [[  $betaAns != 1 ]] && [[ $noCurrentReleaseRepo != 1 ]]; then
-    echo "deb http://apt.insynchq.com/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$distReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $distReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$distReleaseName.list"
   elif [[ $betaAns == 1 ]]; then
-    echo "deb http://apt.insynchq.com/ubuntu $stableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$stableReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $stableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$stableReleaseName.list"
   else
-    echo "deb http://apt.insynchq.com/ubuntu $previousStableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$previousStableReleaseName.list"
+    echo "deb http://apt.insync.io/ubuntu $previousStableReleaseName non-free contrib" | sudo tee "/etc/apt/sources.list.d/insync-$previousStableReleaseName.list"
   fi
   sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ACCAF35C
   repoUpdate
@@ -1314,7 +1327,7 @@ dockerInstall () {
 	# Purge the old repo
 	sudo apt purge -y lxc-docker docker-engine docker.io
   if [[ "$noPrompt" -eq 0 ]]; then
-    read -rp "Do you want to install from the Doublecmd repo? (y/n)" answer
+    read -rp "Do you want to install from the Docker repo? (y/n)" answer
     if [[ $answer = [yY1] ]]; then
       sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
       curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -2200,8 +2213,8 @@ flatpakInstall() {
   sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
   sudo flatpak remote-add --if-not-exists kdeapps --from https://distribute.kde.org/kdeapps.flatpakrepo
   sudo flatpak install -y kdeapps org.kde.okular
-  sudo flatpak install -y flathub org.kde.Platform//5.9
-  sudo flatpak install -y flathub org.kde.Sdk//5.9
+  #sudo flatpak install -y flathub org.kde.Platform//5.15
+  #sudo flatpak install -y flathub org.kde.Sdk//5.15
   # Add support for Gnome in form of adwaita icons and adwaita-qt style
   sudo flatpak install -y kdeapps org.freedesktop.Platform.Icontheme.Adwaita
   sudo flatpak install -y kdeapps org.kde.KStyle.Adwaita
@@ -2300,10 +2313,10 @@ installUniverseApps () {
 
 
   # older packages that will not install on new releases
-  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(yakkety|zesty|artful|bionic|cosmic|disco|eaon|focal|groovy|hirsute)$ ]]; then
    sudo apt install -yf scribes cnijfilter-common-64 cnijfilter-mx710series-64 scangearmp-common-64 scangearmp-mx710series-64
   fi
-  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco|eoan)$ ]]; then
+  if ! [[ "$distReleaseName" =~ ^(bionic|cosmic|disco|eoan|focal|groovy|hirsute)$ ]]; then
    sudo apt install -yf shutter
   fi
 	# desktop specific applications
@@ -3413,8 +3426,11 @@ mainMenu() {
     printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\\n"
     printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
     printf "    4    : Identified Desktop is %s%s%s%s. Select 4 to change.\\n" "${yellow}" "${bold}" "$desktopEnvironment" "${normal}"
-    if [[ ! $(sudo grep $USER /etc/sudoers) ]]; then printf "    5    : Add user %s%s%s to sudoers.\\n" "$bold" "$USER" "$normal"; fi;
-    printf "\\n"
+    if !  $(sudo -l &> /dev/null); then
+      printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
+    else
+      printf "\\n\\n"
+    fi
     printf "    6    : Select the applications and then run uninterupted.
     7    : Select the applications and then run each item individually
     8    : Install applications from the menu one by one.
@@ -3477,9 +3493,9 @@ mainMenu() {
         selectDesktopEnvironment
       ;;
       5 )
-        if [[ ! $(sudo grep $USER /etc/sudoers) ]]; then
-            echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
-        fi
+      if !  $(sudo -l &> /dev/null); then
+        echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
+      fi
       ;;
       6 )
         menuRun "SelectThenAutoRun"
