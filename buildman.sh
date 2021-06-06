@@ -2,7 +2,7 @@
 
 # DateVer 2021/12/18
 # Buildman
-buildmanVersion=V4.6.7
+buildmanVersion=V4.8.0
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,12 +31,12 @@ buildmanVersion=V4.6.7
 
 # Global Variables
 {
-  betaReleaseName="hirsute"
-  betaReleaseVer="21.04"
-  stableReleaseName="groovy"
-  stableReleaseVer="20.10"
-  previousStableReleaseName="focal"
-  previousStableReleaseVer="20.04"
+  betaReleaseName="impish"
+  betaReleaseVer="21.10"
+  stableReleaseName="hirsute"
+  stableReleaseVer="21.04"
+  previousStableReleaseName="groovy"
+  previousStableReleaseVer="20.10"
   noCurrentReleaseRepo=0
   betaAns=0
 
@@ -2082,11 +2082,11 @@ kodiInstall () {
 }
 
 # ############################################################################
-# Install Google Play Music Desktop Player
-google-play-music-desktop-playerInstall () {
-  log_info "Install Google Play Music Desktop Player"
-  println_blue "Install Google Play Music Desktop Player"
-  sudo snap install --classic google-play-music-desktop-player
+# Install YouTube Music Desktop Player
+youtube-music-desktop-playerInstall () {
+  log_info "Install YouTube Music Desktop Player"
+  println_blue "Install YouTube Music Desktop Player"
+  sudo snap install --classic youtube-music-desktop-app
 }
 
 # OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
@@ -2631,7 +2631,7 @@ menuRun() {
 
             #: submenuMedia
       711   #: Music and Video Applications
-      712   #: Google Play Music Desktop Player
+      712   #: YouTube Music Desktop Player
       713   #: Spotify
       721   #: Kodi
 
@@ -2955,7 +2955,7 @@ menuRun() {
     -----: ---------------------------------------\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "711" ]]; then printf "%s%s711%s" "${rev}" "${bold}" "${normal}"; else printf "711"; fi; printf "  : Music and Video Applications.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "713" ]]; then printf "%s%s713%s" "${rev}" "${bold}" "${normal}"; else printf "713"; fi; printf "  : Spotify.\\n"
-    printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : Google Play Music Desktop Player.\\n"
+    printf "     ";if [[ "${menuSelections[*]}" =~ "712" ]]; then printf "%s%s712%s" "${rev}" "${bold}" "${normal}"; else printf "712"; fi; printf "  : YouTube Music Desktop Player.\\n"
     printf "     ";if [[ "${menuSelections[*]}" =~ "721" ]]; then printf "%s%s721%s" "${rev}" "${bold}" "${normal}"; else printf "721"; fi; printf "  : Kodi media center.\\n"
     printf "\\n"
     printf "     0/q  : Return to Selection menu\\n\\n"
@@ -3313,7 +3313,7 @@ runSelection() {
     631 ) asking rapidPhotoDownloaderInstall "install rapidPhotoDownloader" "rapidPhotoDownloader install complete." ;;
     641 ) asking imageEditingAppsInstall  "install Image Editing Applications" "Image Editing Applications installed." ;;
     711 ) asking musicVideoAppsInstall "install Music and Video Applications" "Music and Video Applications installed." ;;
-    712 ) asking google-play-music-desktop-playerInstall "install Google Play Music Desktop Player" "Google Play Music Desktop Player installed." ;;
+    712 ) asking youtube-music-desktop-playerInstall "install YouTube Music Desktop Player" "YouTube Music Desktop Player installed." ;;
     713 ) asking spotifyInstall "install Spotify" "Spotify installed." ;;
     721 ) asking kodiInstall "install Kodi media center" "Kodi media center installed." ;;
     612 ) asking varietyInstall "install Variety" "Variety installed." ;;
