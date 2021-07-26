@@ -11,7 +11,7 @@ parentDir="/data/dotfiles/"
 
 declare -A dotfilePaths
 dotfilePaths=(
-[config]="$HOME/.config"
+#[config]="$HOME/.config"
 [local]="$HOME/.local"
 [homedir]="$HOME"
 )
@@ -26,27 +26,50 @@ dotfilePaths=(
 for sourceDir in "${!dotfilePaths[@]}";
 do
   echo "SOURCEDIR=$sourceDir"
-  for file in "$parentDir$sourceDir/*"
-  do
-    echo "SOURCE FILE: $file"
-    echo "TARGET FILE: ${dotfilePaths[$sourceDir]}/$file"
-    if [[ -e ${dotfilePaths[$sourceDir]}/$file ]]; then
-      echo "${dotfilePaths[$sourceDir]}/$file file exists, will remove!"
-      if [[ -f ${dotfilePaths[$sourceDir]}/$file ]]; then
-        echo "DELETE FILE ${dotfilePaths[$sourceDir]}/$file"
-      fi
-      if [[ -L ${dotfilePaths[$sourceDir]}/$file ]]; then
-        echo "DELETE LINK ${dotfilePaths[$sourceDir]}/$file"
-      fi
-      if [[ -d ${dotfilePaths[$sourceDir]}/$file ]]; then
-        echo "DELETE DIRECTORY ${dotfilePaths[$sourceDir]}/$file"
-      fi
+  echo "PARENTDIR+SOURCEDIR=$parentDir$sourceDir/*"
+  searchDir="$parentDir$sourceDir/*"
+  for fullFilename in $searchDir; do
+    echo "FOR directory loop"
+    echo "SOURCE FILE: $fullFilename"
+    echo "TARGET FILE: ${dotfilePaths[$sourceDir]}/"
+    filename=$(basename -- "$fullFilename")
+    echo "FILENAME: $filename"
+    targetFullFilename="${dotfilePaths[$sourceDir]}/$filename"
+    if [[ $sourceDir = "homedir" ]]; then
+      targetFullFilename="${dotfilePaths[$sourceDir]}/.$filename"
     fi
-    echo "LINK: ln -s  $parentDir$sourceDir/$file ${dotfilePaths[$sourceDir]}/$file"
+    echo "TARGET FILE: $targetFullFilename"
+    if [[ -e $targetFullFilename ]]; then
+      echo "$targetFullFilename exists, will remove!"
+      filetype=$(stat -c%F "$targetFullFilename")
+      echo "FILETYPE: $filetype"
+      case "$filetype" in
+        "regular file")
+          echo "DELETE FILE: rm $targetFullFilename"
+        ;;
+        "directory")
+          echo "DELETE DIRECTORY: rmdir -r $targetFullFilename"
+        ;;
+        "symbolic link")
+          echo "DELETE LINK: rm $targetFullFilename"
+        ;;
+        # *) exit 3;;
+      esac
+      # if [[ -L $targetFullFilename ]]; then
+      #   echo "DELETE LINK: rm $targetFullFilename"
+      # fi
+      # if [[ -f $targetFullFilename  ]]; then
+      #   echo "DELETE FILE: rm $targetFullFilename"
+      # fi
+      # if [[ -d $targetFullFilename  ]]; then
+      #   echo "DELETE DIRECTORY: rmdir -r $targetFullFilename"
+      # fi
+    fi
+    echo "LINK: ln -s  $fullFilename $targetFullFilename "
     echo " "
   done
 done
 
-for file in "/data/dotfiles/config/*"; do
- echo $file
-done
+# for file in "/data/dotfiles/config/*"; do
+#  echo $file
+# done
