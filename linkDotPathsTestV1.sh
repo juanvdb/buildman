@@ -5,7 +5,7 @@ parentDir="/data/dotfiles/"
 declare -A dotfilePaths
 dotfilePaths=(
 [config]="$HOME/.config"
-[local]="$HOME/.local"
+[localshare]="$HOME/.local/share"
 [homedir]="$HOME"
 )
 
@@ -30,7 +30,7 @@ do
         ;;
         "directory")
           echo "DELETE DIRECTORY: rmdir -r $targetFullFilename"
-          rmdir -r "$targetFullFilename"
+          rm -rf "$targetFullFilename"
         ;;
         "symbolic link")
           echo "DELETE LINK: rm $targetFullFilename"
@@ -40,7 +40,7 @@ do
       esac
     fi
     echo "LINK: ln -s  $fullFilename $targetFullFilename "
-    ln -s  $fullFilename $targetFullFilename
+    ln -s  "$fullFilename" "$targetFullFilename"
     echo " "
   done
 done
