@@ -975,7 +975,7 @@ atomInstall() {
       sudo sh -c 'echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list'
       repoUpdate
       read -rp "Do you want to install AtomEditor current release, Beta or Nightly release (current/beta/nightly)? " answer
-      case answer in
+      case $answer in
         beta)
             sudo apt install -yf atom-beta
         ;;
@@ -2231,7 +2231,7 @@ installBaseApps () {
   # Removed for 19.10+
   sudo apt install bzr vim-gnome
 
-  if [[ isVm == 0 ]];
+  if [[ $isVm == 0 ]];
   then
     sudo apt install gparted
   fi
@@ -2305,7 +2305,7 @@ installUniverseApps () {
   # Still active, but replaced with other apps
   # unetbootin = etcher
 
-  if [[ isVm == 0 ]];
+  if [[ $isVm == 0 ]];
   then
     sudo apt install -y rdiff-backup luckybackup
   fi
@@ -3426,7 +3426,7 @@ mainMenu() {
     printf "    3    : Install on a Beta version is "; if [[ "$betaAns" = 1 ]]; then printf "%s%s%sON%s" "${rev}" "${bold}" "${red}" "${normal}"; else printf "%s%sOFF%s" "$bold" "${green}" "$normal"; fi; printf ".\\n"
     printf "            Select 3 to toggle the install for a beta version to "; if [[ "$betaAns" = 1 ]]; then printf "%sOFF%s" "${bold}" "${normal}"; else printf "%sON%s" "${bold}" "${normal}"; fi; printf ".\\n";
     printf "    4    : Identified Desktop is %s%s%s%s. Select 4 to change.\\n" "${yellow}" "${bold}" "$desktopEnvironment" "${normal}"
-    if !  $(sudo -l &> /dev/null); then
+    if [[ !  $(sudo -l &> /dev/null) ]]; then
       printf "    5    : Add user %s%s%s to sudoers.\\n\\n" "$bold" "$USER" "$normal"
     else
       printf "\\n\\n"
@@ -3493,7 +3493,7 @@ mainMenu() {
         selectDesktopEnvironment
       ;;
       5 )
-      if !  $(sudo -l &> /dev/null); then
+      if [[ !  $(sudo -l &> /dev/null) ]]; then
         echo "$USER ALL=(ALL) NOPASSWD:ALL" | sudo tee -a /etc/sudoers
       fi
       ;;
