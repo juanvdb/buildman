@@ -2,3 +2,51 @@ sort what you want to install on a VM and what on a physical in general and univ
 check to install spideroak
 check how to include dot files or move them from somewhere
 build for elementary and zorin which are older releases that does not show kde or gnome
+
+Broken packages in universe install:
+Package deluge-torrent is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+However the following packages replace it:
+  deluge-common
+
+E: Unable to locate package flashplugin-installer
+E: Unable to locate package keepnote
+E: Package 'deluge-torrent' has no installation candidate
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package scribes
+E: Unable to locate package cnijfilter-common-64
+E: Unable to locate package cnijfilter-mx710series-64
+E: Unable to locate package scangearmp-common-64
+E: Unable to locate package scangearmp-mx710series-64
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Package shutter is not available, but is referred to by another package.
+This may mean that the package is missing, has been obsoleted, or
+is only available from another source
+
+E: Package 'shutter' has no installation candidate
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package kdesdk-dolphin-plugins
+E: Unable to locate package libqt4-sql-psql
+E: Unable to locate package libqt4-sql-sqlite
+
+
+Flatpak errors:
+Looking for matches…
+error: Nothing matches org.freedesktop.Platform.Icontheme.Adwaita in remote kdeapps
+Looking for matches…
+
+
+        ID                           Branch       Op      Remote       Download
+ 1. [✓] org.kde.KStyle.Adwaita       master       i       kdeapps      2.1 kB / 1.4 MB
+
+Installation complete.
+Looking for matches…
+error: Nothing matches org.kde.PlatformTheme.QGnomePlatform in remote kdeapps
+
