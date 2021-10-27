@@ -8,10 +8,11 @@ sudo usermod -aG nordvpn $USER
 nordvpn login
 nordvpn whitelist add port 22
 nordvpn whitelist add subnet 172.28.128.1/24
+nordvpn set technology nordlynx
 nordvpn set cybersec on
 nordvpn set killswitch on
 nordvpn set autoconnect on
-nordvpn set obfuscate on
+# nordvpn set obfuscate on
 nordvpn c
 sudo apt install -y openvpn network-manager-openvpn ca-certificates
 nowpath=$(pwd)
