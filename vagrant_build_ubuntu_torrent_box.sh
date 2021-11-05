@@ -1,10 +1,16 @@
 #! /bin/bash
+sudo usermod -aG nordvpn $USER
+read -rp "Do you want to reboot (y/n)?" answer
+if [[ $answer = [Yy1] ]]; then
+  sudo reboot
+fi
+answer=NULL
+
 sudo apt install -y wget qbittorrent
 sudo wget -qnc -P "$HOME/tmp" https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb
 sudo dpkg -i "$HOME/tmp/nordvpn-release_1.0.0_all.deb"
 sudo apt update
 sudo apt -y install nordvpn
-sudo usermod -aG nordvpn $USER
 nordvpn login
 nordvpn whitelist add port 22
 nordvpn whitelist add subnet 172.28.128.1/24

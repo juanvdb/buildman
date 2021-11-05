@@ -1,7 +1,23 @@
 sudo apt update && sudo apt -y upgrade && sudo apt -y dist-upgrade && sudo apt -y full-upgrade && sudo apt -y autoremove && sudo apt -y clean
 
-sudo apt -y install ssh sshfs vim git
+sudo mkdir -p /srv/share/build
+sudo chown vagrant:vagrant /srv/share/
+sudo mount 172.28.128.1:/home/juan/data/ownCloud/Development/buildman /srv/share/build
+
+sudo /media/vagrant/VBox_GAs_*/VBoxLinuxAdditions.run
+sudo /opt/VBoxGuestAdditions*/init/vboxadd setup
+
+ssh juan@vbhost128
+ssh-copy-id juan@172.28.128.1
+
+sudo apt -y install ssh sshfs vim git nfs-common
+sudo apt -y install linux-headers-"$(uname -r)" build-essential dkms vim openssh-server ssh sshfs nfs-common net-tools gcc make perl git virtualbox-dkms virtualbox-qt
+
+sudo mkdir -p /data
+sudo chown -R vagrant:vagrant /data
 ln -s /data $HOME/data
+
+sudo software-properties-kde
 
 dotfilesPath="$HOME/data/dotfiles/k21.04/home"
 

@@ -2,7 +2,7 @@
 
 # DateVer 2021/07/30
 # Buildman
-buildmanVersion=V4.8.1
+buildmanVersion=V4.8.2
 # Author : Juan van der Breggen
 
 # Tools used/required for implementation : bash, sed, grep, regex support, gsettings, apt
@@ -31,12 +31,12 @@ buildmanVersion=V4.8.1
 
 # Global Variables
 {
-  betaReleaseName="impish"
-  betaReleaseVer="21.10"
-  stableReleaseName="hirsute"
-  stableReleaseVer="21.04"
-  previousStableReleaseName="groovy"
-  previousStableReleaseVer="20.10"
+  betaReleaseName="jammy"
+  betaReleaseVer="22.04"
+  stableReleaseName="impish"
+  stableReleaseVer="21.10"
+  previousStableReleaseName="hirsute"
+  previousStableReleaseVer="20.04"
   noCurrentReleaseRepo=0
   betaAns=0
 
